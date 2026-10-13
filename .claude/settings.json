@@ -1,0 +1,13 @@
+{
+  "extraKnownMarketplaces": {
+    "cco": {
+      "source": {
+        "source": "github",
+        "repo": "egorfedorov/claude-context-optimizer"
+      }
+    }
+  },
+  "enabledPlugins": {
+    "claude-context-optimizer@cco": true
+  }
+}
