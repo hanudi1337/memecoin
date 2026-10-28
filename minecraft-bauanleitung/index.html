@@ -3,7 +3,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Saira+Condensed:wght@500;700&family=IBM+Plex+Sans:wght@400;600&family=JetBrains+Mono:wght@400;600&family=Cinzel:wght@600&display=swap">
 <style>
-/* Layout: kompakter Dienstausweis-Kopf, darunter das 3D-Modell mit Steuer-Panel rechts (mobil darunter), danach Bau-Tipps und Checkliste */
+/* Layout: Dienstausweis-Kopf, darunter das 3D-Modell (Tempel oben, Labor darunter) mit Steuer-Panel rechts, danach Ebenen-Akte, Bau-Tipps, Checkliste */
 :root{
   --bg:#eef1f1; --panel:#ffffff; --line:#cfd7d8; --fg:#121718; --muted:#56646a;
   --red:#b3121f; --red-soft:#f6dfe1; --gold:#86650f; --gold-soft:#f3ead2;
@@ -30,11 +30,11 @@
 [hidden]{display:none!important}
 body{background:var(--bg);color:var(--fg);font:15px/1.6 var(--f-body);
   padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:0 64px}
-.wrap{max-width:1280px;margin:0 auto}
+.wrap{max-width:1320px;margin:0 auto}
 h1,h2,h3{font-family:var(--f-display);text-wrap:balance;line-height:1.1;margin:0}
 h2{font-size:28px;letter-spacing:.01em}
 h3{font-size:19px}
-p{margin:0;max-width:68ch}
+p{margin:0;max-width:70ch}
 .eyebrow{font:600 11px/1 var(--f-mono);letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
 .muted{color:var(--muted)}
 
@@ -43,22 +43,19 @@ header{display:grid;grid-template-columns:auto 1fr;gap:16px;align-items:center;p
 .logo path{stroke:var(--bg);stroke-width:1.5}
 header h1{font-size:clamp(32px,5.5vw,48px);font-weight:700;letter-spacing:.02em;text-transform:uppercase}
 header h1 span{color:var(--red)}
+header h1 em{font-family:var(--f-greek);font-style:normal;font-size:.5em;letter-spacing:.06em;color:var(--gold);text-transform:none;vertical-align:.35em;margin-left:10px}
 .meta{display:flex;flex-wrap:wrap;gap:4px 16px;margin-top:6px;font:12px/1.4 var(--f-mono);color:var(--muted)}
 .meta b{color:var(--fg);font-weight:600}
 
-nav{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);display:flex;gap:4px;padding-block:10px;border-block:1px solid var(--line)}
+nav{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);display:flex;gap:4px;padding-block:8px;border-block:1px solid var(--line);overflow-x:auto}
 body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--bg)}
-nav a{font:700 16px/1 var(--f-display);letter-spacing:.06em;text-transform:uppercase;color:var(--muted);text-decoration:none;padding:9px 13px;border:1px solid transparent;border-radius:3px}
-nav a:hover{color:var(--fg)}
-nav a[aria-current="page"]{color:var(--fg);border-color:var(--line);background:var(--panel)}
-nav a[aria-current="page"].lab{box-shadow:inset 0 -3px 0 var(--red)}
-nav a[aria-current="page"].greek{box-shadow:inset 0 -3px 0 var(--gold)}
-nav .prio{font:600 10px/1 var(--f-mono);letter-spacing:.1em;color:var(--red);margin-left:6px;vertical-align:2px}
+nav a{font:700 15px/1 var(--f-display);letter-spacing:.06em;text-transform:uppercase;color:var(--muted);text-decoration:none;padding:9px 12px;border-radius:3px;white-space:nowrap}
+nav a:hover{color:var(--fg);background:var(--panel)}
 a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,canvas:focus-visible{outline:2px solid var(--red);outline-offset:2px}
 
 /* ---- App ---- */
-.app{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:14px;padding-block:14px 6px}
-.viewer{position:relative;height:clamp(440px,76vh,780px);border:1px solid var(--line);border-radius:4px;overflow:hidden;background:linear-gradient(180deg,var(--sky1),var(--sky2))}
+.app{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:14px;padding-block:14px 6px;scroll-margin-top:60px}
+.viewer{position:relative;height:clamp(460px,78vh,820px);border:1px solid var(--line);border-radius:4px;overflow:hidden;background:linear-gradient(180deg,var(--sky1),var(--sky2))}
 #cv{display:block;width:100%;height:100%;cursor:grab;touch-action:none}
 #cv:active{cursor:grabbing}
 .hud{position:absolute;left:10px;right:10px;display:flex;flex-wrap:wrap;gap:6px;align-items:flex-start;pointer-events:none}
@@ -71,16 +68,17 @@ button.chip:hover{border-color:rgba(255,255,255,.4)}
 .chip.title{font:700 15px/1.1 var(--f-display);letter-spacing:.06em;text-transform:uppercase}
 .chip.hint{font-weight:400;max-width:330px}
 .hudbtns{display:flex;gap:6px;flex-wrap:wrap}
-.loading{position:absolute;inset:0;display:grid;place-items:center;text-align:center;padding:20px;font:600 14px/1.5 var(--f-mono);color:var(--hud-fg);background:rgba(8,12,14,.45)}
+.loading{position:absolute;inset:0;display:grid;place-items:center;text-align:center;padding:20px;font:600 14px/1.5 var(--f-mono);color:var(--hud-fg);background:rgba(8,12,14,.5)}
 
-.panel{display:grid;gap:12px;align-content:start;max-height:clamp(440px,76vh,780px);overflow:auto;overscroll-behavior:contain}
-@media (max-width:920px){.app{grid-template-columns:minmax(0,1fr)}.panel{max-height:none;overflow:visible}.viewer{height:clamp(380px,64vh,600px)}}
+.panel{display:grid;gap:12px;align-content:start;max-height:clamp(460px,78vh,820px);overflow:auto;overscroll-behavior:contain}
+@media (max-width:940px){.app{grid-template-columns:minmax(0,1fr)}.panel{max-height:none;overflow:visible}.viewer{height:clamp(380px,64vh,620px)}}
 .pblock{background:var(--panel);border:1px solid var(--line);border-radius:4px;padding:12px 14px;display:grid;gap:10px;min-width:0}
 .pblock h3{font-size:16px;letter-spacing:.06em;text-transform:uppercase}
 .presets{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
 .presets button{font:700 14px/1 var(--f-display);letter-spacing:.04em;text-transform:uppercase;padding:9px 6px;background:var(--bg);color:var(--fg);border:1px solid var(--line);border-radius:3px;cursor:pointer}
 .presets button[aria-pressed="true"]{border-color:var(--red);box-shadow:inset 0 -2px 0 var(--red)}
-.greekmode .presets button[aria-pressed="true"]{border-color:var(--gold);box-shadow:inset 0 -2px 0 var(--gold)}
+.presets button.g{font-family:var(--f-greek);font-size:12.5px;letter-spacing:.06em}
+.presets button.g[aria-pressed="true"]{border-color:var(--gold);box-shadow:inset 0 -2px 0 var(--gold)}
 .row{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center;font-size:14px}
 .row label{cursor:pointer;display:flex;gap:8px;align-items:center}
 .row input[type=checkbox]{width:16px;height:16px;margin:0;accent-color:var(--red)}
@@ -90,8 +88,11 @@ button.chip:hover{border-color:rgba(255,255,255,.4)}
 .slider .ctl{display:grid;grid-template-columns:28px 1fr 28px;gap:6px;align-items:center}
 .slider .ctl button{height:28px;border:1px solid var(--line);background:var(--bg);color:var(--fg);border-radius:3px;cursor:pointer;font:600 15px var(--f-mono)}
 input[type=range]{width:100%;accent-color:var(--red)}
-.greekmode input[type=range],.greekmode .row input[type=checkbox]{accent-color:var(--gold)}
 .small{font-size:12.5px;color:var(--muted);line-height:1.45}
+.roomlist{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:4px}
+.roomlist button{display:grid;gap:1px;text-align:left;padding:6px 8px;background:var(--bg);border:1px solid var(--line);border-radius:3px;color:var(--fg);font:600 13px/1.2 var(--f-body);cursor:pointer}
+.roomlist button small{font:11px/1.2 var(--f-mono);color:var(--muted)}
+.roomlist button:hover{border-color:var(--red)}
 
 .ico{display:inline-block;width:20px;height:20px;flex:none;background-image:var(--atlas);background-size:320px 320px;image-rendering:pixelated;border-radius:2px;box-shadow:inset 0 0 0 1px rgba(0,0,0,.25)}
 .ico.big{width:40px;height:40px;background-size:640px 640px}
@@ -103,43 +104,56 @@ input[type=range]{width:100%;accent-color:var(--red)}
 .info dt{color:var(--muted)}
 .info dd{margin:0;font-family:var(--f-mono);font-size:12.5px}
 .info .note{font-size:13.5px;border-left:2px solid var(--red);padding-left:9px}
-.greekmode .info .note{border-left-color:var(--gold)}
 .btn{font:600 13px/1 var(--f-body);padding:8px 10px;border:1px solid var(--line);border-radius:3px;background:var(--bg);color:var(--fg);cursor:pointer;justify-self:start}
 .btn[aria-pressed="true"]{border-color:var(--red);color:var(--red)}
 select{font:inherit;font-size:13px;padding:6px 8px;border:1px solid var(--line);border-radius:3px;background:var(--bg);color:var(--fg);width:100%}
-.mats{display:grid;gap:2px;max-height:330px;overflow:auto;margin-inline:-6px;padding-inline:6px}
-@media (max-width:920px){.mats{max-height:none}}
+.mats{display:grid;gap:2px;max-height:340px;overflow:auto;margin-inline:-6px;padding-inline:6px}
+@media (max-width:940px){.mats{max-height:460px}}
 .mat{display:grid;grid-template-columns:20px minmax(0,1fr) auto;gap:9px;align-items:center;padding:5px 6px;border:0;border-radius:3px;background:none;color:var(--fg);text-align:left;cursor:pointer;font:inherit;font-size:13.5px;line-height:1.25}
 .mat:hover{background:var(--bg)}
 .mat[aria-pressed="true"]{background:var(--red-soft)}
-.greekmode .mat[aria-pressed="true"]{background:var(--gold-soft)}
 .mat .cnt{text-align:right;font:600 12.5px/1.2 var(--f-mono);font-variant-numeric:tabular-nums}
 .mat .cnt small{font-weight:400;text-align:right}
 .total{display:flex;justify-content:space-between;font:600 12.5px var(--f-mono);color:var(--muted);border-top:1px solid var(--line);padding-top:8px}
 
 /* ---- Text ---- */
-.text{display:grid;gap:34px;padding-top:28px}
-.block{display:grid;gap:12px}
+.text{display:grid;gap:36px;padding-top:30px}
+.block{display:grid;gap:12px;scroll-margin-top:60px}
 .lead{font-size:16.5px}
+.entr{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:12px}
+.card{padding:16px;background:var(--panel);border:1px solid var(--line);border-radius:4px;display:grid;gap:8px;align-content:start;min-width:0}
+.card h3{font-size:20px}
+.card .tag{font:600 11px/1 var(--f-mono);letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.card.greek h3{font-family:var(--f-greek);letter-spacing:.04em}
+.card ol,.card ul{margin:0;padding-left:20px;display:grid;gap:4px;font-size:14px}
+.card p{font-size:14px}
+.levels{display:grid;gap:14px}
+.lvl{border:1px solid var(--line);border-radius:4px;background:var(--panel);overflow:hidden}
+.lvl summary{cursor:pointer;list-style:none;display:grid;grid-template-columns:auto 1fr auto;gap:14px;align-items:center;padding:14px 16px}
+.lvl summary::-webkit-details-marker{display:none}
+.lvl .badge{font:700 22px/1 var(--f-display);color:#fff;background:var(--red);padding:8px 10px;border-radius:3px;min-width:52px;text-align:center}
+.lvl summary h3{font-size:21px}
+.lvl summary p{font-size:13.5px;color:var(--muted)}
+.lvl summary .y{font:600 12px var(--f-mono);color:var(--muted);text-align:right}
+.lvl .body{padding:0 16px 16px;display:grid;gap:12px}
+.quads{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:12px}
+.quad h4{margin:0 0 6px;font:600 11px/1 var(--f-mono);letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.quad ul{margin:0;padding:0;list-style:none;display:grid;gap:8px}
+.quad li{display:grid;gap:1px;padding-left:10px;border-left:2px solid var(--line);font-size:13.5px}
+.quad li b{font-weight:600}
+.quad li span{color:var(--muted)}
 .tricks{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:12px}
-.trick{padding:15px;background:var(--panel);border:1px solid var(--line);border-radius:3px;display:grid;gap:7px;align-content:start}
-.trick h3{font-size:18px}
-.trick ol,.trick ul{margin:0;padding-left:20px;display:grid;gap:4px;font-size:14px}
-.trick p{font-size:14px}
 .warn{border-left:3px solid var(--red);padding:10px 14px;background:var(--red-soft);border-radius:0 3px 3px 0;font-size:14px;max-width:none}
-.greek .warn{border-left-color:var(--gold);background:var(--gold-soft)}
-.greek h2,.greek .g{font-family:var(--f-greek);letter-spacing:.04em}
-.checks{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px}
+.checks{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:14px}
 .checkgroup{display:grid;gap:6px;align-content:start}
 .checkgroup h3{font-size:16px;letter-spacing:.04em;text-transform:uppercase;color:var(--muted)}
 .checkgroup label{display:grid;grid-template-columns:20px 1fr;gap:8px;align-items:start;font-size:14px;cursor:pointer}
 .checkgroup input{width:16px;height:16px;margin:3px 0 0;accent-color:var(--red)}
-.greek .checkgroup input{accent-color:var(--gold)}
 .checkgroup label:has(input:checked) span{color:var(--muted);text-decoration:line-through}
 .progress{font:600 13px/1 var(--f-mono);color:var(--muted)}
 .progress b{color:var(--fg)}
 footer{margin-top:44px;padding-top:14px;border-top:1px solid var(--line);font-size:13px;color:var(--muted)}
-@media (max-width:520px){nav a{font-size:14px;padding:9px 10px;white-space:nowrap}nav .prio{display:none}header{grid-template-columns:1fr}.logo{width:44px;height:44px}h2{font-size:24px}.chip.hint{display:none}}
+@media (max-width:520px){header h1 em{display:block;margin:4px 0 0;font-size:.44em}header{grid-template-columns:1fr}.logo{width:44px;height:44px}h2{font-size:24px}.chip.hint{display:none}nav a{font-size:14px;padding:8px 9px}.lvl summary{grid-template-columns:auto 1fr}.lvl summary .y{display:none}}
 </style>
 
 <div class="wrap">
@@ -147,21 +161,24 @@ footer{margin-top:44px;padding-top:14px;border-top:1px solid var(--line);font-si
   <svg class="logo" viewBox="-50 -50 100 100" aria-hidden="true" id="logo"></svg>
   <div>
     <div class="eyebrow">3D-Bauplan · Minecraft Java 1.20.1 · Forge</div>
-    <h1>Projekt <span>Hive</span></h1>
-    <div class="meta"><span>Untergrundlabor nach Umbrella-Vorbild · <b>Priorität</b></span><span>Athena-Tempel mit Statue</span><span>nur Vanilla-Blöcke aus 1.20.1</span></div>
+    <h1>Projekt <span>Hive</span><em>unter dem Tempel der Athena</em></h1>
+    <div class="meta"><span>Tempel als getarnter Eingang</span><span>Atrium mit 5 Ebenen · <b>80 Räume</b></span><span>nur Vanilla-Blöcke aus 1.20.1</span></div>
   </div>
 </header>
 
-<nav aria-label="Bauprojekte">
-  <a href="#labor" class="lab" data-scene="labor">Untergrundlabor<span class="prio">PRIO 1</span></a>
-  <a href="#tempel" class="greek" data-scene="tempel">Athena-Tempel</a>
+<nav aria-label="Abschnitte">
+  <a href="#modell">3D-Modell</a>
+  <a href="#eingaenge">Eingänge</a>
+  <a href="#ebenen">Ebenen &amp; Räume</a>
+  <a href="#tipps">Bau-Tipps</a>
+  <a href="#checkliste">Checkliste</a>
 </nav>
 
-<section class="app" id="app">
+<section class="app" id="modell">
   <div class="viewer" id="viewer">
     <canvas id="cv" aria-label="3D-Modell, mit Maus oder Finger drehbar"></canvas>
     <div class="hud top">
-      <div class="chip title" id="hudTitle">Untergrundlabor</div>
+      <div class="chip title">Projekt Hive</div>
       <div class="chip hint">Ziehen: drehen · Rechte Maustaste oder 2 Finger: schieben · Mausrad oder Pinch: zoomen · Tippen: Block-Info</div>
     </div>
     <div class="hud bottom">
@@ -171,7 +188,7 @@ footer{margin-top:44px;padding-top:14px;border-top:1px solid var(--line);font-si
         <button class="chip" type="button" id="btnReset">Kamera zurück</button>
       </div>
     </div>
-    <div class="loading" id="loading">Baue das Modell Block für Block …</div>
+    <div class="loading" id="loading">Baue Tempel und Labor Block für Block …</div>
   </div>
 
   <aside class="panel" aria-label="Steuerung">
@@ -192,8 +209,14 @@ footer{margin-top:44px;padding-top:14px;border-top:1px solid var(--line);font-si
     </div>
 
     <div class="pblock">
+      <h3>Räume anfliegen</h3>
+      <select id="lvSel" aria-label="Ebene wählen"></select>
+      <div class="roomlist" id="roomList"></div>
+    </div>
+
+    <div class="pblock">
       <h3>Ausgewählter Block</h3>
-      <div class="info" id="info"><p class="small">Tippe im Modell auf einen Block. Du siehst Name, Minecraft-ID, Position und wie viele davon im ganzen Bau stecken.</p></div>
+      <div class="info" id="info"><p class="small">Tippe im Modell auf einen Block. Du siehst Name, Minecraft-ID, Raum, Position und wie viele davon verbaut sind.</p></div>
     </div>
 
     <div class="pblock">
@@ -206,78 +229,56 @@ footer{margin-top:44px;padding-top:14px;border-top:1px solid var(--line);font-si
   </aside>
 </section>
 
-<!-- ============ Text Labor ============ -->
-<section class="text" id="text-labor">
+<section class="text">
   <div class="block">
     <div class="eyebrow">Briefing</div>
-    <h2>Das Labor unter dem Herrenhaus</h2>
-    <p class="lead">Vorbild ist der „Hive“ aus Resident Evil: ein geheimer Forschungskomplex der Umbrella Corporation unter einem unauffälligen Haus bei Raccoon City. Oben steht das Tarnhaus auf der Wiese. Darunter führen ein Wasser-Aufzug und ein Leiterschacht zu vier Ebenen mit je 27 × 15 Blöcken.</p>
-    <p class="muted">B1 Sicherheit auf Y 40, B2 Labore auf Y 30, B3 Red Queen auf Y 20 und B4 Reaktor auf Y −10 im Tiefenschiefer. Die Y-Angabe ist immer der Boden der Ebene. Alle Koordinaten im Modell zählen x und z ab der Nordwest-Ecke des Labors.</p>
+    <h2>Ein Tempel als Tarnung, darunter der Hive</h2>
+    <p class="lead">Oben steht der Tempel der Athena mit Statue, Olivenhain und Zypressen. Niemand ahnt etwas. Unter der Cella beginnt ein Forschungskomplex nach dem Vorbild des „Hive“ aus Resident Evil: ein rundes Atrium, das wie ein umgedrehter Wolkenkratzer vier Ebenen tief in die Erde reicht, darunter der Reaktor und ein Bahnhof im Tiefenschiefer.</p>
+    <p class="muted">Bauplatz 69 × 91 Blöcke. Das Labor ist 61 × 61 Blöcke groß, hat 5 Ebenen mit 80 Räumen und reicht von Y 51 bis Y −4. Koordinaten im Modell zählen x und z ab der Nordwest-Ecke des Bauplatzes. Y ist die echte Minecraft-Höhe, Grasoberfläche auf Y 63.</p>
   </div>
 
-  <div class="block">
-    <div class="eyebrow">Nachbauen</div>
-    <h3>So nutzt du das Modell auf dem Server</h3>
-    <ol class="trick" style="padding-left:34px;margin:0">
-      <li>Stell dich auf die Stelle, an der die Nordwest-Ecke des Labors liegen soll, und notiere x und z aus F3. Das ist im Modell x 0, z 0.</li>
-      <li>Wähle oben eine Ebene, z. B. „B1“. Die Decke wird ausgeblendet und du schaust von oben hinein.</li>
-      <li>Schalte den Schicht-Modus ein. Jetzt siehst du genau eine Y-Schicht hell, alles darunter abgedunkelt. Mit + und − gehst du Schicht für Schicht nach oben.</li>
-      <li>Wähle die Materialliste für die Ebene, bevor du losgräbst, und pack die Stacks in deine Shulker-Kisten.</li>
-    </ol>
-  </div>
-
-  <div class="block">
-    <div class="eyebrow">Details</div>
-    <h3>So funktionieren die Umbrella-Elemente</h3>
-    <div class="tricks">
-      <div class="trick"><h3>Umbrella-Logo</h3><p>Weißes Banner in den Webstuhl, rote Farbe, Muster „Geständert“ (englisch Gyronny). Ergibt die acht rot-weißen Segmente, ganz ohne Bannermuster-Item. Im Modell hängen sie in jeder Halle an der Nordwand.</p></div>
-      <div class="trick"><h3>Aufzug nach oben</h3><ol><li>Ganz unten in B4 (Y −10) ein Seelensand, darüber Wasser bis ins Tarnhaus (Y 64).</li><li>Wasser oben rein, die Säule mit Seetang füllen und den Seetang abbauen. Dann ist jeder Block eine Quelle.</li><li>Auf jeder Ebene ein Glasring mit Eisentür nach Süden. Knopf drücken, rausschwimmen.</li></ol></div>
-      <div class="trick"><h3>Leiterschacht nach unten</h3><p>Eine Leiter-Spalte von B4 bis ins Haus, an der Südwand des Schachts. Pro Ebene eine Eisentür nach Norden zur Halle. Mit Shift hältst du dich an der Leiter fest.</p></div>
-      <div class="trick"><h3>Probentanks</h3><p>3 × 3 Eisenblöcke als Sockel mit Seelaterne in der Mitte, darauf 3 Schichten Glas, innen Wasser, oben ein Deckel aus Eisenblöcken. Ein Zombie mit Namensschild im Wasser wird nach kurzer Zeit zum Ertrunkenen.</p></div>
-      <div class="trick"><h3>Laser-Korridor</h3><p>Rote Buntglasscheiben quer durch den Gang, abwechselnd auf Höhe 1 und 3 bzw. 2 und 4. Dazu ein echter Stolperdraht am Boden, der Redstone-Lampen oder Werfer auslöst.</p></div>
-      <div class="trick"><h3>Red Queen</h3><p>Eisenblock, Redstone-Lampe, zwei rote Buntglasblöcke, Redstone-Lampe. Mit einem Taktgeber an den Lampen pulsiert der Kern. Die Bildschirmwand ist schwarzer Beton mit Leucht-Rahmen und Karten darin.</p></div>
-      <div class="trick"><h3>Dekon-Dusche</h3><p>Heuballen unter dem Boden, darauf ein Lagerfeuer, darüber eine Eisenfalltür im Boden. Der Rauch steigt wie Dampf durchs Gitter. Ein Endstab an der Decke ist der Duschkopf.</p></div>
-      <div class="trick"><h3>Bahn nach Raccoon City</h3><p>Das Gleis liegt eine Stufe tiefer als der Bahnsteig. Eine Antriebsschiene mit Redstone-Block darunter alle 30 Blöcke reicht auf gerader Strecke. Der Tunnel läuft im Modell nach Osten weiter.</p></div>
-      <div class="trick"><h3>Alarm (Extra)</h3><p>Nicht im Modell, aber passend: ein kalibrierter Skulk-Sensor (neu in 1.20) neben jeder Tür. Laute Schritte lassen rote Redstone-Lampen im Gang aufleuchten.</p></div>
+  <div class="block" id="eingaenge">
+    <div class="eyebrow">Eingänge</div>
+    <h2>Zwei Wege hinein</h2>
+    <div class="entr">
+      <div class="card greek"><span class="tag">Haupteingang · Tempel</span><h3>Die heilige Quelle</h3><p>Mitten in der Cella liegen zwei kleine Becken, eingefasst mit gemeißeltem Quarz. Sie sehen aus wie eine Tempelquelle. In Wahrheit sind es zwei Wassersäulen, die 46 Blöcke tief bis B4 reichen.</p><ul><li>Nördliches Becken: Magmablock am Grund, die Strömung zieht dich nach unten.</li><li>Südliches Becken: Seelensand am Grund, die Strömung drückt dich nach oben.</li><li>Auf jeder Ebene eine Eisentür mit Knopf zur Brücke über das Atrium.</li></ul></div>
+      <div class="card greek"><span class="tag">Notausgang · Statue</span><h3>Die Tür im Sockel</h3><p>In der Rückseite des Statuensockels, zum Tempel hin, sitzt eine Eisentür. Dahinter führt eine Wendeltreppe aus Quarztreppen um eine Quarzsäule 67 Blöcke nach unten.</p><ul><li>Eine Umdrehung sind genau 8 Stufen, das ist genau eine Ebene.</li><li>Darum liegt die Tür zu jeder Ebene immer an derselben Stelle (Nordseite).</li><li>Die Treppe endet in B5 am Reaktor.</li></ul></div>
+      <div class="card"><span class="tag">Herzstück</span><h3>Das Atrium</h3><p>Ein runder Schacht mit 17 Blöcken Durchmesser, von B1 bis B4 offen. Auf jeder Ebene ein Balkon mit Glasgeländer, roter Kante, 8 Quarzsäulen und Umbrella-Bannern.</p><ul><li>Decke oben: das Umbrella-Logo aus rotem und weißem Beton mit Leuchtring.</li><li>Boden unten: Glas, darunter der leuchtende Reaktor.</li><li>In der Mitte die gläserne Aufzugsröhre mit Brücken.</li></ul></div>
     </div>
-    <p class="warn">Alles im Modell ist Vanilla 1.20.1. Hat dein Forge-Server zusätzlich Mods wie Create, kannst du Aufzug und Konsolen damit ersetzen. Nötig ist das nicht.</p>
   </div>
 
-  <div class="block">
+  <div class="block" id="ebenen">
+    <div class="eyebrow">Ebenen &amp; Räume</div>
+    <h2>Jede Ebene, jeder Raum</h2>
+    <p class="muted">Jede Ring-Ebene ist gleich aufgebaut: Atrium in der Mitte, Balkon, eine Glaswand mit Quarzsäulen, dann vier Gänge in alle Himmelsrichtungen. Zwischen den Gängen liegen vier Viertel mit je vier Räumen: A in der Außenecke, B am Nord-Süd-Gang, C am Ost-West-Gang, D direkt am Atrium mit Glaswand zum Balkon. Tippe auf eine Ebene, um sie aufzuklappen.</p>
+    <div class="levels" id="levelDocs"></div>
+  </div>
+
+  <div class="block" id="tipps">
+    <div class="eyebrow">Bau-Tipps</div>
+    <h2>So funktionieren die Details</h2>
+    <div class="tricks">
+      <div class="card"><h3>Reihenfolge</h3><ol><li>Bauplatz markieren, Nordwest-Ecke notieren.</li><li>Von oben nach unten graben: erst das Atrium als runden Schacht, dann Ebene für Ebene.</li><li>Pro Ebene erst Boden, Außenwand und Decke, dann Innenwände, dann Möbel.</li><li>Tempel und Statue ganz zum Schluss.</li></ol></div>
+      <div class="card"><h3>Kreise bauen</h3><p>Im Schicht-Modus bei B1 siehst du jeden Block des Kreises. Atrium: alle Felder bis Abstand 8,5 zur Mitte. Balkon bis 12, Glaswand bis 13. Es lohnt sich, den Kreis einmal mit Wolle auf dem Boden vorzuzeichnen.</p></div>
+      <div class="card"><h3>Wassersäulen</h3><p>Wasser oben einfüllen, die Säule mit Seetang vollsetzen und den Seetang abbauen. Dann ist jeder Block eine Quelle. Erst danach Seelensand bzw. Magmablock unten einsetzen.</p></div>
+      <div class="card"><h3>Umbrella-Logo</h3><p>Banner: weißes Banner im Webstuhl mit roter Farbe und Muster „Geständert“. Decke im Atrium: 8 Tortenstücke abwechselnd roter und weißer Beton, außen ein Ring Seelaternen.</p></div>
+      <div class="card"><h3>Probentanks</h3><p>3 × 3 Eisenblöcke mit Seelaterne in der Mitte, darauf 3 Schichten Glas mit Wasser innen, oben Eisenblöcke. Ein Zombie mit Namensschild wird im Wasser zum Ertrunkenen.</p></div>
+      <div class="card"><h3>Laser und Red Queen</h3><p>Laser: rote Glasscheiben quer im Gang auf wechselnden Höhen, dazu Stolperdraht. Red Queen: Eisenblock, Redstone-Lampe, zwei rote Glasblöcke, zwei Lampen. Mit Taktgeber pulsiert sie.</p></div>
+      <div class="card"><h3>Gewächshaus</h3><p>Die drei Kräuter aus Resident Evil: grün (Farn), rot (Mohn), blau (Kornblume). Dazwischen Ackerboden mit Weizen und Wasserrinnen. Seelaternen ersetzen die Sonne.</p></div>
+      <div class="card"><h3>Reaktor</h3><p>Kern aus Seelaternen, umhüllt von Glas mit Kupferringen, auf einem Sockel aus gewachstem Kupfer. Gewachst, damit nichts grün oxidiert. Er ragt durch den Schacht bis unter den Glasboden von B4.</p></div>
+      <div class="card"><h3>Bahnhof</h3><p>Im Ostgang von B5 liegt das Gleis eine Stufe tiefer als der Bahnsteig. Antriebsschienen mit Redstone-Block darunter alle 8 Blöcke, der Tunnel läuft nach Osten weiter.</p></div>
+    </div>
+    <p class="warn">Alles ist Vanilla 1.20.1: keine Kupferbirnen, keine Tuffziegel, keine Crafter aus 1.21. Hat dein Forge-Server Mods wie Create, kannst du Aufzüge damit ersetzen, musst aber nicht.</p>
+  </div>
+
+  <div class="block" id="checkliste">
     <div class="eyebrow">Checkliste · wird in diesem Browser gespeichert</div>
-    <h3>Baufortschritt <span class="progress" id="lab-progress"></span></h3>
+    <h2>Baufortschritt <span class="progress" id="lab-progress"></span></h2>
     <div class="checks" id="lab-checks"></div>
   </div>
 </section>
 
-<!-- ============ Text Tempel ============ -->
-<section class="text greek" id="text-tempel" hidden>
-  <div class="block">
-    <div class="eyebrow">Briefing</div>
-    <h2>Tempel der Athena mit Statue</h2>
-    <p class="lead">Ein Tempel nach dem Vorbild des Parthenon in Athen: 8 Säulen an den Schmalseiten, 13 an den Langseiten, innen die Cella mit Altar. Auf dem Vorplatz steht die Athena Parthenos. Das Original von Phidias war rund 12 Meter hoch und aus Gold und Elfenbein. Im Spiel nimmst du Goldblöcke und Kalzit.</p>
-    <p class="muted">Tempel 28 × 43 Blöcke, mit Dach 23 hoch. Statue 21 breit, 28 hoch, bis 9 tief. Der Eingang liegt im Süden, die Statue schaut zum Tempel hin vom Platz weg nach Süden.</p>
-  </div>
-  <div class="block">
-    <div class="eyebrow">Details</div>
-    <h3 class="g">Kleine Dinge, die viel ausmachen</h3>
-    <div class="tricks">
-      <div class="trick"><h3>Säulen</h3><p>Unten gemeißelter Quarz, dann 8 Quarzsäulen, oben wieder gemeißelter Quarz. 10 hoch, alle 3 Blöcke eine.</p></div>
-      <div class="trick"><h3>Bunter Fries</h3><p>Antike Tempel waren bemalt. Über jeder Säule sitzt im Fries ein Block blaue Keramik, dazwischen Quarzziegel.</p></div>
-      <div class="trick"><h3>Flaches Dach</h3><p>Abwechselnd untere und obere Stufe aus poliertem Granit. So steigt das Dach nur einen Block auf zwei, flach wie beim echten Parthenon.</p></div>
-      <div class="trick"><h3>Amphoren</h3><p>Verzierte Töpfe (1.20) mit Töpferscherben aus Wüsten- und Ozeanruinen, paarweise am Portal und neben dem Altar.</p></div>
-      <div class="trick"><h3>Olivenbäume</h3><p>Krummer Eichenstamm mit Azaleenlaub. Dazu schmale Zypressen aus Fichtennadeln. Dazwischen Rosa Blütenblätter und Fackellilien.</p></div>
-      <div class="trick"><h3>Statue</h3><p>Baue zuerst den Sockel, dann von unten nach oben. Im Modell siehst du bei „Statue“ jede Schicht im Schicht-Modus einzeln.</p></div>
-    </div>
-  </div>
-  <div class="block">
-    <div class="eyebrow">Checkliste · wird in diesem Browser gespeichert</div>
-    <h3 class="g">Baufortschritt <span class="progress" id="gr-progress"></span></h3>
-    <div class="checks" id="gr-checks"></div>
-  </div>
-</section>
-
-<footer>3D-Bauplan für Minecraft Java 1.20.1 (Forge-Server). Keine Inhalte aus 1.21 wie Kupferbirnen oder Tuffziegel. Resident Evil und Umbrella gehören Capcom; dies ist eine Fan-Bauidee.</footer>
+<footer>3D-Bauplan für Minecraft Java 1.20.1 (Forge-Server). Texturen sind nachgezeichnet. Resident Evil und Umbrella gehören Capcom; dies ist eine Fan-Bauidee.</footer>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js" integrity="sha384-CI3ELBVUz9XQO+97x6nwMDPosPR5XvsxW2ua7N1Xeygeh1IxtgqtCkGfQY9WWdHu" crossorigin="anonymous"></script>
@@ -285,26 +286,21 @@ footer{margin-top:44px;padding-top:14px;border-top:1px solid var(--line);font-si
 <script>
 "use strict";
 const $=id=>document.getElementById(id);
-
-// ---------- Logo ----------
 (function(){let s='';for(let i=0;i<8;i++){const a1=(i*45-90)*Math.PI/180,a2=((i+1)*45-90)*Math.PI/180;
   s+=`<path d="M0 0 L${46*Math.cos(a1)} ${46*Math.sin(a1)} L${46*Math.cos(a2)} ${46*Math.sin(a2)} Z" fill="${i%2?'var(--fg)':'var(--red)'}"/>`;}$('logo').innerHTML=s;})();
 
-// ---------- Zufall & Rauschen ----------
+// ================= Zufall =================
 function rng(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
 function hs(s){let h=2166136261;for(let i=0;i<s.length;i++)h=Math.imul(h^s.charCodeAt(i),16777619);return h>>>0}
 function h3(x,y,z){let h=(Math.imul(x|0,374761393)+Math.imul(y|0,668265263)+Math.imul(z|0,1274126177))|0;h=Math.imul(h^(h>>>13),1274126177);h^=h>>>16;return(h>>>0)/4294967296}
-function vnoise(x,z,seed){const ix=Math.floor(x),iz=Math.floor(z),fx=x-ix,fz=z-iz,sx=fx*fx*(3-2*fx),sz=fz*fz*(3-2*fz);
-  const a=h3(ix,seed,iz),b=h3(ix+1,seed,iz),c=h3(ix,seed,iz+1),d=h3(ix+1,seed,iz+1);return a+(b-a)*sx+(c-a)*sz+(a-b-c+d)*sx*sz}
 const cl=v=>v<0?0:v>255?255:v|0;
 
-// ---------- Textur-Atlas (16×16 Pixel pro Block, wie in Minecraft) ----------
+// ================= Texturen =================
 const AT=256,cvA=document.createElement('canvas');cvA.width=cvA.height=AT;
 const actx=cvA.getContext('2d'),ad=actx.createImageData(AT,AT);
 const TILE={};let tileN=0;
 function tile(name,fn){const i=tileN++;TILE[name]=i;const ox=(i&15)*16,oy=(i>>4)*16,r=rng(hs(name));
-  const set=(x,y,c,a=255)=>{if(x<0||y<0||x>15||y>15)return;const p=((oy+y)*AT+ox+x)*4;ad.data[p]=cl(c[0]);ad.data[p+1]=cl(c[1]);ad.data[p+2]=cl(c[2]);ad.data[p+3]=a};
-  fn(set,r);}
+  const set=(x,y,c,a=255)=>{if(x<0||y<0||x>15||y>15)return;const p=((oy+y)*AT+ox+x)*4;ad.data[p]=cl(c[0]);ad.data[p+1]=cl(c[1]);ad.data[p+2]=cl(c[2]);ad.data[p+3]=a};fn(set,r)}
 const mul=(c,f)=>[c[0]*f,c[1]*f,c[2]*f];
 const each=f=>{for(let y=0;y<16;y++)for(let x=0;x<16;x++)f(x,y)};
 function pN(s,r,c,a){each((x,y)=>s(x,y,mul(c,1+(r()-.5)*a)))}
@@ -314,12 +310,11 @@ function pBr(s,r,c,m,h=4,w=8){each((x,y)=>{const row=y/h|0,off=row%2?w/2:0,e=y%h
 function pPl(s,r,c){each((x,y)=>{let f=.92+r()*.12;if(y%4===3)f=.66;const seam=(y>>2)%2?5:11;if(x===seam&&y%4!==3)f=.74;s(x,y,mul(c,f))})}
 function pLog(s,r,c){each((x,y)=>{const st=(x*5+(h3(x,0,3)*3|0))%4===0;s(x,y,mul(c,st?.74:.94+r()*.12))})}
 function pLogT(s,r,c,b){each((x,y)=>{const d=Math.max(Math.abs(x-7.5),Math.abs(y-7.5));if(d>6.5)s(x,y,mul(b,.9+r()*.15));else s(x,y,mul(c,(Math.floor(d)%2?.86:1)*(.95+r()*.08)))})}
-function pLv(s,r,c){each((x,y)=>{if(r()<.22)s(x,y,[0,0,0],0);else s(x,y,mul(c,.72+r()*.42))})}
+function pLv(s,r,c,dots){each((x,y)=>{if(r()<.22)s(x,y,[0,0,0],0);else if(dots&&r()<.12)s(x,y,dots);else s(x,y,mul(c,.72+r()*.42))})}
 function pGl(s,r,c,ia,fa){each((x,y)=>{const e=x===0||y===0||x===15||y===15,st=((x-y===4||x-y===5)&&x>3&&x<11)||(x-y===-6&&x>6&&x<9);if(e)s(x,y,c,fa);else if(st)s(x,y,mul(c,1.05),Math.min(255,ia+100));else s(x,y,c,ia)})}
 function pOre(s,r,b,oc){pN(s,r,b,.22);for(let k=0;k<4;k++){const x=1+r()*12|0,y=1+r()*12|0;[[0,0],[1,0],[0,1],[1,1],[2,1]].forEach(([dx,dy])=>{if(r()<.8)s(x+dx,y+dy,mul(oc,.85+r()*.3))})}}
-function pFlower(s,r,petal,mid){each((x,y)=>{const stem=(x===7||x===8)&&y>=8;const d=Math.hypot(x-7.5,y-5);if(d<1.3)s(x,y,mid);else if(d<3)s(x,y,mul(petal,.9+r()*.15));else if(stem||(y===11&&(x===5||x===6))||(y===12&&(x===9||x===10)))s(x,y,[60,120,40]);else s(x,y,[0,0,0],0)})}
-const GLYPH={B:['110','101','110','101','110'],1:['010','110','010','010','111'],2:['110','001','010','100','111'],3:['110','001','010','001','110'],4:['101','101','111','001','001']};
-
+function pFlower(s,r,petal,mid){each((x,y)=>{const stem=(x===7||x===8)&&y>=8,d=Math.hypot(x-7.5,y-5);if(d<1.3)s(x,y,mid);else if(d<3)s(x,y,mul(petal,.9+r()*.15));else if(stem||(y===11&&(x===5||x===6))||(y===12&&(x===9||x===10)))s(x,y,[60,120,40]);else s(x,y,[0,0,0],0)})}
+const GLYPH={B:['110','101','110','101','110'],1:['010','110','010','010','111'],2:['110','001','010','100','111'],3:['110','001','010','001','110'],4:['101','101','111','001','001'],5:['111','100','110','001','110']};
 tile('grass_top',(s,r)=>pN(s,r,[98,158,58],.34));
 tile('dirt',(s,r)=>{pN(s,r,[134,96,67],.3);pSp(s,r,[104,72,50],6,1)});
 tile('grass_side',(s,r)=>{pN(s,r,[134,96,67],.3);for(let x=0;x<16;x++){const h=3+(r()<.5?1:0)+(r()<.25?1:0);for(let y=0;y<h;y++)s(x,y,mul([98,158,58],.8+r()*.35))}});
@@ -339,7 +334,7 @@ tile('granite',(s,r)=>{pN(s,r,[149,103,85],.25);pSp(s,r,[184,134,112],8,1)});
 tile('diorite',(s,r)=>{pN(s,r,[190,190,192],.15);pSp(s,r,[120,120,120],8,1)});
 tile('tuff',(s,r)=>{pN(s,r,[108,109,102],.25);pSp(s,r,[88,90,84],6,2)});
 const conc=(n,c)=>tile(n,(s,r)=>pN(s,r,c,.05));
-conc('white_concrete',[207,213,214]);conc('light_gray_concrete',[125,125,115]);conc('black_concrete',[16,18,22]);conc('red_concrete',[142,33,33]);conc('yellow_concrete',[241,175,21]);
+conc('white_concrete',[207,213,214]);conc('light_gray_concrete',[125,125,115]);conc('black_concrete',[16,18,22]);conc('red_concrete',[142,33,33]);conc('yellow_concrete',[241,175,21]);conc('cyan_concrete',[21,119,136]);
 tile('smooth_stone',(s,r)=>{pN(s,r,[160,160,160],.06);pB(s,[160,160,160],.92,.84)});
 tile('slab_side',(s,r)=>{pN(s,r,[168,168,168],.06);for(let x=0;x<16;x++){s(x,7,[138,138,138]);s(x,8,[138,138,138])}pB(s,[160,160,160],.92,.84)});
 tile('polished_andesite',(s,r)=>{pN(s,r,[132,134,133],.1);pB(s,[132,134,133],1.12,.8)});
@@ -347,15 +342,13 @@ tile('polished_deepslate',(s,r)=>{pN(s,r,[72,72,74],.12);pB(s,[72,72,74],1.2,.8)
 tile('deepslate_tiles',(s,r)=>each((x,y)=>s(x,y,(x%8===7||y%8===7)?[36,36,40]:mul([62,62,66],.9+r()*.2))));
 tile('deepslate_bricks',(s,r)=>pBr(s,r,[76,76,80],[40,40,44]));
 tile('stone_bricks',(s,r)=>pBr(s,r,[122,121,122],[78,78,78]));
-tile('cobblestone',(s,r)=>each((x,y)=>{const c=h3((x>>2)+((y>>2)%2),y>>2,7),e=x%4===0||y%4===0;s(x,y,e?[78,78,78]:mul([128,128,128],.75+c*.45+(r()-.5)*.1))}));
 tile('glass',(s,r)=>pGl(s,r,[214,236,242],34,230));
+tile('white_glass',(s,r)=>pGl(s,r,[240,242,244],110,235));
 tile('red_glass',(s,r)=>pGl(s,r,[222,40,50],150,235));
 tile('iron_block',(s,r)=>{pN(s,r,[218,218,218],.05);pB(s,[218,218,218],1.05,.7);for(let x=2;x<14;x++){s(x,5,[188,188,188]);s(x,10,[188,188,188])}});
 tile('iron_bars',(s,r)=>each((x,y)=>{const bar=x%4===1||x%4===2,rail=y===1||y===14;if(bar||rail)s(x,y,mul([112,114,116],x%4===1?1.28:1));else s(x,y,[0,0,0],0)}));
 tile('iron_door_b',(s,r)=>{pN(s,r,[200,200,200],.05);pB(s,[200,200,200],1.05,.7);for(let y=2;y<14;y+=4)for(let x=3;x<13;x++)s(x,y,[158,158,158]);s(12,1,[80,80,80])});
 tile('iron_door_t',(s,r)=>{pN(s,r,[200,200,200],.05);pB(s,[200,200,200],1.05,.7);for(let y=3;y<11;y++)for(let x=3;x<13;x++)s(x,y,(x===8||y===7)?[168,168,168]:[56,66,78])});
-tile('dark_oak_door_b',(s,r)=>{pPl(s,r,[66,43,20]);for(let y=0;y<16;y++){s(0,y,[44,28,12]);s(15,y,[44,28,12])}s(12,2,[150,150,150])});
-tile('dark_oak_door_t',(s,r)=>{pPl(s,r,[66,43,20]);for(let y=3;y<10;y++)for(let x=3;x<13;x++)s(x,y,(x===8||y===6)?[52,34,16]:[150,190,200])});
 tile('iron_trapdoor',(s,r)=>each((x,y)=>{const hole=x%5!==0&&y%5!==0;if(hole)s(x,y,[0,0,0],0);else s(x,y,mul([196,196,196],.9+r()*.12))}));
 tile('chain',(s,r)=>each((x,y)=>{const on=(y%6<3)?(x===7||x===8):(x===6||x===9);if(on)s(x,y,[62,66,80]);else s(x,y,[0,0,0],0)}));
 tile('sea_lantern',(s,r)=>each((x,y)=>{const e=x===0||y===0||x===15||y===15,c=x===y||x===15-y;s(x,y,e?[170,200,190]:c?[242,255,250]:mul([200,232,222],.95+r()*.08))}));
@@ -370,14 +363,13 @@ tile('oak_log',(s,r)=>pLog(s,r,[109,85,50]));
 tile('oak_log_top',(s,r)=>pLogT(s,r,[176,143,86],[109,85,50]));
 tile('spruce_log',(s,r)=>pLog(s,r,[58,38,22]));
 tile('spruce_log_top',(s,r)=>pLogT(s,r,[120,90,52],[58,38,22]));
-tile('dark_oak_log',(s,r)=>pLog(s,r,[60,46,26]));
-tile('dark_oak_log_top',(s,r)=>pLogT(s,r,[84,62,36],[60,46,26]));
 tile('oak_leaves',(s,r)=>pLv(s,r,[64,126,36]));
 tile('spruce_leaves',(s,r)=>pLv(s,r,[50,86,54]));
 tile('azalea_leaves',(s,r)=>pLv(s,r,[106,128,72]));
+tile('flowering_azalea',(s,r)=>pLv(s,r,[100,126,62],[236,120,190]));
 tile('water',(s,r)=>each((x,y)=>s(x,y,mul([52,96,222],.88+(((x+y*2+(r()*3|0))%6===0)?.25:0)+r()*.08),165)));
 tile('soul_sand',(s,r)=>{pN(s,r,[84,64,51],.25);for(let k=0;k<3;k++){const x=2+r()*10|0,y=2+r()*10|0;s(x,y,[48,34,26]);s(x+2,y,[48,34,26]);s(x+1,y+2,[48,34,26])}});
-tile('ladder',(s,r)=>each((x,y)=>{if(x===2||x===3||x===12||x===13)s(x,y,mul([120,90,50],.9+r()*.15));else if(y%4===1)s(x,y,mul([152,116,66],.9+r()*.1));else s(x,y,[0,0,0],0)}));
+tile('magma',(s,r)=>each((x,y)=>{const k=h3(x>>1,y>>1,3)>.68;s(x,y,k?[252,156,44]:mul([122,42,20],.8+r()*.3))}));
 tile('rail_ew',(s,r)=>each((x,y)=>{if(y===3||y===12)s(x,y,[150,150,156]);else if((x%4===1||x%4===2)&&y>0&&y<15)s(x,y,mul([110,82,50],.9+r()*.15));else s(x,y,[0,0,0],0)}));
 tile('powered_rail_ew',(s,r)=>each((x,y)=>{if(y===3||y===12)s(x,y,[232,192,52]);else if(y===7||y===8)s(x,y,[205,30,30]);else if((x%4===1||x%4===2)&&y>0&&y<15)s(x,y,[110,82,50]);else s(x,y,[0,0,0],0)}));
 tile('packed_ice',(s,r)=>each((x,y)=>s(x,y,mul([142,180,250],.92+r()*.12+((x+y)%9===0?.12:0)))));
@@ -385,8 +377,10 @@ tile('brewing_stand',(s,r)=>each((x,y)=>{if((x===7||x===8)&&y<12)s(x,y,[200,170,
 tile('cauldron_side',(s,r)=>{pN(s,r,[64,64,68],.12);pB(s,[64,64,68],1.2,.7);for(let y=12;y<16;y++)for(let x=4;x<12;x++)s(x,y,[30,30,33])});
 tile('cauldron_top',(s,r)=>each((x,y)=>{const rim=x<2||y<2||x>13||y>13;s(x,y,rim?[72,72,76]:mul([52,96,222],.9+r()*.1))}));
 tile('furnace_side',(s,r)=>{pN(s,r,[110,110,112],.18);pB(s,[110,110,112],1.15,.75)});
+tile('furnace_front',(s,r)=>{pN(s,r,[110,110,112],.18);pB(s,[110,110,112],1.15,.75);for(let y=8;y<14;y++)for(let x=4;x<12;x++)s(x,y,[30,30,30]);for(let x=3;x<13;x++)s(x,4,[80,80,80])});
 tile('blast_front',(s,r)=>{pN(s,r,[88,88,92],.15);pB(s,[88,88,92],1.2,.7);for(let y=7;y<14;y++)for(let x=3;x<13;x++)s(x,y,x%2?[250,160,42]:[40,30,30]);for(let x=3;x<13;x++)s(x,3,[150,150,150])});
 tile('blast_top',(s,r)=>{pN(s,r,[100,100,104],.1);pB(s,[100,100,104],1.2,.7)});
+tile('smoker_front',(s,r)=>{pLog(s,r,[92,70,44]);for(let y=6;y<13;y++)for(let x=3;x<13;x++)s(x,y,y>9?[240,140,40]:[40,34,30])});
 tile('dispenser_front',(s,r)=>{pN(s,r,[118,118,118],.2);for(let y=5;y<11;y++)for(let x=5;x<11;x++)s(x,y,(y===5||y===10||x===5||x===10)?[70,70,70]:[24,24,24])});
 tile('observer_front',(s,r)=>{pN(s,r,[96,96,96],.08);for(let x=1;x<15;x++){s(x,3,[60,60,60]);s(x,12,[60,60,60])}[[4,7],[10,7]].forEach(([x,y])=>{s(x,y,[28,28,28]);s(x+1,y,[28,28,28]);s(x,y+1,[28,28,28]);s(x+1,y+1,[28,28,28])});for(let x=4;x<12;x++)s(x,10,[40,40,40])});
 tile('observer_side',(s,r)=>{pN(s,r,[100,100,100],.1);for(let y=2;y<14;y+=3)for(let x=2;x<12;x++)s(x,y,[68,68,68]);s(13,4,[60,224,96]);s(13,7,[60,224,96]);s(13,10,[224,60,60])});
@@ -400,6 +394,8 @@ tile('end_rod',(s,r)=>pN(s,r,[244,240,232],.03));
 tile('bed_foot',(s,r)=>each((x,y)=>s(x,y,mul([212,212,216],y===1?.85:.97+r()*.05))));
 tile('bed_head_s',(s,r)=>each((x,y)=>s(x,y,y<5&&x>1&&x<14?[252,252,252]:mul([212,212,216],.97+r()*.05))));
 tile('bed_head_n',(s,r)=>each((x,y)=>s(x,y,y>10&&x>1&&x<14?[252,252,252]:mul([212,212,216],.97+r()*.05))));
+tile('bed_head_e',(s,r)=>each((x,y)=>s(x,y,x>10&&y>1&&y<14?[252,252,252]:mul([212,212,216],.97+r()*.05))));
+tile('bed_head_w',(s,r)=>each((x,y)=>s(x,y,x<5&&y>1&&y<14?[252,252,252]:mul([212,212,216],.97+r()*.05))));
 tile('bed_side',(s,r)=>each((x,y)=>s(x,y,y<10?mul([212,212,216],.95):mul([162,130,78],.88+r()*.1))));
 tile('banner',(s,r)=>each((x,y)=>{const a=Math.atan2(y-7.5,x-7.5)+Math.PI,seg=Math.floor(a/(Math.PI/4));s(x,y,seg%2?[238,238,238]:[204,30,40])}));
 tile('campfire_log',(s,r)=>pLog(s,r,[92,72,42]));
@@ -410,6 +406,8 @@ tile('hay',(s,r)=>each((x,y)=>s(x,y,mul([206,172,52],y%4===0?.8:.95+r()*.1))));
 tile('dirt_path',(s,r)=>pN(s,r,[148,121,65],.18));
 tile('dirt_path_side',(s,r)=>{pN(s,r,[134,96,67],.3);for(let x=0;x<16;x++)for(let y=0;y<3;y++)s(x,y,mul([148,121,65],.9+r()*.15))});
 tile('red_wool',(s,r)=>pN(s,r,[160,39,34],.12));
+tile('white_wool',(s,r)=>pN(s,r,[234,236,236],.06));
+tile('gray_wool',(s,r)=>pN(s,r,[142,142,134],.08));
 tile('redstone_block',(s,r)=>{pN(s,r,[176,24,6],.15);pB(s,[176,24,6],1.2,.7)});
 tile('zombie_skin',(s,r)=>pN(s,r,[82,128,72],.15));
 tile('zombie_face',(s,r)=>{pN(s,r,[82,128,72],.12);[[4,7],[5,7],[10,7],[11,7]].forEach(([x,y])=>s(x,y,[18,28,18]));for(let x=5;x<11;x++)s(x,11,[48,78,44])});
@@ -417,7 +415,23 @@ tile('zombie_shirt',(s,r)=>pN(s,r,[44,160,166],.12));
 tile('zombie_pants',(s,r)=>pN(s,r,[66,58,152],.12));
 tile('lab_coat',(s,r)=>{pN(s,r,[238,240,242],.05);for(let y=0;y<16;y++)s(7,y,[200,204,208])});
 tile('iron_armor',(s,r)=>{pN(s,r,[206,206,212],.07);pB(s,[206,206,212],1.05,.8)});
-for(const n of [1,2,3,4])tile('sign_b'+n,(s,r)=>{pPl(s,r,[114,84,48]);const txt='B'+n;[...txt].forEach((ch,i)=>GLYPH[ch].forEach((row,yy)=>[...row].forEach((v,xx)=>{if(v==='1')s(4+i*4+xx,5+yy,[240,232,214])})))});
+for(const n of [1,2,3,4,5])tile('sign_b'+n,(s,r)=>{pPl(s,r,[114,84,48]);[...('B'+n)].forEach((ch,i)=>GLYPH[ch].forEach((row,yy)=>[...row].forEach((v,xx)=>{if(v==='1')s(4+i*4+xx,5+yy,[240,232,214])})))});
+tile('crafting_top',(s,r)=>{pPl(s,r,[162,130,78]);for(let i=1;i<15;i++){s(i,1,[90,66,40]);s(1,i,[90,66,40]);s(i,14,[90,66,40]);s(14,i,[90,66,40])}for(let i=4;i<12;i++)s(i,i,[140,140,140])});
+tile('crafting_side',(s,r)=>{pPl(s,r,[150,118,70]);for(let x=2;x<7;x++)s(x,4,[120,120,120]);for(let y=3;y<10;y++)s(11,y,[90,66,40])});
+tile('smithing_top',(s,r)=>{pN(s,r,[56,58,70],.12);pB(s,[56,58,70],1.2,.7)});
+tile('smithing_side',(s,r)=>{pPl(s,r,[70,50,40]);for(let x=0;x<16;x++){s(x,0,[56,58,70]);s(x,1,[56,58,70])}});
+tile('target_side',(s,r)=>each((x,y)=>{const d=Math.hypot(x-7.5,y-7.5);s(x,y,d<2||(d>4&&d<6)?[220,40,40]:d<4?[240,236,226]:mul([206,172,52],.9+r()*.1))}));
+tile('chest_front',(s,r)=>{pPl(s,r,[160,112,46]);for(let x=0;x<16;x++)s(x,5,[70,48,20]);for(let y=4;y<9;y++){s(7,y,[200,200,200]);s(8,y,[200,200,200])}});
+tile('chest_side',(s,r)=>{pPl(s,r,[160,112,46]);for(let x=0;x<16;x++)s(x,5,[70,48,20])});
+tile('chest_top',(s,r)=>{pPl(s,r,[160,112,46]);pB(s,[160,112,46],.8,.6)});
+tile('flower_pot',(s,r)=>pN(s,r,[124,66,46],.1));
+tile('fern',(s,r)=>each((x,y)=>{const c=Math.abs(x-7.5);const leaf=(y>2&&c<(y-2)*.6&&((x+y)%3!==0))||(c<1&&y>1);if(leaf)s(x,y,mul([70,140,50],.8+r()*.3));else s(x,y,[0,0,0],0)}));
+tile('wheat',(s,r)=>each((x,y)=>{if(x%3===1&&y>2)s(x,y,y<7?[220,190,80]:[170,150,60]);else if(x%3===2&&y<6&&y>2)s(x,y,[230,200,90]);else s(x,y,[0,0,0],0)}));
+tile('farmland',(s,r)=>each((x,y)=>s(x,y,mul([96,62,38],(y%4===0?.75:.95+r()*.12)))));
+tile('sniffer_egg',(s,r)=>{pN(s,r,[160,64,48],.12);pSp(s,r,[60,120,90],7,1)});
+tile('bone_side',(s,r)=>each((x,y)=>s(x,y,mul([226,220,196],x%4===0?.86:.97+r()*.05))));
+tile('bone_top',(s,r)=>each((x,y)=>{const d=Math.hypot(x-7.5,y-7.5);s(x,y,mul([226,220,196],d>3&&d<5?.8:1))}));
+tile('lectern_top',(s,r)=>{pPl(s,r,[162,130,78]);for(let y=4;y<12;y++)for(let x=3;x<13;x++)s(x,y,x===8?[180,160,120]:[246,240,224])});
 // Tempel
 tile('smooth_quartz',(s,r)=>pN(s,r,[236,230,223],.04));
 tile('quartz_pillar',(s,r)=>each((x,y)=>s(x,y,mul([236,230,223],x%4===0?.86:.98+r()*.04))));
@@ -441,10 +455,10 @@ tile('pink_petals',(s,r)=>each((x,y)=>{const v=h3(x>>1,y>>1,31);if(v>.55)s(x,y,v
 actx.putImageData(ad,0,0);
 document.documentElement.style.setProperty('--atlas',`url(${cvA.toDataURL()})`);
 
-// ---------- Blöcke ----------
+// ================= Blöcke =================
 const BL=[null],BK={};
 function blk(key,o){o.key=key;o.id=BL.length;BL.push(o);BK[key]=o.id;o.shape=o.shape||'cube';o.alpha=o.alpha||'opaque';o.cat=o.cat||'build';o.per=o.per||1;o.ck=o.ck||key;
-  const t=typeof o.t==='string'?{side:o.t}:o.t;o.tiles={side:t.side,top:t.top||t.side,bottom:t.bottom||t.top||t.side,front:t.front};}
+  const t=typeof o.t==='string'?{side:o.t}:o.t;o.tiles={side:t.side,top:t.top||t.side,bottom:t.bottom||t.top||t.side,front:t.front}}
 const TER='terrain',NAT='nature';
 blk('grass_block',{n:'Grasblock',mc:'grass_block',t:{side:'grass_side',top:'grass_top',bottom:'dirt'},cat:TER});
 blk('dirt',{n:'Erde',mc:'dirt',t:'dirt',cat:TER});
@@ -462,70 +476,85 @@ blk('andesite',{n:'Andesit',mc:'andesite',t:'andesite',cat:TER});
 blk('granite',{n:'Granit',mc:'granite',t:'granite',cat:TER});
 blk('diorite',{n:'Diorit',mc:'diorite',t:'diorite',cat:TER});
 blk('tuff',{n:'Tuffstein',mc:'tuff',t:'tuff',cat:TER});
-blk('oak_log',{n:'Eichenstamm',mc:'oak_log',t:{side:'oak_log',top:'oak_log_top'},cat:NAT});
-blk('spruce_log',{n:'Fichtenstamm',mc:'spruce_log',t:{side:'spruce_log',top:'spruce_log_top'},cat:NAT});
-blk('oak_leaves',{n:'Eichenlaub',mc:'oak_leaves',t:'oak_leaves',alpha:'cutout',cat:NAT});
-blk('spruce_leaves',{n:'Fichtennadeln',mc:'spruce_leaves',t:'spruce_leaves',alpha:'cutout',cat:NAT});
 blk('short_grass',{n:'Gras',mc:'grass',t:'short_grass',shape:'cross',alpha:'cutout',cat:NAT,note:'In 1.20.1 heißt die Pflanze noch minecraft:grass.'});
 for(const [k,n] of [['poppy','Mohn'],['dandelion','Löwenzahn'],['cornflower','Kornblume'],['oxeye_daisy','Margerite'],['torchflower','Fackellilie']])blk(k,{n,mc:k,t:k,shape:'cross',alpha:'cutout',cat:NAT,h:.8});
 blk('pink_petals',{n:'Rosa Blütenblätter',mc:'pink_petals',t:'pink_petals',shape:'flat',alpha:'cutout',cat:NAT,note:'Neu in 1.20.'});
-// Bau
-blk('white_concrete',{n:'Weißer Beton',mc:'white_concrete',t:'white_concrete',note:'Boden in allen Räumen.'});
-blk('light_gray_concrete',{n:'Hellgrauer Beton',mc:'light_gray_concrete',t:'light_gray_concrete',note:'Wände. Alternativ polierter Andesit.'});
+// Labor
+blk('white_concrete',{n:'Weißer Beton',mc:'white_concrete',t:'white_concrete'});
+blk('light_gray_concrete',{n:'Hellgrauer Beton',mc:'light_gray_concrete',t:'light_gray_concrete',note:'Wände im ganzen Labor.'});
 blk('black_concrete',{n:'Schwarzer Beton',mc:'black_concrete',t:'black_concrete'});
-blk('red_concrete',{n:'Roter Beton',mc:'red_concrete',t:'red_concrete',note:'Umbrella-Streifen: Leitlinie im Boden und Band auf Hüfthöhe.'});
-blk('yellow_concrete',{n:'Gelber Beton',mc:'yellow_concrete',t:'yellow_concrete',note:'Sicherheitskante am Bahnsteig.'});
+blk('red_concrete',{n:'Roter Beton',mc:'red_concrete',t:'red_concrete',note:'Umbrella-Rot: Gangmitte, Wandband, Balkonkante, Logo.'});
+blk('yellow_concrete',{n:'Gelber Beton',mc:'yellow_concrete',t:'yellow_concrete',note:'Warnlinien auf B5.'});
+blk('cyan_concrete',{n:'Türkiser Beton',mc:'cyan_concrete',t:'cyan_concrete',note:'OP-Boden.'});
 blk('smooth_stone',{n:'Glatter Stein',mc:'smooth_stone',t:'smooth_stone',note:'Decken.'});
-blk('smooth_stone_slab_top',{n:'Glatte Steinstufe',mc:'smooth_stone_slab',t:{side:'slab_side',top:'smooth_stone'},shape:'slab_top',ck:'smooth_stone_slab',note:'Als obere Stufe gesetzt ergibt sie einen Labortisch.'});
-blk('polished_andesite',{n:'Polierter Andesit',mc:'polished_andesite',t:'polished_andesite',note:'Verkleidung der Schächte zwischen den Ebenen.'});
+blk('smooth_stone_slab_top',{n:'Glatte Steinstufe',mc:'smooth_stone_slab',t:{side:'slab_side',top:'smooth_stone'},shape:'slab_top',ck:'smooth_stone_slab',note:'Als obere Stufe gesetzt ein Labortisch.'});
+blk('polished_andesite',{n:'Polierter Andesit',mc:'polished_andesite',t:'polished_andesite'});
 blk('polished_deepslate',{n:'Polierter Tiefenschiefer',mc:'polished_deepslate',t:'polished_deepslate'});
-blk('deepslate_tiles',{n:'Tiefenschieferfliesen',mc:'deepslate_tiles',t:'deepslate_tiles',note:'Wände auf B4.'});
+blk('deepslate_tiles',{n:'Tiefenschieferfliesen',mc:'deepslate_tiles',t:'deepslate_tiles'});
 blk('deepslate_bricks',{n:'Tiefenschieferziegel',mc:'deepslate_bricks',t:'deepslate_bricks'});
-blk('stone_bricks',{n:'Steinziegel',mc:'stone_bricks',t:'stone_bricks'});
-blk('stone_brick_stairs',{n:'Steinziegeltreppe',mc:'stone_brick_stairs',t:'stone_bricks',shape:'stairs'});
-blk('cobblestone',{n:'Bruchstein',mc:'cobblestone',t:'cobblestone'});
 blk('glass',{n:'Glas',mc:'glass',t:'glass',alpha:'blend'});
 blk('glass_pane',{n:'Glasscheibe',mc:'glass_pane',t:'glass',shape:'pane',alpha:'blend'});
+blk('white_glass_pane',{n:'Weiße Glasscheibe',mc:'white_stained_glass_pane',t:'white_glass',shape:'pane',alpha:'blend'});
 blk('red_stained_glass',{n:'Rotes Glas',mc:'red_stained_glass',t:'red_glass',alpha:'blend',light:1});
-blk('red_stained_glass_pane',{n:'Rote Glasscheibe',mc:'red_stained_glass_pane',t:'red_glass',shape:'pane',alpha:'blend',light:1,note:'Der „Laser“. Dazu einen Stolperdraht am Boden spannen.'});
+blk('red_stained_glass_pane',{n:'Rote Glasscheibe',mc:'red_stained_glass_pane',t:'red_glass',shape:'pane',alpha:'blend',light:1,note:'Der „Laser“. Dazu Stolperdraht am Boden.'});
 blk('iron_block',{n:'Eisenblock',mc:'iron_block',t:'iron_block'});
 blk('iron_bars',{n:'Eisenstangen',mc:'iron_bars',t:'iron_bars',shape:'pane',alpha:'cutout'});
 blk('iron_door',{n:'Eisentür',mc:'iron_door',t:{side:'iron_door_b',top:'iron_door_t'},shape:'door',per:2,note:'Mit Knopf auf beiden Seiten. Hält auch Wasser auf.'});
 blk('iron_trapdoor',{n:'Eisenfalltür',mc:'iron_trapdoor',t:'iron_trapdoor',shape:'plate',alpha:'cutout'});
-blk('sea_lantern',{n:'Seelaterne',mc:'sea_lantern',t:'sea_lantern',light:1,note:'Deckenlicht, alle 4 Blöcke eins.'});
-blk('redstone_lamp',{n:'Redstone-Lampe',mc:'redstone_lamp',t:'redstone_lamp',light:1,note:'Braucht ein Redstone-Signal, z. B. Redstone-Block daneben oder Taktgeber.'});
+blk('iron_trapdoor_v',{n:'Eisenfalltür',mc:'iron_trapdoor',t:'iron_trapdoor',shape:'vplate',alpha:'cutout',ck:'iron_trapdoor'});
+blk('chain',{n:'Kette',mc:'chain',t:'chain',shape:'rod',w:.19,alpha:'cutout'});
+blk('sea_lantern',{n:'Seelaterne',mc:'sea_lantern',t:'sea_lantern',light:1,note:'Licht: alle 4 Blöcke in der Decke, Ringe im Atrium.'});
+blk('redstone_lamp',{n:'Redstone-Lampe',mc:'redstone_lamp',t:'redstone_lamp',light:1,note:'Braucht Redstone-Signal, z. B. Redstone-Block daneben.'});
 blk('barrel',{n:'Fass',mc:'barrel',t:{side:'barrel_side',top:'barrel_top'}});
-blk('chiseled_bookshelf',{n:'Gemeißeltes Bücherregal',mc:'chiseled_bookshelf',t:{side:'spruce_planks',top:'oak_planks',front:'chiseled_bookshelf'},facing:1,note:'Neu in 1.20. Bücher einzeln einsortieren.'});
-blk('soul_sand',{n:'Seelensand',mc:'soul_sand',t:'soul_sand',note:'Ganz unten im Aufzug: erzeugt die Blasensäule nach oben.'});
-blk('water',{n:'Wasser (Quellblock)',mc:'water_bucket',t:'water',alpha:'blend',note:'Säule oben füllen, mit Seetang vollsetzen, Seetang abbauen: jeder Block wird zur Quelle.'});
-blk('ladder',{n:'Leiter',mc:'ladder',t:'ladder',shape:'ladder',alpha:'cutout'});
-blk('rail',{n:'Schiene',mc:'rail',t:{side:'rail_ew',top:'rail_ew'},shape:'rail',alpha:'cutout'});
-blk('powered_rail',{n:'Antriebsschiene',mc:'powered_rail',t:{side:'powered_rail_ew',top:'powered_rail_ew'},shape:'rail',alpha:'cutout',note:'Mit Redstone-Block darunter immer an.'});
+blk('chest',{n:'Truhe',mc:'chest',t:{side:'chest_side',top:'chest_top',front:'chest_front'},shape:'chest',facing:1});
+blk('chiseled_bookshelf',{n:'Gemeißeltes Bücherregal',mc:'chiseled_bookshelf',t:{side:'spruce_planks',top:'oak_planks',front:'chiseled_bookshelf'},facing:1,note:'Neu in 1.20.'});
+blk('lectern',{n:'Lesepult',mc:'lectern',t:{side:'oak_planks',top:'lectern_top'},shape:'slab_full'});
+blk('soul_sand',{n:'Seelensand',mc:'soul_sand',t:'soul_sand',note:'Am Grund der Aufwärts-Säule: Blasen drücken nach oben.'});
+blk('magma_block',{n:'Magmablock',mc:'magma_block',t:'magma',light:1,note:'Am Grund der Abwärts-Säule: Strudel zieht nach unten.'});
+blk('water',{n:'Wasser (Quellblock)',mc:'water_bucket',t:'water',alpha:'blend',note:'Säule füllen, Seetang setzen, Seetang abbauen: jeder Block wird Quelle.'});
+blk('rail',{n:'Schiene',mc:'rail',t:'rail_ew',shape:'rail',alpha:'cutout'});
+blk('powered_rail',{n:'Antriebsschiene',mc:'powered_rail',t:'powered_rail_ew',shape:'rail',alpha:'cutout',note:'Mit Redstone-Block darunter immer an.'});
 blk('redstone_block',{n:'Redstone-Block',mc:'redstone_block',t:'redstone_block'});
-blk('packed_ice',{n:'Packeis',mc:'packed_ice',t:'packed_ice',note:'Kühlraum. Schmilzt nicht neben Licht.'});
+blk('packed_ice',{n:'Packeis',mc:'packed_ice',t:'packed_ice'});
 blk('brewing_stand',{n:'Braustand',mc:'brewing_stand',t:'brewing_stand',shape:'cross',alpha:'cutout'});
 blk('cauldron',{n:'Kessel',mc:'cauldron',t:{side:'cauldron_side',top:'cauldron_top'}});
-blk('blast_furnace',{n:'Hochofen',mc:'blast_furnace',t:{side:'furnace_side',top:'blast_top',front:'blast_front'},facing:1,note:'Generator-Optik. Mit Brennstoff leuchtet die Front.'});
+blk('blast_furnace',{n:'Hochofen',mc:'blast_furnace',t:{side:'furnace_side',top:'blast_top',front:'blast_front'},facing:1});
+blk('furnace',{n:'Ofen',mc:'furnace',t:{side:'furnace_side',top:'blast_top',front:'furnace_front'},facing:1});
+blk('smoker',{n:'Räucherofen',mc:'smoker',t:{side:'furnace_side',top:'blast_top',front:'smoker_front'},facing:1});
 blk('dispenser',{n:'Werfer',mc:'dispenser',t:{side:'furnace_side',front:'dispenser_front'},facing:1});
 blk('observer',{n:'Beobachter',mc:'observer',t:{side:'observer_side',top:'observer_top',front:'observer_front'},facing:1,note:'Drei übereinander sehen aus wie ein Server-Schrank.'});
-blk('monitor',{n:'Bildschirm',mc:'black_concrete + glow_item_frame + filled_map',t:{side:'black_concrete',front:(x,y,z,m)=>m&4?'monitor_red':(h3(x,y,z)<.5?'monitor_map':'monitor_term')},facing:1,note:'Schwarzer Beton, davor ein Leucht-Rahmen mit einer Karte.'});
-blk('waxed_cut_copper',{n:'Gewachstes geschnittenes Kupfer',mc:'waxed_cut_copper',t:'waxed_cut_copper',note:'Rohre und Reaktor. Durch das Wachs oxidiert es nicht.'});
+blk('crafting_table',{n:'Werkbank',mc:'crafting_table',t:{side:'crafting_side',top:'crafting_top'}});
+blk('smithing_table',{n:'Schmiedetisch',mc:'smithing_table',t:{side:'smithing_side',top:'smithing_top'}});
+blk('target',{n:'Zielblock',mc:'target',t:{side:'target_side',top:'hay'}});
+blk('monitor',{n:'Bildschirm',mc:'black_concrete + glow_item_frame + filled_map',t:{side:'black_concrete',front:(x,y,z,m)=>m&4?'monitor_red':(h3(x,y,z)<.5?'monitor_map':'monitor_term')},facing:1,note:'Schwarzer Beton, davor ein Leucht-Rahmen mit Karte.'});
+blk('waxed_cut_copper',{n:'Gewachstes geschnittenes Kupfer',mc:'waxed_cut_copper',t:'waxed_cut_copper',note:'Rohre und Reaktor. Gewachst, damit es nicht oxidiert.'});
 blk('lightning_rod',{n:'Blitzableiter',mc:'lightning_rod',t:'copper',shape:'rod',w:.25});
-blk('end_rod',{n:'Endstab',mc:'end_rod',t:'end_rod',shape:'rod',w:.13,light:1,note:'Duschkopf an der Decke.'});
+blk('end_rod',{n:'Endstab',mc:'end_rod',t:'end_rod',shape:'rod',w:.13,light:1});
 blk('white_bed',{n:'Weißes Bett',mc:'white_bed',t:'bed_foot',shape:'bed',per:2});
 blk('banner',{n:'Umbrella-Banner',mc:'white_banner',t:'banner',shape:'banner',note:'Webstuhl: weißes Banner + rote Farbe + Muster „Geständert“.'});
-blk('campfire',{n:'Lagerfeuer',mc:'campfire',t:'campfire_log',shape:'campfire',light:1,note:'Auf einem Heuballen wird der Rauch viel höher.'});
-blk('hay_block',{n:'Heuballen',mc:'hay_block',t:'hay'});
+blk('campfire',{n:'Lagerfeuer',mc:'campfire',t:'campfire_log',shape:'campfire',light:1});
 blk('lantern',{n:'Laterne',mc:'lantern',t:'lantern',shape:'lantern',light:1});
-for(const n of [1,2,3,4])blk('sign_b'+n,{n:'Hängeschild „B'+n+'“',mc:'spruce_hanging_sign',t:'sign_b'+n,shape:'sign',ck:'hanging_sign',note:'Neu in 1.20. An zwei Ketten unter der Decke.'});
+for(const n of [1,2,3,4,5])blk('sign_b'+n,{n:'Hängeschild „B'+n+'“',mc:'spruce_hanging_sign',t:'sign_b'+n,shape:'sign',ck:'hanging_sign',note:'Neu in 1.20. An zwei Ketten unter der Decke.'});
 blk('spruce_planks',{n:'Fichtenholzbretter',mc:'spruce_planks',t:'spruce_planks'});
 blk('dark_oak_planks',{n:'Schwarzeichenholzbretter',mc:'dark_oak_planks',t:'dark_oak_planks'});
-blk('dark_oak_log',{n:'Schwarzeichenstamm',mc:'dark_oak_log',t:{side:'dark_oak_log',top:'dark_oak_log_top'}});
-blk('dark_oak_stairs',{n:'Schwarzeichentreppe',mc:'dark_oak_stairs',t:'dark_oak_planks',shape:'stairs'});
-blk('dark_oak_door',{n:'Schwarzeichentür',mc:'dark_oak_door',t:{side:'dark_oak_door_b',top:'dark_oak_door_t'},shape:'door',per:2});
+blk('spruce_slab',{n:'Fichtenholzstufe',mc:'spruce_slab',t:'spruce_planks',shape:'slab'});
+blk('spruce_slab_top',{n:'Fichtenholzstufe',mc:'spruce_slab',t:'spruce_planks',shape:'slab_top',ck:'spruce_slab'});
+blk('spruce_stairs',{n:'Fichtenholztreppe',mc:'spruce_stairs',t:'spruce_planks',shape:'stairs',note:'Als Stuhl: die hohe Seite ist die Lehne.'});
 blk('red_carpet',{n:'Roter Teppich',mc:'red_carpet',t:'red_wool',shape:'flat'});
-blk('oak_fence',{n:'Eichenzaun',mc:'oak_fence',t:'oak_planks',shape:'fence'});
-blk('dirt_path',{n:'Trampelpfad',mc:'dirt_path',t:{side:'dirt_path_side',top:'dirt_path',bottom:'dirt'},note:'Schaufel-Rechtsklick auf Gras.'});
+blk('white_carpet',{n:'Weißer Teppich',mc:'white_carpet',t:'white_wool',shape:'flat'});
+blk('light_gray_carpet',{n:'Hellgrauer Teppich',mc:'light_gray_carpet',t:'gray_wool',shape:'flat'});
+blk('potted_azalea',{n:'Getopfte Azalee',mc:'potted_azalea_bush',t:'flower_pot',shape:'potted'});
+blk('flowering_azalea',{n:'Blühende Azalee',mc:'flowering_azalea',t:'flowering_azalea',alpha:'cutout'});
+blk('herb_green',{n:'Farn (grünes Kraut)',mc:'fern',t:'fern',shape:'cross',alpha:'cutout'});
+blk('herb_red',{n:'Mohn (rotes Kraut)',mc:'poppy',t:'poppy',shape:'cross',alpha:'cutout',h:.8});
+blk('herb_blue',{n:'Kornblume (blaues Kraut)',mc:'cornflower',t:'cornflower',shape:'cross',alpha:'cutout',h:.8});
+blk('wheat',{n:'Weizen',mc:'wheat_seeds',t:'wheat',shape:'cross',alpha:'cutout'});
+blk('farmland',{n:'Ackerboden',mc:'farmland',t:{side:'dirt',top:'farmland'},note:'Erde mit der Hacke bearbeiten.'});
+blk('garden_grass',{n:'Grasblock',mc:'grass_block',t:{side:'grass_side',top:'grass_top',bottom:'dirt'},note:'Mit Behutsamkeit-Spitzhacke abbauen.'});
+blk('sniffer_egg',{n:'Schnüffler-Ei',mc:'sniffer_egg',t:'sniffer_egg',shape:'egg',note:'Neu in 1.20. Aus verdächtigem Sand in Warmwasser-Ruinen.'});
+blk('bone_block',{n:'Knochenblock',mc:'bone_block',t:{side:'bone_side',top:'bone_top'}});
+blk('hay_block',{n:'Heuballen',mc:'hay_block',t:'hay'});
+blk('dirt_path',{n:'Trampelpfad',mc:'dirt_path',t:{side:'dirt_path_side',top:'dirt_path',bottom:'dirt'}});
 // Tempel
 blk('smooth_quartz',{n:'Glatter Quarzblock',mc:'smooth_quartz',t:'smooth_quartz'});
 blk('quartz_pillar',{n:'Quarzsäule',mc:'quartz_pillar',t:{side:'quartz_pillar',top:'quartz_pillar_top'}});
@@ -540,18 +569,17 @@ blk('blue_terracotta',{n:'Blaue Keramik',mc:'blue_terracotta',t:'blue_terracotta
 blk('granite_slab',{n:'Polierte Granitstufe',mc:'polished_granite_slab',t:'polished_granite',shape:'slab',ck:'granite_slab'});
 blk('granite_slab_top',{n:'Polierte Granitstufe',mc:'polished_granite_slab',t:'polished_granite',shape:'slab_top',ck:'granite_slab'});
 blk('decorated_pot',{n:'Verzierter Topf',mc:'decorated_pot',t:'decorated_pot',shape:'pot',note:'Neu in 1.20. Aus Töpferscherben gebaut.'});
-blk('olive_log',{n:'Eichenstamm',mc:'oak_log',t:{side:'oak_log',top:'oak_log_top'},ck:'oak_log'});
+blk('oak_fence',{n:'Eichenzaun',mc:'oak_fence',t:'oak_planks',shape:'fence'});
+blk('olive_log',{n:'Eichenstamm',mc:'oak_log',t:{side:'oak_log',top:'oak_log_top'}});
 blk('azalea_leaves',{n:'Azaleenlaub',mc:'azalea_leaves',t:'azalea_leaves',alpha:'cutout',note:'Graugrün wie ein Olivenbaum.'});
-blk('cypress_leaves',{n:'Fichtennadeln',mc:'spruce_leaves',t:'spruce_leaves',alpha:'cutout',ck:'spruce_leaves'});
+blk('cypress_leaves',{n:'Fichtennadeln',mc:'spruce_leaves',t:'spruce_leaves',alpha:'cutout'});
 const OPQ=new Uint8Array(BL.length);BL.forEach((b,i)=>{if(b)OPQ[i]=b.shape==='cube'&&b.alpha==='opaque'?1:0});
-
 const EDEF={zombie:{n:'Zombie mit Namensschild',mc:'zombie_spawn_egg + name_tag',tile:'zombie_face',note:'Mit Namensschild verschwindet er nicht. Im Wasser wird er zum Ertrunkenen.'},
-  armor_stand:{n:'Rüstungsständer',mc:'armor_stand',tile:'iron_armor',note:'Eisenrüstung mit Rüstungsbesatz (1.20) oder weiße Lederrüstung als Laborkittel.'},
-  minecart:{n:'Lore',mc:'minecart',tile:'iron_block'}};
-const MAT={};BL.forEach(b=>{if(b&&!MAT[b.ck])MAT[b.ck]={n:b.n,mc:b.mc,tile:b.tiles.front&&typeof b.tiles.front==='string'?b.tiles.front:b.key==='monitor'?'monitor_map':b.tiles.side,note:b.note}});
+  armor_stand:{n:'Rüstungsständer',mc:'armor_stand',tile:'iron_armor',note:'Eisenrüstung oder weiße Lederrüstung als Laborkittel.'},minecart:{n:'Lore',mc:'minecart',tile:'iron_block'}};
+const MAT={};BL.forEach(b=>{if(b&&!MAT[b.ck])MAT[b.ck]={n:b.n,mc:b.mc,tile:typeof b.tiles.front==='string'?b.tiles.front:b.key==='monitor'?'monitor_map':b.tiles.side,note:b.note}});
 for(const k in EDEF)MAT['e_'+k]={n:EDEF[k].n,mc:EDEF[k].mc,tile:EDEF[k].tile,note:EDEF[k].note};
 
-// ---------- Welt ----------
+// ================= Welt =================
 class World{constructor(x0,y0,z0,nx,ny,nz){Object.assign(this,{x0,y0,z0,nx,ny,nz});this.v=new Uint16Array(nx*ny*nz);this.m=new Uint8Array(nx*ny*nz);this.ents=[]}
   idx(x,y,z){return((y-this.y0)*this.nz+(z-this.z0))*this.nx+(x-this.x0)}
   inb(x,y,z){return x>=this.x0&&x<this.x0+this.nx&&y>=this.y0&&y<this.y0+this.ny&&z>=this.z0&&z<this.z0+this.nz}
@@ -560,229 +588,360 @@ class World{constructor(x0,y0,z0,nx,ny,nz){Object.assign(this,{x0,y0,z0,nx,ny,nz
   box(x1,y1,z1,x2,y2,z2,key,m){for(let y=y1;y<=y2;y++)for(let z=z1;z<=z2;z++)for(let x=x1;x<=x2;x++)this.s(x,y,z,key,m)}
   ent(type,x,y,z,f=2,kit){this.ents.push({type,x,y,z,f,kit})}}
 
-function tree(W,x,y0,z,type){
-  if(type==='oak'){const h=4+(h3(x,1,z)*2|0);for(let y=0;y<h;y++)W.s(x,y0+y,z,'oak_log');const ty=y0+h;
-    for(let dy=-2;dy<=1;dy++){const r=dy<0?2:1;for(let dx=-r;dx<=r;dx++)for(let dz=-r;dz<=r;dz++){if(Math.abs(dx)===r&&Math.abs(dz)===r&&(dy>=0||h3(x+dx,ty+dy,z+dz)<.5))continue;if(!W.g(x+dx,ty+dy,z+dz))W.s(x+dx,ty+dy,z+dz,'oak_leaves')}}}
-  else{const h=7+(h3(x,2,z)*2|0),top=y0+h;for(let y=y0;y<top;y++)W.s(x,y,z,'spruce_log');W.s(x,top,z,'spruce_leaves');W.s(x,top+1,z,'spruce_leaves');
-    for(let y=y0+2;y<top;y++){const d=top-y,r=d<=1?1:(d%2?2:1)+(d>4?1:0);for(let dx=-r;dx<=r;dx++)for(let dz=-r;dz<=r;dz++){if(Math.abs(dx)+Math.abs(dz)>r+(r>1?0:0)||(!dx&&!dz))continue;if(!W.g(x+dx,y,z+dz))W.s(x+dx,y,z+dz,'spruce_leaves')}}}}
-
-// ---------- Labor ----------
-const S=(...p)=>p.join('');
-const H27='#'.repeat(27);
-const LV=[
- {key:'b1',name:'B1 · Sicherheit',L:40,banners:[11,12,13],mobF:0,plan:[H27,
-  S('#','SSSSa.','#','.........','#','.BBB.BBB','#'),
-  S('#','......','#','.........','#','.bbb.bbb','#'),
-  S('#','SSSS..','D','.........','D','.bbb.bbb','#'),
-  S('#','......','#','...TCT...','#','.BBB.BBB','#'),
-  S('####D###','.........','#','########','#'),
-  S('#','......','#','...EEE...','#','AAA...SS','#'),
-  S('#','PPP...','D','...EEE...','D','........','#'),
-  S('#','......','#','...EEE...','#','AAA...SS','#'),
-  S('####D###','.........','#','###D####','#'),
-  S('#','......','G','.........','D','........','#'),
-  S('#','.CTC..','D','...ZZZ...','#','XXDX#XDX','#'),
-  S('#','......','G','...ZZZ...','G','....#...','#'),
-  S('#','....S.','#','...ZZZ...','#','.!..#...','#'),H27]},
- {key:'b2',name:'B2 · Labore',L:30,banners:[12],plan:[H27,
-  S('#','KTKU.U','#','.........','#','........','#'),
-  S('#','......','G','.........','G','.W....W.','#'),
-  S('#','.TTTT.','D','.........','#','........','#'),
-  S('#','......','G','....C....','G','........','#'),
-  S('####D###','.........','#','###D####','#'),
-  S('#','III.II','#','...EEE...','#','PP....PP','#'),
-  S('#','I.....','D','...EEE...','D','........','#'),
-  S('#','III.II','#','...EEE...','#','PP....PP','#'),
-  S('####D###','.........','#','########','#'),
-  S('#','......','#','.........','#','........','#'),
-  S('#','S.CTC.','D','...ZZZ...','D','.MMM.MMM','#'),
-  S('#','......','#','...ZZZ...','#','........','#'),
-  S('#','NNNNNN','#','...ZZZ...','#','.MMM.MMM','#'),H27]},
- {key:'b3',name:'B3 · Red Queen',L:20,banners:[12],mobF:1,hallLight:'redstone_lamp',plan:[H27,
-  S('#','......','X','.........','#','QQQQQQQQ','#'),
-  S('#','..!...','D','.........','#','........','#'),
-  S('#','......','X','...TCT...','#','.C.CC.C.','#'),
-  S('#','......','X','.........','#','........','#'),
-  S('########','.........','#','...RR...','#'),
-  S('#','......','X','...EEE...','#','...RR...','#'),
-  S('#','...!..','D','...EEE...','D','........','#'),
-  S('#','......','X','...EEE...','#','.CC..CC.','#'),
-  S('########','.........','#','D#######','#'),
-  S('#','......','X','.........','#','.#######','#'),
-  S('#','..!...','D','...ZZZ...','#','.LLLLL.V','#'),
-  S('#','......','X','...ZZZ...','#','.LLLLL.V','#'),
-  S('#','......','X','...ZZZ...','#','########','#'),H27]},
- {key:'b4',name:'B4 · Reaktor',L:-10,banners:[12],wall:'deepslate_tiles',floor:'polished_deepslate',plan:[H27,
-  S('#','FFFFFF','#','.........','#','.SS..SS.','#'),
-  S('#','......','#','.........','#','........','#'),
-  S('#','FFFFF.','D','.........','D','YYYYYYYY','#'),
-  S('#','......','#','.........','#','HHHHHHHH','H'),
-  S('####D###','.........','#','########','#'),
-  S('#','......','#','...EEE...','#','........','#'),
-  S('#','......','D','...EEE...','D','.JJJJJJ.','#'),
-  S('#','......','#','...EEE...','#','.wwwwww.','#'),
-  S('#','..OO..','#','.........','#','.wwwwww.','#'),
-  S('#','..OO..','#','.........','#','.JJJJJJ.','#'),
-  S('#','......','#','...ZZZ...','#','........','#'),
-  S('#','......','#','...ZZZ...','#','........','#'),
-  S('#','......','#','...ZZZ...','#','........','#'),H27],
-  deco(W,L){for(let x=2;x<=5;x++)for(let z=8;z<=11;z++){if(x>=3&&x<=4&&z>=9&&z<=10)continue;if(x===3&&z===8)continue;const c=(x===2||x===5)&&(z===8||z===11);W.s(x,L+1,z,c?'lightning_rod':'iron_bars')}
-    for(let x=1;x<=6;x++)W.s(x,L+5,2,'waxed_cut_copper');W.ent('minecart',22,L,4,2)}},
+// ================= Labor-Geometrie =================
+const C=34,D4=[[0,-1],[1,0],[0,1],[-1,0]];
+const QS={NW:[-1,-1],NE:[1,-1],SW:[-1,1],SE:[1,1]},QN={NW:'Nordwest',NE:'Nordost',SW:'Südwest',SE:'Südost'},LET=['A','B','C','D'];
+const LEVELS=[
+ {key:'b1',n:'Sicherheit & Unterkunft',L:44,H:6,kind:'ring',bridge:'E',desc:'Hier kommt man an. Brücke vom Aufzug nach Osten. Wachen, Schlafsäle, Kantine und Zellen.',
+  rooms:{NW:['quartiere','spinde','dekon','sicherheit'],NE:['kantine','kueche','besprechung','lounge'],SW:['waffenkammer','schiessstand','zellen','wache'],SE:['quartiere','lager','krankenstation','buero']}},
+ {key:'b2',n:'Forschung',L:36,H:6,kind:'ring',bridge:'W',desc:'Das Herz der Wissenschaft: T-Virus-Tanks, Gewächshäuser mit den drei Kräutern, Genetik und Archive. Brücke nach Westen.',
+  rooms:{NW:['chemie','buero','kuehl','virologie'],NE:['gewaechshaus','genetik','chemie','gewaechshaus'],SW:['bibliothek','buero','besprechung','genetik'],SE:['lager','werkstatt','kuehl','virologie']}},
+ {key:'b3',n:'Medizin & Containment',L:28,H:6,kind:'ring',bridge:'E',desc:'OP-Säle, Leichenhallen und die Gehege der Experimente. Hier wird es unheimlich. Brücke nach Osten.',
+  rooms:{NW:['op','krankenstation','leichenhalle','zellen'],NE:['zellen','chemie','op','licker'],SW:['leichenhalle','lager','wache','licker'],SE:['krankenstation','dekon','kuehl','zellen']}},
+ {key:'b4',n:'Red Queen',L:20,H:6,kind:'ring',bridge:null,glassFloor:1,desc:'Die KI steuert von hier den ganzen Komplex. Serverhallen, zwei Kontrollräume, Tresor hinter Lasern. Der Atriumboden ist aus Glas.',
+  rooms:{NW:['server','server','technik','kontrolle'],NE:['tresor','laser','wache','server'],SW:['server','technik','besprechung','kontrolle'],SE:['lager','werkstatt','buero','server']}},
+ {key:'b5',n:'Reaktor & Bahnhof',L:-4,H:8,kind:'hall',wall:'deepslate_tiles',floor:'polished_deepslate',ceil:'polished_deepslate',desc:'Ganz unten im Tiefenschiefer: runde Reaktorhalle, Generatoren, Kühlbecken und der Bahnhof im Ostgang.',
+  rooms:{NW:['generator','generator','technik','lager'],NE:['kuehlung','kuehlung','werkstatt','lager'],SW:['generator','lager','technik','lager'],SE:['kuehlung','werkstatt','lager','lager']}},
 ];
-const WALLISH='#GXD';
-function faceFrom(P,x,z){const at=(dx,dz)=>(P[z+dz]||'')[x+dx];if(at(0,1)==='.')return 2;if(at(0,-1)==='.')return 0;if(at(1,0)==='.')return 1;if(at(-1,0)==='.')return 3;return 2}
-function labCell(W,lv,x,z,ch){const L=lv.L,P=lv.plan,wall=lv.wall||'light_gray_concrete',at=(dx,dz)=>(P[z+dz]||'')[x+dx]||'#',f=faceFrom(P,x,z);
-  switch(ch){
-  case 'D':{const ax=(WALLISH.includes(at(-1,0))&&WALLISH.includes(at(1,0)))?0:1;W.s(x,L+1,z,'iron_door',ax<<1);W.s(x,L+2,z,'iron_door',ax<<1|1);const nb=ax?at(0,-1):at(-1,0);for(let y=L+3;y<=L+5;y++)W.s(x,y,z,nb==='X'?'iron_bars':wall);break}
-  case 'G':W.s(x,L+1,z,wall);for(let y=L+2;y<=L+4;y++)W.s(x,y,z,'glass_pane');W.s(x,L+5,z,wall);break;
-  case 'X':for(let y=L+1;y<=L+5;y++)W.s(x,y,z,'iron_bars');break;
-  case 'S':W.s(x,L+1,z,'barrel');if(h3(x,L,z)<.55)W.s(x,L+2,z,'barrel');break;
-  case 'B':W.s(x,L+1,z,'white_bed',1|(at(0,1)==='b'?2:0));break;
-  case 'b':W.s(x,L+1,z,'white_bed',0);break;
-  case 'A':W.ent('armor_stand',x,L+1,z,at(0,1)==='.'?2:0);break;
-  case 'a':W.ent('armor_stand',x,L+1,z,2,'coat');break;
-  case 'P':W.s(x,L-1,z,'hay_block');W.s(x,L,z,'campfire');W.s(x,L+1,z,'iron_trapdoor');W.s(x,L+5,z,'end_rod');break;
-  case 'T':W.s(x,L+1,z,'smooth_stone_slab_top');break;
-  case 'C':W.s(x,L+1,z,'smooth_stone_slab_top');W.s(x,L+2,z,'monitor',f);break;
-  case 'K':W.s(x,L+1,z,'smooth_stone_slab_top');W.s(x,L+2,z,'brewing_stand');break;
-  case 'U':W.s(x,L+1,z,'cauldron');break;
-  case 'I':for(let y=L+1;y<=L+3;y++)W.s(x,y,z,'packed_ice');break;
-  case 'N':for(let y=L+1;y<=L+3;y++)W.s(x,y,z,'chiseled_bookshelf',f);break;
-  case 'W':for(let dz=-1;dz<=1;dz++)for(let dx=-1;dx<=1;dx++){const c=!dx&&!dz;W.s(x+dx,L+1,z+dz,c?'sea_lantern':'iron_block');for(let y=L+2;y<=L+4;y++)W.s(x+dx,y,z+dz,c?'water':'glass');W.s(x+dx,L+5,z+dz,'iron_block')}W.ent('zombie',x,L+2,z,2);break;
-  case 'M':for(let y=L+1;y<=L+3;y++)W.s(x,y,z,'observer',f);break;
-  case 'F':W.s(x,L+1,z,'blast_furnace',f);W.s(x,L+2,z,'blast_furnace',f);break;
-  case 'J':W.s(x,L+1,z,'dispenser',f);for(let y=L+2;y<=L+5;y++)W.s(x,y,z,'waxed_cut_copper');break;
-  case 'w':W.s(x,L-1,z,'polished_deepslate');W.s(x,L,z,'water');break;
-  case 'Q':W.s(x,L+1,z,'black_concrete');for(let y=L+2;y<=L+4;y++)W.s(x,y,z,'monitor',f|((x===21||x===22)&&y===L+3?4:0));W.s(x,L+5,z,'black_concrete');break;
-  case 'R':W.s(x,L+1,z,'iron_block');W.s(x,L+2,z,'redstone_lamp');W.s(x,L+3,z,'red_stained_glass');W.s(x,L+4,z,'red_stained_glass');W.s(x,L+5,z,'redstone_lamp');break;
-  case 'L':for(const y of (x%2?[L+2,L+4]:[L+1,L+3]))W.s(x,y,z,'red_stained_glass_pane',1);break;
-  case 'V':for(let y=L+1;y<=L+5;y++)W.s(x,y,z,y===L+2?'gold_block':'iron_block');break;
-  case '!':W.ent('zombie',x,L+1,z,lv.mobF??1);break;
-  case 'O':W.s(x,L+1,z,'waxed_cut_copper');for(let y=L+2;y<=L+4;y++)W.s(x,y,z,'sea_lantern');W.s(x,L+5,z,'waxed_cut_copper');break;
-  case 'Y':W.s(x,L,z,'yellow_concrete');break;
-  case 'H':W.s(x,L-1,z,x===20?'redstone_block':'polished_deepslate');W.s(x,L,z,x===20?'powered_rail':'rail',1);if(x===26)for(let y=L+3;y<=L+5;y++)W.s(x,y,z,wall);break;
-  }}
-function buildLevel(W,lv){const L=lv.L,P=lv.plan,wall=lv.wall||'light_gray_concrete',floor=lv.floor||'white_concrete';
-  for(let z=0;z<15;z++)for(let x=0;x<27;x++){const ch=P[z][x];W.s(x,L,z,ch==='#'?wall:floor);
-    W.s(x,L+6,z,ch!=='#'&&x%4===2&&z%4===2?(lv.hallLight&&x>=8&&x<=16?lv.hallLight:'sea_lantern'):'smooth_stone');
-    for(let y=L+1;y<=L+5;y++)W.s(x,y,z,ch==='#'?wall:null)}
-  for(let z=0;z<15;z++)for(let x=0;x<27;x++)labCell(W,lv,x,z,P[z][x]);
-  for(let z=1;z<14;z++)for(const x of [8,16])if(P[z][x]==='.')W.s(x,L,z,'red_concrete');
-  for(let z=0;z<15;z++)for(let x=7;x<=17;x++)if(P[z][x]==='#'&&(x===7||x===17||z===0||z===14))W.s(x,L+2,z,'red_concrete');
-  for(const bx of lv.banners)W.s(bx,L+4,1,'banner',2);
-  W.s(12,L+5,2,'sign_'+lv.key);
-  if(lv.deco)lv.deco(W,L);}
-function shafts(W){const lvAt=y=>LV.find(l=>y>=l.L&&y<=l.L+6);
-  for(let y=-10;y<=64;y++){const lv=lvAt(y);
-    W.s(12,y,7,y===-10?'soul_sand':'water');
-    if(y>-10)W.s(12,y,12,'ladder',0);
-    if(y>=64)continue;
-    for(const [cx,cz,kind] of [[12,7,'lift'],[12,12,'ladder']])for(let dz=-1;dz<=1;dz++)for(let dx=-1;dx<=1;dx++){if(!dx&&!dz)continue;const x=cx+dx,z=cz+dz;
-      if(lv){if(y===lv.L||y===lv.L+6)continue;const door=kind==='lift'?(dx===0&&dz===1):(dx===0&&dz===-1);
-        if(door&&(y===lv.L+1||y===lv.L+2)){W.s(x,y,z,'iron_door',y===lv.L+2?1:0);continue}
-        W.s(x,y,z,kind==='lift'?'glass':(lv.wall||'light_gray_concrete'))}
-      else W.s(x,y,z,'polished_andesite')}}}
-function mansion(W){const X0=6,X1=18,Z0=3,Z1=14;
-  for(let x=X0;x<=X1;x++)for(let z=Z0;z<=Z1;z++){W.s(x,63,z,'stone_bricks');const edge=x===X0||x===X1||z===Z0||z===Z1;W.s(x,64,z,edge?'stone_bricks':'dark_oak_planks');
-    if(edge){const pil=((x-X0)%4===0&&(z===Z0||z===Z1))||((z-Z0)%4===0&&(x===X0||x===X1))||((x===X0||x===X1)&&(z===Z0||z===Z1));
-      for(let y=65;y<=69;y++)W.s(x,y,z,pil?'dark_oak_log':y===65?'stone_bricks':'spruce_planks')}
-    W.s(x,70,z,'dark_oak_planks')}
-  for(const x of [8,9,12,15,16])for(const y of [66,67]){W.s(x,y,Z0,'glass_pane');if(x!==12)W.s(x,y,Z1,'glass_pane')}
-  for(const z of [5,9,12,13])for(const y of [66,67]){W.s(X0,y,z,'glass_pane');W.s(X1,y,z,'glass_pane')}
-  W.s(12,65,Z1,'dark_oak_door',0);W.s(12,66,Z1,'dark_oak_door',1);
-  for(let k=0;k<=6;k++){const y=70+k,zn=2+k,zs=15-k;for(let x=5;x<=19;x++){W.s(x,y,zn,'dark_oak_stairs',2);W.s(x,y,zs,'dark_oak_stairs',0)}
-    if(k>=1)for(let z=zn+1;z<zs;z++){W.s(X0,y,z,'spruce_planks');W.s(X1,y,z,'spruce_planks')}}
-  for(let y=71;y<=79;y++)W.s(16,y,6,'cobblestone');
-  for(let x=8;x<=10;x++)for(let z=9;z<=12;z++){W.s(x,65,z,'red_carpet');W.s(x+6,65,z,'red_carpet')}
-  for(let z=8;z<=10;z++)for(let y=65;y<=67;y++)W.s(17,y,z,'chiseled_bookshelf',3);
-  W.s(8,65,5,'smooth_stone_slab_top');W.s(8,66,5,'lantern');
-  for(let dz=-1;dz<=1;dz++)for(let dx=-1;dx<=1;dx++)if((dx||dz)&&!(dx===0&&dz===1))W.s(12+dx,65,7+dz,'glass');
-  W.s(12,69,10,'lantern',1);W.s(9,69,8,'lantern',1);W.s(15,69,8,'lantern',1);
-  for(let x=11;x<=13;x++){W.s(x,64,15,'stone_brick_stairs',0);for(let z=16;z<=20;z++)W.s(x,63,z,'dirt_path')}
-  for(const x of [10,14]){W.s(x,64,15,'oak_fence');W.s(x,65,15,'lantern')}}
-function tunnel(W){const L=-10;for(let x=27;x<=34;x++){for(let z=3;z<=5;z++){W.s(x,L-1,z,'polished_deepslate');W.s(x,L+3,z,x%4===1&&z===4?'sea_lantern':'deepslate_bricks')}
-  for(let y=L;y<=L+2;y++){W.s(x,y,3,'deepslate_bricks');W.s(x,y,5,'deepslate_bricks')}
-  W.s(x,L,4,x===30?'powered_rail':'rail',1);W.s(x,L+1,4,null);W.s(x,L+2,4,null);if(x===30)W.s(x,L-1,4,'redstone_block')}}
-function genLab(){const W=new World(-8,-14,-6,43,99,27),hm={};
-  for(let x=W.x0;x<W.x0+W.nx;x++)for(let z=W.z0;z<W.z0+W.nz;z++){let h=63+Math.round(vnoise(x*.13,z*.13,7)*3-1.5);if(x>=3&&x<=21&&z>=0&&z<=20)h=63;hm[x+','+z]=h;
-    for(let y=W.y0;y<=h;y++)W.s(x,y,z,y===h?'grass_block':y>=h-3?'dirt':(y<=0||(y<8&&h3(x,y,z)<(8-y)/8))?'deepslate':'stone')}
-  const R=rng(1337),ST=BK.stone,DS=BK.deepslate,DI=BK.dirt;
-  const blob=(k,rep,n,y0,y1,rad)=>{for(let i=0;i<n;i++){const cx=W.x0+R()*W.nx|0,cy=y0+R()*(y1-y0)|0,cz=W.z0+R()*W.nz|0,r=rad[0]+R()*(rad[1]-rad[0]);
-    for(let y=Math.floor(cy-r);y<=cy+r;y++)for(let z=Math.floor(cz-r);z<=cz+r;z++)for(let x=Math.floor(cx-r);x<=cx+r;x++){if((x-cx)**2+(y-cy)**2*1.4+(z-cz)**2>r*r)continue;if(rep.includes(W.g(x,y,z)))W.s(x,y,z,k)}}};
-  blob('granite',[ST],9,4,55,[1.5,3]);blob('diorite',[ST],9,4,55,[1.5,3]);blob('andesite',[ST],9,4,55,[1.5,3]);blob('tuff',[DS],7,-14,0,[1.5,3]);blob('gravel',[ST,DI],5,30,60,[1.2,2.2]);blob('dirt',[ST],4,20,55,[1.2,2.2]);
-  const ore=(k,rep,n,y0,y1,len)=>{for(let i=0;i<n;i++){let x=W.x0+R()*W.nx|0,y=y0+R()*(y1-y0)|0,z=W.z0+R()*W.nz|0;const l=len[0]+(R()*(len[1]-len[0]+1)|0);
-    for(let j=0;j<l;j++){if(rep.includes(W.g(x,y,z)))W.s(x,y,z,k);const d=R()*6|0;if(d===0)x++;else if(d===1)x--;else if(d===2)y++;else if(d===3)y--;else if(d===4)z++;else z--}}};
-  ore('coal_ore',[ST],80,5,60,[4,8]);ore('iron_ore',[ST],50,0,55,[3,6]);ore('copper_ore',[ST],40,0,55,[3,7]);ore('d_redstone_ore',[DS],16,-14,2,[3,6]);ore('d_gold_ore',[DS],9,-14,2,[2,5]);ore('d_lapis_ore',[DS],7,-14,2,[2,4]);ore('d_diamond_ore',[DS],6,-14,-6,[2,4]);
-  mansion(W);for(const lv of LV)buildLevel(W,lv);shafts(W);tunnel(W);
-  for(const [x,z,t] of [[-5,-3,'s'],[-4,8,'s'],[-6,17,'s'],[25,-4,'s'],[30,3,'s'],[32,15,'s'],[24,18,'s'],[0,-4,'o'],[1,16,'o'],[27,9,'o'],[-1,4,'o'],[29,-2,'s'],[19,-3,'o']])tree(W,x,hm[x+','+z]+1,z,t==='o'?'oak':'spruce');
-  const FL=['poppy','dandelion','cornflower','oxeye_daisy'];
-  for(let x=W.x0;x<W.x0+W.nx;x++)for(let z=W.z0;z<W.z0+W.nz;z++){const h=hm[x+','+z];if(W.g(x,h,z)!==BK.grass_block||W.g(x,h+1,z))continue;
-    if(x>=5&&x<=19&&z>=2&&z<=15)continue;if(x>=10&&x<=14&&z>=15)continue;const r=h3(x,99,z);
-    if(r<.24)W.s(x,h+1,z,'short_grass');else if(r<.29)W.s(x,h+1,z,FL[h3(x,7,z)*4|0])}
-  return W}
-const LAB_GROUPS={tarnhaus:'Tarnhaus',schacht:'Schächte',b1:'B1 · Sicherheit',b2:'B2 · Labore',b3:'B3 · Red Queen',b4:'B4 · Reaktor + Bahn'};
-function labGroup(x,y,z){if(y>=63)return'tarnhaus';for(const l of LV)if(y>=l.L-1&&y<=l.L+6)return l.key;return'schacht'}
+function zone(lv,x,z){const dx=x-C,dz=z-C,ax=Math.abs(dx),az=Math.abs(dz),d2=dx*dx+dz*dz;
+  if(ax>30||az>30)return null;if(ax===30||az===30)return'wall';
+  if(lv.kind==='ring'){if(d2<=72)return'void';if(d2<=144)return'balcony';if(d2<=169)return(ax<=1||az<=1)?'opening':'ring'}
+  else{if(d2<=196)return'hall';if(d2<=225)return(ax<=1||az<=1)?'opening':'ring'}
+  if(ax<=1||az<=1)return'corr';if(ax===2||az===2)return'cwall';if(ax===16||az===16)return'iwall';return'room'}
+function makeRooms(lv){const out=[],ringOut=lv.kind==='hall'?225:169,dk=lv.kind==='hall'?15:14;
+  for(const q in lv.rooms){const [sx,sz]=QS[q];lv.rooms[q].forEach((type,i)=>{const letter=LET[i];
+    const R={A:[[17,29],[17,29]],B:[[3,15],[17,29]],C:[[17,29],[3,15]],D:[[3,15],[3,15]]}[letter];
+    const xs=R[0].map(v=>C+sx*v),zs=R[1].map(v=>C+sz*v),x0=Math.min(...xs),x1=Math.max(...xs),z0=Math.min(...zs),z1=Math.max(...zs);
+    const ins=letter==='D'?(x,z)=>x>=x0&&x<=x1&&z>=z0&&z<=z1&&(x-C)**2+(z-C)**2>ringOut:(x,z)=>x>=x0&&x<=x1&&z>=z0&&z<=z1;
+    const DO={A:[[16,23,1],[23,16,0]],B:[[2,23,1],[16,23,1]],C:[[23,2,0],[23,16,0]],D:lv.kind==='ring'?[[6,11,0],[2,dk,1],[dk,2,0]]:[[2,dk,1],[dk,2,0]]}[letter];
+    const doors=DO.map(([a,b,ax])=>[C+sx*a,C+sz*b,ax]);
+    const back={A:sz<0?0:2,B:sz<0?0:2,C:sx<0?3:1,D:sz<0?0:2}[letter];
+    const map=back===0?(u,v)=>[x0+u,z0+v]:back===2?(u,v)=>[x0+u,z1-v]:back===1?(u,v)=>[x1-v,z0+u]:(u,v)=>[x0+v,z0+u];
+    const U=back%2===0?x1-x0+1:z1-z0+1,V=back%2===0?z1-z0+1:x1-x0+1;
+    let sx2=0,sz2=0,nc=0;for(let z=z0;z<=z1;z++)for(let x=x0;x<=x1;x++)if(ins(x,z)){sx2+=x;sz2+=z;nc++}
+    out.push({lv,L:lv.L,H:lv.H,type,q,letter,x0,x1,z0,z1,ins,doors,back,map,U,V,mid:U>>1,vm:V>>1,used:new Set(),udir:back%2===0?1:2,name:FUR[type].n,cx:sx2/nc,cz:sz2/nc})})}
+  return out}
 
-// ---------- Tempel ----------
+// ================= Möbel-Helfer =================
+const rk=(x,z)=>x*4096+z;
+const ok=(r,x,z)=>r.ins(x,z)&&!r.used.has(rk(x,z))&&!r.doors.some(d=>Math.abs(x-d[0])+Math.abs(z-d[1])<=2);
+const take=(r,x,z)=>r.used.add(rk(x,z));
+function edges(r){const o=[];for(let z=r.z0;z<=r.z1;z++)for(let x=r.x0;x<=r.x1;x++){if(!r.ins(x,z))continue;for(let d=0;d<4;d++)if(!r.ins(x+D4[d][0],z+D4[d][1])){o.push({x,z,d,a:(d+2)%4});break}}return o}
+function inner(r,m){const o=[];for(let z=r.z0;z<=r.z1;z++)for(let x=r.x0;x<=r.x1;x++){let g=true;for(let dz=-m;dz<=m&&g;dz++)for(let dx=-m;dx<=m;dx++)if(!r.ins(x+dx,z+dz)){g=false;break}if(g)o.push([x,z])}return o}
+const away=r=>(r.back+2)%4;
+const okUV=(r,u,v)=>{const p=r.map(u,v);return ok(r,p[0],p[1])};
+function bed(P,r,x,z,d){const a=(d+2)%4,fx=x+D4[a][0],fz=z+D4[a][1];if(!ok(r,x,z)||!ok(r,fx,fz))return false;P(x,1,z,'white_bed',1|d<<1);P(fx,1,fz,'white_bed',d<<1);take(r,x,z);take(r,fx,fz);return true}
+function desk(P,r,x,z,f,top){if(!ok(r,x,z))return false;P(x,1,z,'smooth_stone_slab_top');if(top==='monitor')P(x,2,z,'monitor',f);else if(top)P(x,2,z,top);take(r,x,z);return true}
+function tank(W,P,r,x,z){for(let dz=-1;dz<=1;dz++)for(let dx=-1;dx<=1;dx++)if(!ok(r,x+dx,z+dz))return false;
+  for(let dz=-1;dz<=1;dz++)for(let dx=-1;dx<=1;dx++){const c=!dx&&!dz;P(x+dx,1,z+dz,c?'sea_lantern':'iron_block');for(let y=2;y<=4;y++)P(x+dx,y,z+dz,c?'water':'glass');P(x+dx,5,z+dz,'iron_block');take(r,x+dx,z+dz)}
+  W.ent('zombie',x,r.L+2,z,2);return true}
+function cornersIn(r){const e=edges(r).filter(e=>{let n=0;for(const [a,b] of D4)if(!r.ins(e.x+a,e.z+b))n++;return n>=2});return e}
+
+// ================= Raumtypen =================
+const FUR={
+ quartiere:{n:'Quartiere',floor:'spruce_planks',desc:'Betten mit Nachttisch und Laterne, grauer Teppich, Tisch in der Mitte.',f(W,r,P){
+   for(const e of edges(r)){const t=(e.x+e.z)%3;if(t===0)bed(P,r,e.x,e.z,e.d);else if(t===1&&ok(r,e.x,e.z)){P(e.x,1,e.z,'barrel');P(e.x,2,e.z,'lantern');take(r,e.x,e.z)}}
+   for(const [x,z] of inner(r,3))if(ok(r,x,z))P(x,1,z,'light_gray_carpet');
+   const [cx,cz]=r.map(r.mid,r.vm);if(ok(r,cx,cz)){P(cx,1,cz,'spruce_slab_top');P(cx,2,cz,'lantern');take(r,cx,cz)}}},
+ spinde:{n:'Umkleide',desc:'Spinde aus Fässern, Bänke aus Fichtenstufen, Laborkittel auf Rüstungsständern.',f(W,r,P){
+   for(const e of edges(r))if(ok(r,e.x,e.z)&&(e.x+e.z)%5!==4){P(e.x,1,e.z,'barrel');P(e.x,2,e.z,'barrel');take(r,e.x,e.z)}
+   for(let v=3;v<r.V-2;v+=3)for(let u=2;u<r.U-2;u++){if(u===r.mid)continue;const [x,z]=r.map(u,v);if(ok(r,x,z)){P(x,1,z,'spruce_slab');take(r,x,z)}}
+   const c=cornersIn(r);for(const e of [c[0],c[c.length-1]])if(e&&!r.used.has(rk(e.x,e.z))){W.ent('armor_stand',e.x,r.L+1,e.z,e.a,'coat');take(r,e.x,e.z)}}},
+ dekon:{n:'Dekontamination',win:1,floor:'white_concrete',desc:'Duschen: Lagerfeuer unter Eisenfalltür, Endstab als Duschkopf, weiße Glaswände.',f(W,r,P){
+   for(const [x,z] of inner(r,1))if(x%3===0&&z%3===0&&ok(r,x,z)){P(x,0,z,'campfire');P(x,1,z,'iron_trapdoor');P(x,r.H,z,'end_rod');take(r,x,z);
+     for(const [a,b] of [[1,0],[0,1]])if(ok(r,x+a,z+b))for(let y=1;y<=3;y++)P(x+a,y,z+b,'white_glass_pane')}
+   for(const e of edges(r))if(ok(r,e.x,e.z)&&(e.x+e.z)%4===0){P(e.x,1,e.z,'cauldron');take(r,e.x,e.z)}}},
+ sicherheit:{n:'Sicherheitszentrale',win:1,desc:'Monitorwand über die ganze Rückwand, Pulte mit Stühlen, Wachen in Eisenrüstung.',f(W,r,P){const a=away(r),[ax,az]=D4[a];
+   for(const e of edges(r).filter(e=>e.d===r.back))if(ok(r,e.x,e.z)){P(e.x,1,e.z,'black_concrete');for(let y=2;y<=4;y++)P(e.x,y,e.z,'monitor',a);P(e.x,5,e.z,'black_concrete');take(r,e.x,e.z);
+     const dx=e.x+ax*3,dz=e.z+az*3;if((e.x+e.z)%3&&ok(r,dx+ax,dz+az)&&desk(P,r,dx,dz,a,'monitor')){P(dx+ax,1,dz+az,'spruce_stairs',a);take(r,dx+ax,dz+az)}}
+   for(const e of cornersIn(r))if(ok(r,e.x,e.z)){W.ent('armor_stand',e.x,r.L+1,e.z,e.a);take(r,e.x,e.z)}}},
+ kantine:{n:'Kantine',win:1,floor:'polished_diorite',desc:'Drei lange Tische mit Stühlen, Theke mit Räucheröfen, Fässern und Kesseln.',f(W,r,P){const a=away(r);
+   for(const e of edges(r).filter(e=>e.d===r.back))if(ok(r,e.x,e.z)){const t=(e.x+e.z)%3;P(e.x,1,e.z,t===0?'smoker':t===1?'barrel':'cauldron',a);if(t===1)P(e.x,2,e.z,'lantern');take(r,e.x,e.z)}
+   for(const v of [3,7,11])for(let u=2;u<r.U-2;u++){if(u===r.mid)continue;const [x,z]=r.map(u,v),[x1,z1]=r.map(u,v-1),[x2,z2]=r.map(u,v+1);if(!ok(r,x,z))continue;
+     P(x,1,z,'spruce_slab_top');take(r,x,z);if(u%4===1)P(x,2,z,'lantern');if(ok(r,x1,z1)){P(x1,1,z1,'spruce_stairs',r.back);take(r,x1,z1)}if(ok(r,x2,z2)){P(x2,1,z2,'spruce_stairs',a);take(r,x2,z2)}}}},
+ kueche:{n:'Küche',desc:'Öfen, Räucheröfen, Werkbank und Kessel an den Wänden, Kochinsel in der Mitte.',f(W,r,P){const K=['smoker','furnace','barrel','cauldron','crafting_table','smoker'];
+   for(const e of edges(r))if(ok(r,e.x,e.z)){P(e.x,1,e.z,K[(e.x+e.z)%6],e.a);take(r,e.x,e.z)}
+   for(const v of [5,6])for(let u=3;u<r.U-3;u++){const [x,z]=r.map(u,v);if(ok(r,x,z)){P(x,1,z,'smooth_stone_slab_top');if(u%3===0)P(x,2,z,'lantern');take(r,x,z)}}}},
+ besprechung:{n:'Besprechungsraum',floor:'dark_oak_planks',desc:'Langer Konferenztisch mit 16 Stühlen, Bildschirm an der Stirnwand, Pflanzen in den Ecken.',f(W,r,P){const a=away(r);
+   for(const e of edges(r).filter(e=>e.d===r.back)){const [mu]=[r.mid];const p=r.map(mu-1,0),q=r.map(mu+1,0);if(ok(r,e.x,e.z)&&Math.abs((r.back%2?e.z:e.x)-(r.back%2?r.map(mu,0)[1]:r.map(mu,0)[0]))<=1){P(e.x,1,e.z,'black_concrete');P(e.x,2,e.z,'monitor',a);P(e.x,3,e.z,'monitor',a);P(e.x,4,e.z,'black_concrete');take(r,e.x,e.z)}}
+   for(let u=3;u<r.U-3;u++)for(const v of [5,6]){const [x,z]=r.map(u,v);if(ok(r,x,z)){P(x,1,z,'spruce_slab_top');take(r,x,z);if(u===r.mid)P(x,2,z,'lantern')}}
+   for(let u=3;u<r.U-3;u++){const [x1,z1]=r.map(u,4),[x2,z2]=r.map(u,7);if(ok(r,x1,z1)){P(x1,1,z1,'spruce_stairs',r.back);take(r,x1,z1)}if(ok(r,x2,z2)){P(x2,1,z2,'spruce_stairs',a);take(r,x2,z2)}}
+   for(const e of cornersIn(r))if(ok(r,e.x,e.z)){P(e.x,1,e.z,'potted_azalea');take(r,e.x,e.z)}}},
+ lounge:{n:'Lounge',win:1,desc:'Sofas aus Quarztreppen um einen Couchtisch, roter Teppich, Bücherregale und viele Pflanzen.',f(W,r,P){const a=away(r);
+   for(const e of edges(r).filter(e=>e.d===r.back))if(ok(r,e.x,e.z)){for(let y=1;y<=2;y++)P(e.x,y,e.z,'chiseled_bookshelf',a);take(r,e.x,e.z)}
+   for(const [x,z] of inner(r,2))if(ok(r,x,z))P(x,1,z,'red_carpet');
+   for(let u=r.mid-2;u<=r.mid+2;u++){const [x1,z1]=r.map(u,r.vm-2),[x2,z2]=r.map(u,r.vm+2);if(ok(r,x1,z1)){P(x1,1,z1,'quartz_stairs',r.back);take(r,x1,z1)}if(ok(r,x2,z2)){P(x2,1,z2,'quartz_stairs',a);take(r,x2,z2)}}
+   for(let u=r.mid-1;u<=r.mid+1;u++)for(let v=r.vm-1;v<=r.vm+1;v+=2){const [x,z]=r.map(u,v);if(ok(r,x,z)){P(x,1,z,'spruce_slab_top');take(r,x,z)}}
+   const [cx,cz]=r.map(r.mid,r.vm);if(ok(r,cx,cz)){P(cx,1,cz,'spruce_slab_top');P(cx,2,cz,'lantern');take(r,cx,cz)}
+   for(const e of edges(r))if(ok(r,e.x,e.z)&&(e.x+e.z)%3===0){P(e.x,1,e.z,'potted_azalea');take(r,e.x,e.z)}}},
+ waffenkammer:{n:'Waffenkammer',desc:'Rüstungsständer mit Eisenrüstung, Munitionsfässer, Waffentische.',f(W,r,P){
+   for(const e of edges(r))if(ok(r,e.x,e.z)){if((e.x+e.z)%2===0)W.ent('armor_stand',e.x,r.L+1,e.z,e.a);else{P(e.x,1,e.z,'barrel');P(e.x,2,e.z,'barrel')}take(r,e.x,e.z)}
+   for(const v of [5,8])for(let u=3;u<r.U-3;u++){const [x,z]=r.map(u,v);if(ok(r,x,z)){P(x,1,z,u===3||u===r.U-4?'iron_block':'smooth_stone_slab_top');if(u===r.mid)P(x,2,z,'lantern');take(r,x,z)}}}},
+ schiessstand:{n:'Schießstand',desc:'Zielblöcke vor Heuballen, Bahnen aus Eisenstangen, Theke zum Anlegen.',f(W,r,P){const a=away(r),[ax,az]=D4[a];
+   for(const e of edges(r).filter(e=>e.d===r.back))if(ok(r,e.x,e.z)){P(e.x,1,e.z,'hay_block');P(e.x,2,e.z,'target');P(e.x,3,e.z,'hay_block');take(r,e.x,e.z);
+     if((e.x+e.z)%3===0)for(let k=1;k<=5;k++){const x=e.x+ax*k,z=e.z+az*k;if(ok(r,x,z)){for(let y=1;y<=3;y++)P(x,y,z,'iron_bars');take(r,x,z)}}}
+   for(let u=1;u<r.U-1;u++){if(u===r.mid)continue;const [x,z]=r.map(u,8);if(ok(r,x,z)){P(x,1,z,'smooth_stone_slab_top');take(r,x,z)}}}},
+ zellen:{n:'Zellentrakt',win:1,desc:'Zellen mit Gittern und Eisentüren, in jeder ein Zombie mit Namensschild. Davor ein Wachpult.',f(W,r,P){const ax=r.udir===1?0:1;
+   for(let u=0;u<r.U;u++){for(let v=0;v<=3;v++){const [x,z]=r.map(u,v);if(!ok(r,x,z))continue;
+     if(v<3&&u%4===0){for(let y=1;y<=r.H;y++)P(x,y,z,'iron_bars');take(r,x,z)}
+     else if(v===3){if(u%4===2){P(x,1,z,'iron_door',ax<<1);P(x,2,z,'iron_door',ax<<1|1);for(let y=3;y<=r.H;y++)P(x,y,z,'iron_bars')}else for(let y=1;y<=r.H;y++)P(x,y,z,'iron_bars');take(r,x,z)}
+     else{P(x,0,z,'polished_andesite');take(r,x,z);if(v===1&&u%4===2)W.ent('zombie',x,r.L+1,z,away(r))}}}
+   const [dx,dz]=r.map(r.mid,7);if(desk(P,r,dx,dz,r.back,'monitor')){}}},
+ wache:{n:'Wachstube',desc:'Tisch mit acht Stühlen, Rüstungsständer, Fässer und ein Pult mit Bildschirm.',f(W,r,P){const a=away(r);
+   for(let u=r.mid-1;u<=r.mid;u++)for(let v=r.vm-1;v<=r.vm;v++){const [x,z]=r.map(u,v);if(ok(r,x,z)){P(x,1,z,'spruce_slab_top');take(r,x,z)}}
+   const [lx,lz]=r.map(r.mid,r.vm);P(lx,2,lz,'lantern');
+   for(let u=r.mid-1;u<=r.mid;u++){const [x1,z1]=r.map(u,r.vm-2),[x2,z2]=r.map(u,r.vm+1);if(ok(r,x1,z1)){P(x1,1,z1,'spruce_stairs',r.back);take(r,x1,z1)}if(ok(r,x2,z2)){P(x2,1,z2,'spruce_stairs',a);take(r,x2,z2)}}
+   for(const e of edges(r))if(ok(r,e.x,e.z)){const t=(e.x+e.z)%3;if(t===0)W.ent('armor_stand',e.x,r.L+1,e.z,e.a);else if(t===1){P(e.x,1,e.z,'barrel')}else if(e.d===r.back){desk(P,r,e.x,e.z,a,'monitor')}take(r,e.x,e.z)}}},
+ lager:{n:'Lager',desc:'Regalreihen aus Fässern, drei hoch gestapelt, Truhen an den Wänden.',f(W,r,P){
+   for(let v=2;v<r.V-1;v+=3)for(let u=1;u<r.U-1;u++){if(u%5===0)continue;const [x,z]=r.map(u,v);if(ok(r,x,z)){for(let y=1;y<=3;y++)P(x,y,z,'barrel');take(r,x,z)}}
+   for(const e of edges(r))if(ok(r,e.x,e.z)&&(e.x+e.z)%2===0){P(e.x,1,e.z,'chest',e.a);take(r,e.x,e.z)}}},
+ krankenstation:{n:'Krankenstation',floor:'white_concrete',desc:'Krankenbetten mit Kessel daneben, Arzneitisch mit Braustand, Endstäbe als Lampen.',f(W,r,P){
+   for(const e of edges(r)){const t=(e.x+e.z)%4;if(t===0)bed(P,r,e.x,e.z,e.d);else if(t===1&&ok(r,e.x,e.z)){P(e.x,1,e.z,'cauldron');take(r,e.x,e.z)}}
+   for(let u=r.mid-2;u<=r.mid+2;u++){const [x,z]=r.map(u,r.vm);desk(P,r,x,z,0,u%2?'brewing_stand':'lantern')}
+   for(const [x,z] of inner(r,3))if((x+z)%4===0)P(x,r.H,z,'end_rod')}},
+ buero:{n:'Büro',floor:'spruce_planks',desc:'Schreibtisch mit Bildschirm und Lesepult, Bücherwand, Umbrella-Banner, Teppich und Pflanzen.',f(W,r,P){const a=away(r);
+   for(const e of edges(r).filter(e=>e.d===r.back))if(ok(r,e.x,e.z)){for(let y=1;y<=3;y++)P(e.x,y,e.z,'chiseled_bookshelf',a);take(r,e.x,e.z)}
+   const [bx,bz]=r.map(r.mid,0);if(r.ins(bx,bz))P(bx,5,bz,'banner',a);
+   for(const [x,z] of inner(r,2))if(ok(r,x,z))P(x,1,z,'red_carpet');
+   for(let u=r.mid-1;u<=r.mid+1;u++){const [x,z]=r.map(u,3);desk(P,r,x,z,a,u===r.mid?'monitor':u<r.mid?'lantern':null)}
+   const [lx,lz]=r.map(r.mid+2,3);if(ok(r,lx,lz)){P(lx,1,lz,'lectern');take(r,lx,lz)}
+   const [sx,sz]=r.map(r.mid,4);if(ok(r,sx,sz)){P(sx,1,sz,'spruce_stairs',a);take(r,sx,sz)}
+   for(const e of cornersIn(r))if(ok(r,e.x,e.z)){P(e.x,1,e.z,'potted_azalea');take(r,e.x,e.z)}}},
+ chemie:{n:'Chemielabor',win:1,desc:'Labortische mit Braustanden und Kesseln an allen Wänden, zwei Arbeitsinseln in der Mitte.',f(W,r,P){
+   for(const e of edges(r))if(ok(r,e.x,e.z)){const t=(e.x+e.z)%3;if(t===1){P(e.x,1,e.z,'cauldron');take(r,e.x,e.z)}else desk(P,r,e.x,e.z,0,t===0?'brewing_stand':null)}
+   for(const v of [4,8])for(let u=3;u<r.U-3;u++){const [x,z]=r.map(u,v);desk(P,r,x,z,0,u%2?'brewing_stand':null)}}},
+ kuehl:{n:'Kühlraum',floor:'packed_ice',desc:'Wände aus Packeis, Probenfässer in Reihen, eisiger Boden.',f(W,r,P){
+   for(const e of edges(r))if(ok(r,e.x,e.z)&&(e.x+e.z)%4!==3){for(let y=1;y<=3;y++)P(e.x,y,e.z,'packed_ice');take(r,e.x,e.z)}
+   for(let v=3;v<r.V-2;v+=3)for(let u=2;u<r.U-2;u++){if(u===r.mid)continue;const [x,z]=r.map(u,v);if(ok(r,x,z)){P(x,1,z,'barrel');P(x,2,z,'barrel');take(r,x,z)}}}},
+ virologie:{n:'Virologie',win:1,desc:'Probentanks mit Ertrunkenen in leuchtendem Wasser, Pulte mit Bildschirmen dazwischen.',f(W,r,P){
+   for(let v=2;v<r.V-1;v+=4)for(let u=2;u<r.U-1;u+=4){const [x,z]=r.map(u,v);tank(W,P,r,x,z)}
+   const a=away(r);for(const e of edges(r))if((e.x+e.z)%5===0)desk(P,r,e.x,e.z,e.a,'monitor')}},
+ gewaechshaus:{n:'Gewächshaus',win:1,desc:'Beete mit grünem, rotem und blauem Kraut, Weizenreihen, Wasserrinnen, blühende Azaleen.',f(W,r,P){const H=['herb_green','herb_red','herb_blue'];
+   for(const [x,z] of inner(r,1)){if(!ok(r,x,z))continue;const t=(r.back%2?x:z)%4;
+     if(t===0)P(x,0,z,'dirt_path');else if(t===1){P(x,0,z,'farmland');P(x,1,z,'wheat')}else if(t===2)P(x,0,z,'water');else{P(x,0,z,'garden_grass');P(x,1,z,H[(x+z)%3])}take(r,x,z)}
+   for(const e of edges(r))if(ok(r,e.x,e.z)){P(e.x,1,e.z,(e.x+e.z)%2?'flowering_azalea':'potted_azalea');take(r,e.x,e.z)}
+   for(let z=r.z0;z<=r.z1;z++)for(let x=r.x0;x<=r.x1;x++)if(r.ins(x,z)&&x%3===1&&z%3===1)W.s(x,r.L+r.H+1,z,'sea_lantern')}},
+ genetik:{n:'Genetiklabor',win:1,desc:'Schnüffler-Eier in Glasvitrinen auf Eisensockeln, Pulte mit Bildschirmen und Braustanden.',f(W,r,P){
+   for(let v=3;v<r.V-2;v+=4)for(let u=3;u<r.U-2;u+=4){const [x,z]=r.map(u,v);let g=true;for(let dz=-1;dz<=1;dz++)for(let dx=-1;dx<=1;dx++)if(!ok(r,x+dx,z+dz))g=false;if(!g)continue;
+     P(x,1,z,'iron_block');P(x,2,z,'sniffer_egg');P(x,3,z,'glass');for(const [a,b] of D4)P(x+a,2,z+b,'glass_pane');for(let dz=-1;dz<=1;dz++)for(let dx=-1;dx<=1;dx++)take(r,x+dx,z+dz)}
+   for(const e of edges(r)){const t=(e.x+e.z)%3;if(t===0)desk(P,r,e.x,e.z,e.a,'monitor');else if(t===1)desk(P,r,e.x,e.z,0,'brewing_stand')}}},
+ bibliothek:{n:'Archiv',floor:'dark_oak_planks',desc:'Regalreihen aus gemeißelten Bücherregalen, Lesepulte, roter Läufer im Mittelgang.',f(W,r,P){const a=away(r);
+   for(const e of edges(r).filter(e=>e.d===r.back))if(ok(r,e.x,e.z)){for(let y=1;y<=3;y++)P(e.x,y,e.z,'chiseled_bookshelf',a);take(r,e.x,e.z)}
+   for(let v=3;v<r.V-1;v+=3)for(let u=1;u<r.U-1;u++){const [x,z]=r.map(u,v);if(u===r.mid){if(ok(r,x,z))P(x,1,z,'red_carpet');continue}if(ok(r,x,z)){for(let y=1;y<=3;y++)P(x,y,z,'chiseled_bookshelf',v%2?r.back:a);take(r,x,z)}}
+   for(let v=1;v<r.V-1;v++){const [x,z]=r.map(r.mid,v);if(ok(r,x,z))P(x,1,z,'red_carpet')}
+   for(let v=2;v<r.V-1;v+=3){const [x,z]=r.map(1,v);if(ok(r,x,z)){P(x,1,z,'lectern');take(r,x,z)}}}},
+ werkstatt:{n:'Werkstatt',desc:'Werkbänke, Schmiedetische, Werkzeugfässer und Werktische mit Laternen.',f(W,r,P){const K=['crafting_table','smithing_table','barrel','iron_block'];
+   for(const e of edges(r))if(ok(r,e.x,e.z)){const k=K[(e.x+e.z)%4];P(e.x,1,e.z,k);if(k==='iron_block')P(e.x,2,e.z,'lantern');take(r,e.x,e.z)}
+   for(const v of [4,8])for(let u=3;u<r.U-3;u++){const [x,z]=r.map(u,v);desk(P,r,x,z,0,u%4===0?'lantern':null)}}},
+ op:{n:'OP-Saal',win:1,desc:'Operationstisch unter Endstab-Lampen, türkiser Boden, Braustande, Kessel und Monitore drumherum.',f(W,r,P){const a=away(r);
+   const [tx,tz]=r.map(r.mid,r.vm),[tx2,tz2]=r.map(r.mid,r.vm+1);
+   for(let du=-2;du<=2;du++)for(let dv=-2;dv<=3;dv++){const [x,z]=r.map(r.mid+du,r.vm+dv);if(r.ins(x,z))W.s(x,r.L,z,'cyan_concrete')}
+   for(const [x,z] of [[tx,tz],[tx2,tz2]])if(ok(r,x,z)){P(x,1,z,'smooth_stone_slab_top');P(x,2,z,'white_carpet');P(x,r.H,z,'end_rod');take(r,x,z)}
+   const ring=[[-2,0,'brewing_stand'],[2,0,'monitor'],[-2,1,null],[2,1,'brewing_stand']];for(const [du,dv,top] of ring){const [x,z]=r.map(r.mid+du,r.vm+dv);desk(P,r,x,z,a,top)}
+   for(const [du,dv] of [[0,-2],[0,3]]){const [x,z]=r.map(r.mid+du,r.vm+dv);if(ok(r,x,z)){P(x,1,z,'cauldron');take(r,x,z)}}
+   for(const e of edges(r))if(ok(r,e.x,e.z)&&(e.x+e.z)%2===0){P(e.x,1,e.z,'barrel');P(e.x,2,e.z,'iron_block');take(r,e.x,e.z)}}},
+ leichenhalle:{n:'Leichenhalle',desc:'Kühlfächer aus Eisenblöcken mit Eisenfalltüren, zwei Obduktionstische, hängende Laternen.',f(W,r,P){const a=away(r);
+   for(const e of edges(r)){if(e.d===a)continue;const ix=e.x+D4[e.a][0],iz=e.z+D4[e.a][1];if(!ok(r,e.x,e.z)||!ok(r,ix,iz))continue;
+     for(let y=1;y<=3;y++){P(e.x,y,e.z,'iron_block');P(ix,y,iz,'iron_trapdoor_v',e.a)}take(r,e.x,e.z);take(r,ix,iz)}
+   for(const du of [-2,2]){const [x,z]=r.map(r.mid+du,r.vm);if(ok(r,x,z)){P(x,1,z,'smooth_stone_slab_top');P(x,2,z,'white_carpet');P(x,r.H,z,'lantern',1);take(r,x,z)}}}},
+ licker:{n:'Licker-Gehege',win:1,desc:'Großer Käfig aus Eisenstangen mit Seelensand-Boden, Ketten und Knochen, drinnen zwei Experimente.',f(W,r,P){
+   const E=new Set(inner(r,2).map(([x,z])=>rk(x,z)));const inE=(x,z)=>E.has(rk(x,z));let gate=false;
+   for(const k of E){const x=Math.floor(k/4096),z=k%4096;const b=D4.some(([a,c])=>!inE(x+a,z+c));
+     if(b){const front=r.back%2?Math.abs(x-r.map(0,r.V-3)[0])<1:Math.abs(z-r.map(0,r.V-3)[1])<1;const mid=r.back%2?z===r.map(r.mid,0)[1]:x===r.map(r.mid,0)[0];
+       if(front&&mid&&!gate){const ax=r.udir===1?0:1;P(x,1,z,'iron_door',ax<<1);P(x,2,z,'iron_door',ax<<1|1);for(let y=3;y<=r.H;y++)P(x,y,z,'iron_bars');gate=true}else for(let y=1;y<=r.H;y++)P(x,y,z,'iron_bars')}
+     else{P(x,0,z,'soul_sand');if(h3(x,7,z)<.18)for(let y=4;y<=r.H;y++)P(x,y,z,'chain');else if(h3(x,9,z)<.08)P(x,1,z,'bone_block')}take(r,x,z)}
+   const [z1x,z1z]=r.map(r.mid-2,r.vm),[z2x,z2z]=r.map(r.mid+2,r.vm-1);W.ent('zombie',z1x,r.L+1,z1z,away(r));W.ent('zombie',z2x,r.L+1,z2z,r.back);
+   const [dx,dz]=r.map(r.mid+3,r.V-1);desk(P,r,dx,dz,r.back,'monitor')}},
+ kontrolle:{n:'Kontrollraum',win:1,desc:'Riesige Bildschirmwand mit dem Gesicht der Red Queen, Pultreihen, in der Mitte der pulsierende KI-Kern.',f(W,r,P){const a=away(r),[ax,az]=D4[a];
+   for(const e of edges(r).filter(e=>e.d===r.back))if(ok(r,e.x,e.z)){const c=Math.abs((r.back%2?e.z:e.x)-(r.back%2?r.map(r.mid,0)[1]:r.map(r.mid,0)[0]))<=1;
+     P(e.x,1,e.z,'black_concrete');for(let y=2;y<=5;y++)P(e.x,y,e.z,'monitor',a|(c&&(y===3||y===4)?4:0));P(e.x,6,e.z,'black_concrete');take(r,e.x,e.z)}
+   for(let u=1;u<r.U-1;u++){if(u%4===0)continue;const [x,z]=r.map(u,3),[cx,cz]=r.map(u,4);if(ok(r,cx,cz)&&desk(P,r,x,z,a,'monitor')){P(cx,1,cz,'spruce_stairs',a);take(r,cx,cz)}}
+   for(let du=0;du<=1;du++)for(let dv=0;dv<=1;dv++){const [x,z]=r.map(r.mid+du-1+(r.U%2),r.vm+dv+1);if(!ok(r,x,z))continue;P(x,1,z,'iron_block');P(x,2,z,'redstone_lamp');P(x,3,z,'red_stained_glass');P(x,4,z,'red_stained_glass');P(x,5,z,'redstone_lamp');P(x,6,z,'redstone_lamp');take(r,x,z)}}},
+ server:{n:'Serverhalle',win:1,floor:'polished_andesite',desc:'Reihen aus Server-Schränken (je drei Beobachter), Kabelkanäle aus Kupfer unter der Decke.',f(W,r,P){const a=away(r);
+   for(let v=2;v<r.V-1;v+=3)for(let u=1;u<r.U-1;u++){const [x,z]=r.map(u,v);if(u===r.mid||u===2||u===r.U-3){continue}if(ok(r,x,z)){for(let y=1;y<=3;y++)P(x,y,z,'observer',(v/3|0)%2?r.back:a);P(x,r.H,z,'waxed_cut_copper');take(r,x,z)}}
+   for(const e of edges(r))if(ok(r,e.x,e.z)&&(e.x+e.z)%4===0){P(e.x,1,e.z,'barrel');take(r,e.x,e.z)}}},
+ technik:{n:'Technikraum',floor:'polished_andesite',desc:'Hochöfen als Aggregate, Kupferrohre bis zur Decke, Werfer mit Redstone-Lampen.',f(W,r,P){
+   for(const e of edges(r))if(ok(r,e.x,e.z)){const t=(e.x+e.z)%3;if(t===0){P(e.x,1,e.z,'blast_furnace',e.a);P(e.x,2,e.z,'blast_furnace',e.a)}else if(t===1){for(let y=1;y<=r.H;y++)P(e.x,y,e.z,'waxed_cut_copper')}else{P(e.x,1,e.z,'dispenser',e.a);P(e.x,2,e.z,'redstone_lamp')}take(r,e.x,e.z)}
+   for(const [x,z] of inner(r,3))if(x%4===2&&z%4===2&&ok(r,x,z)){P(x,1,z,'waxed_cut_copper');P(x,2,z,'waxed_cut_copper');P(x,3,z,'lightning_rod');take(r,x,z)}}},
+ tresor:{n:'Tresor',floor:'polished_andesite',desc:'Wände komplett aus Eisenblöcken, Sockel mit Gold- und Rohgoldblöcken, Truhen.',f(W,r,P){
+   for(const e of edges(r))if(ok(r,e.x,e.z)){for(let y=1;y<=r.H;y++)P(e.x,y,e.z,'iron_block');take(r,e.x,e.z)}
+   for(const [x,z] of inner(r,2))if((x+z)%2===0&&ok(r,x,z)){P(x,1,z,'iron_block');P(x,2,z,(x+z)%4?'gold_block':'raw_gold_block');take(r,x,z)}
+   for(const [x,z] of inner(r,1))if(ok(r,x,z)&&h3(x,5,z)<.15){P(x,1,z,'chest',away(r));take(r,x,z)}}},
+ laser:{n:'Laser-Korridor',floor:'black_concrete',desc:'Rote Laser auf wechselnden Höhen quer zum Weg. Wer durch will, muss sich bücken und springen.',f(W,r,P){
+   const [d0,d1]=r.doors,pathX=Math.abs(d0[0]-d1[0])>=Math.abs(d0[1]-d1[1]);
+   for(let z=r.z0;z<=r.z1;z++)for(let x=r.x0;x<=r.x1;x++){if(!ok(r,x,z))continue;const k=pathX?x:z;if(k%2)continue;for(const y of (k%4?[1,3]:[2,4]))P(x,y,z,'red_stained_glass_pane',pathX?1:2)}}},
+ generator:{n:'Generatorhalle',floor:'polished_deepslate',desc:'Hochofen-Generatoren mit Kupferrohren, Generatorblöcke mit Blitzableitern und Lampen.',f(W,r,P){
+   for(const e of edges(r))if(ok(r,e.x,e.z)){if((e.x+e.z)%2===0){P(e.x,1,e.z,'blast_furnace',e.a);P(e.x,2,e.z,'blast_furnace',e.a);for(let y=3;y<=r.H;y++)P(e.x,y,e.z,'waxed_cut_copper')}else for(let y=1;y<=r.H;y++)P(e.x,y,e.z,'waxed_cut_copper');take(r,e.x,e.z)}
+   for(const [x,z] of inner(r,3))if(x%5===2&&z%5===2&&ok(r,x,z)){for(let y=1;y<=3;y++)P(x,y,z,'waxed_cut_copper');P(x,4,z,'redstone_lamp');P(x,5,z,'lightning_rod');take(r,x,z)}}},
+ kuehlung:{n:'Kühlbecken',desc:'Großes Wasserbecken im Boden, Pumpen aus Werfern mit Kupferrohren zur Decke.',f(W,r,P){
+   for(const [x,z] of inner(r,2))if(ok(r,x,z)){P(x,-1,z,'polished_deepslate');P(x,0,z,'water');take(r,x,z)}
+   for(const e of edges(r))if(ok(r,e.x,e.z)&&(e.x+e.z)%3===0){P(e.x,1,e.z,'dispenser',e.a);for(let y=2;y<=r.H;y++)P(e.x,y,e.z,'waxed_cut_copper');take(r,e.x,e.z)}}},
+};
+
+// ================= Ebenen bauen =================
+function buildLevel(W,lv){const L=lv.L,H=lv.H,T=L+H+1,ring=lv.kind==='ring';
+  const wall=lv.wall||'light_gray_concrete',floor=lv.floor||'white_concrete',ceil=lv.ceil||'smooth_stone',band=ring?'red_concrete':'yellow_concrete';
+  lv.list=makeRooms(lv);lv.map={};for(const r of lv.list)lv.map[r.q+r.letter]=r;
+  for(let z=C-30;z<=C+30;z++)for(let x=C-30;x<=C+30;x++){const zn=zone(lv,x,z),dx=x-C,dz=z-C,ax=Math.abs(dx),az=Math.abs(dz),d2=dx*dx+dz*dz;
+    for(let y=L;y<=T;y++)W.s(x,y,z,null);const light=x%4===2&&z%4===2;
+    if(zn==='wall'||zn==='iwall'||zn==='cwall'){W.s(x,L,z,wall);W.s(x,T,z,ceil);for(let y=L+1;y<=L+H;y++)W.s(x,y,z,wall);if(zn==='cwall')W.s(x,L+2,z,band)}
+    else if(zn==='corr'){const ns=ax<=1,c=ns?dx===0:dz===0,along=ns?az:ax;W.s(x,L,z,c?band:floor);W.s(x,T,z,c&&along%4===0?'sea_lantern':ceil)}
+    else if(zn==='room'){const r=roomOf(lv,x,z);W.s(x,L,z,FUR[r.type].floor||floor);W.s(x,T,z,light?'sea_lantern':ceil)}
+    else if(zn==='balcony'){const rail=D4.some(([a,b])=>(dx+a)**2+(dz+b)**2<=72);
+      W.s(x,L,z,rail?'red_concrete':(d2>100&&d2<=121)?'polished_diorite':'smooth_quartz');W.s(x,T,z,rail?'sea_lantern':'smooth_quartz');if(rail&&!lv.glassFloor)W.s(x,L+1,z,'glass_pane')}
+    else if(zn==='ring'){W.s(x,L,z,ring?'polished_andesite':floor);W.s(x,T,z,ring?'smooth_quartz':ceil);
+      if(ring){const ang=Math.floor((Math.atan2(dz,dx)+Math.PI)/(2*Math.PI)*64);W.s(x,L+1,z,'polished_andesite');for(let y=L+2;y<L+H;y++)W.s(x,y,z,ang%4===0?'quartz_pillar':'glass_pane');W.s(x,L+H,z,'smooth_quartz')}
+      else for(let y=L+1;y<=L+H;y++)W.s(x,y,z,wall)}
+    else if(zn==='opening'){W.s(x,L,z,ring?'smooth_quartz':floor);W.s(x,T,z,ring?'smooth_quartz':ceil);for(let y=L+5;y<=L+H;y++)W.s(x,y,z,ring?'smooth_quartz':wall)}
+    else if(zn==='hall'){W.s(x,L,z,(d2>56&&d2<=64)?'yellow_concrete':(d2>140&&d2<=156)?'deepslate_tiles':floor);if(d2>72)W.s(x,T,z,light?'sea_lantern':ceil)}}
+  // Fenster zu Laboren in den Gangwänden
+  for(let z=C-30;z<=C+30;z++)for(let x=C-30;x<=C+30;x++){if(zone(lv,x,z)!=='cwall')continue;const dx=x-C,dz=z-C,ns=Math.abs(dx)===2,along=ns?Math.abs(dz):Math.abs(dx);
+    const rx=ns?x+Math.sign(dx):x,rz=ns?z:z+Math.sign(dz);if(zone(lv,rx,rz)!=='room'||along%4===0)continue;const r=roomOf(lv,rx,rz);if(FUR[r.type].win)for(let y=L+2;y<=L+4;y++)W.s(x,y,z,'glass_pane')}
+  // Türen
+  const done=new Set();for(const r of lv.list)for(const [x,z,ax] of r.doors){const k=rk(x,z);if(done.has(k))continue;done.add(k);const zn=zone(lv,x,z);
+    W.s(x,L+1,z,'iron_door',ax<<1);W.s(x,L+2,z,'iron_door',ax<<1|1);for(let y=L+3;y<=L+H;y++)W.s(x,y,z,zn==='ring'?'smooth_quartz':wall)}
+  if(ring){for(const [a,b] of [[4,10],[10,4],[-4,10],[-10,4],[4,-10],[10,-4],[-4,-10],[-10,-4]]){W.s(C+a,L+1,C+b,'chiseled_quartz');for(let y=L+2;y<L+H;y++)W.s(C+a,y,C+b,'quartz_pillar');W.s(C+a,L+H,C+b,'chiseled_quartz')}
+    for(const [a,b,f] of [[3,-11,2],[-3,-11,2],[3,11,0],[-3,11,0],[11,3,3],[11,-3,3],[-11,3,1],[-11,-3,1]])W.s(C+a,L+H-1,C+b,'banner',f)}
+  const so=ring?17:16;for(const [a,b,m] of [[0,-so,0],[0,so,0],[so,0,1],[-so,0,1]])W.s(C+a,L+H,C+b,'sign_'+lv.key,m);
+  for(const [nx,nz,f] of [[0,-1,2],[1,0,3],[-1,0,1]]){if(lv.key==='b5'&&nx===1)continue;for(let k=-1;k<=1;k++){const x=C+nx*29+(nz?k:0),z=C+nz*29+(nx?k:0);W.s(x,L+H-1,z,'banner',f);if(k)W.s(x,L+1,z,'potted_azalea')}}
+  for(const r of lv.list){const P=(x,dy,z,k,m)=>W.s(x,r.L+dy,z,k,m);FUR[r.type].f(W,r,P)}}
+function roomOf(lv,x,z){const dx=x-C,dz=z-C,ax=Math.abs(dx),az=Math.abs(dz),q=(dz<0?'N':'S')+(dx<0?'W':'E');return lv.map[q+(ax>=17&&az>=17?'A':ax<=15&&az>=17?'B':ax>=17&&az<=15?'C':'D')]}
+
+// ---- Atrium, Aufzug, Reaktor, Bahnhof, Treppe ----
+function atrium(W){const cap=LEVELS[0].L+LEVELS[0].H+1,tube=(x,z)=>x>=33&&x<=35&&z>=32&&z<=36;
+  for(let z=C-10;z<=C+10;z++)for(let x=C-10;x<=C+10;x++){const dx=x-C,dz=z-C,d2=dx*dx+dz*dz;
+    if(d2<=72){if(!tube(x,z)){if(d2>56)W.s(x,cap,z,'sea_lantern');else W.s(x,cap,z,Math.floor((Math.atan2(dz,dx)+Math.PI)/(Math.PI/4))%2?'white_concrete':'red_concrete')}
+      W.s(x,20,z,d2>56?'iron_block':'glass');for(let y=6;y<=19;y++)W.s(x,y,z,null)}
+    else if(d2<=100)for(let y=6;y<=19;y++)W.s(x,y,z,(y%4===1&&(dx+dz)%2===0)?'sea_lantern':'deepslate_tiles')}
+  for(let y=20;y<=66;y++)for(let z=32;z<=36;z++)for(let x=33;x<=35;x++){
+    if(x===34&&z===33)W.s(x,y,z,y===20?'magma_block':'water');else if(x===34&&z===35)W.s(x,y,z,y===20?'soul_sand':'water');
+    else W.s(x,y,z,y===66?'chiseled_quartz':y<=51?'glass':'polished_andesite')}
+  for(const lv of LEVELS){if(lv.kind!=='ring')continue;const L=lv.L,side=lv.bridge||'E',sx=side==='E'?1:-1;
+    for(let z=31;z<=37;z++)for(let x=32;x<=36;x++)if(x===32||x===36||z===31||z===37){W.s(x,L,z,'iron_block');W.s(x,L+lv.H,z,'sea_lantern')}
+    const wx=34+sx;for(const z of [33,35]){W.s(wx,L+1,z,'iron_door',1<<1);W.s(wx,L+2,z,'iron_door',1<<1|1)}
+    if(lv.bridge){for(let k=3;k<=8;k++){const x=C+sx*k;for(let z=32;z<=36;z++){W.s(x,L,z,(z===32||z===36)?'iron_block':'polished_andesite');if(z===32||z===36)W.s(x,L+1,z,'iron_bars')}}
+      for(let z=33;z<=35;z++)W.s(C+sx*9,L+1,z,null)}}}
+function reactor(W){const L=-4;
+  for(let z=C-14;z<=C+14;z++)for(let x=C-14;x<=C+14;x++){const dx=x-C,dz=z-C,d2=dx*dx+dz*dz;
+    if(d2<=13)W.s(x,L+1,z,'waxed_cut_copper');
+    if(d2<=2)for(let y=L+2;y<=14;y++)W.s(x,y,z,'sea_lantern');
+    else if(d2<=5)for(let y=L+2;y<=14;y++)W.s(x,y,z,y%4===0?'waxed_cut_copper':'glass');
+    if(d2<=5)W.s(x,15,z,'waxed_cut_copper');
+    if(d2>42&&d2<=56&&Math.abs(dx)>1&&Math.abs(dz)>1)W.s(x,L+1,z,'iron_bars')}
+  W.s(C,16,C,'lightning_rod');
+  for(const [a,b] of [[5,0],[-5,0],[0,5],[0,-5],[4,4],[-4,4],[4,-4],[-4,-4]])W.s(C+a,L+1,C+b,'lightning_rod');
+  for(const [a,b] of [[8,8],[-8,8],[8,-8],[-8,-8]])for(let y=L+1;y<=L+8;y++){W.s(C+a,y,C+b,'waxed_cut_copper');if(y===L+4)W.s(C+a,y,C+b,'redstone_lamp')}
+  for(const [nx,nz] of D4)for(let k=-1;k<=1;k++){const x=C+nx*10+(nz?k:0),z=C+nz*10+(nx?k:0),cx=x+nx,cz=z+nz,f=nx===1?1:nx===-1?3:nz===1?2:0;
+    W.s(x,L+1,z,'smooth_stone_slab_top');W.s(x,L+2,z,'monitor',f);W.s(cx,L+1,cz,'spruce_stairs',f)}}
+function station(W){const L=-4;
+  for(let x=C+16;x<=68;x++){W.s(x,L-1,C,x%8===0?'redstone_block':'polished_deepslate');W.s(x,L,C,x%8===0?'powered_rail':'rail',1);
+    if(x<=C+29){W.s(x,L,C-1,'yellow_concrete');W.s(x,L,C+1,'yellow_concrete')}
+    if(x>=C+30){W.s(x,L+1,C,null);W.s(x,L+2,C,null);for(let y=L;y<=L+2;y++){W.s(x,y,C-1,'deepslate_bricks');W.s(x,y,C+1,'deepslate_bricks')}for(let z=C-1;z<=C+1;z++)W.s(x,L+3,z,x%4===1&&z===C?'sea_lantern':'deepslate_bricks')}}
+  W.s(C+16,L,C,'iron_block');W.ent('minecart',C+22,L,C,2);
+  for(const [nx,nz] of [[0,-1],[-1,0]])for(let k=16;k<=29;k++)W.s(C+nx*k,L+8,C+nz*k,'waxed_cut_copper')}
+function stairwell(W){const cx=34,cz=68,R=[[0,-1],[1,-1],[1,0],[1,1],[0,1],[-1,1],[-1,0],[-1,-1]],F=[1,2,2,3,3,0,0,1];
+  for(let y=-4;y<=63;y++){for(let dz=-2;dz<=2;dz++)for(let dx=-2;dx<=2;dx++){if(Math.max(Math.abs(dx),Math.abs(dz))===2)W.s(cx+dx,y,cz+dz,(Math.abs(dx)===2&&dz===0&&(y+4)%8===4)?'sea_lantern':'polished_andesite');else if(dx||dz){if(y>-4)W.s(cx+dx,y,cz+dz,null)}}W.s(cx,y,cz,'quartz_pillar')}
+  for(let h=-4,i=0;h<=63;h++,i++){const [ox,oz]=R[i%8];W.s(cx+ox,h,cz+oz,'quartz_stairs',F[i%8])}
+  for(const lv of LEVELS){const L=lv.L,wall=lv.wall||'light_gray_concrete';W.s(34,L,65,lv.floor||'white_concrete');W.s(34,L+1,64,'iron_door',0);W.s(34,L+2,64,'iron_door',1);
+    for(const y of [L+1,L+2]){W.s(34,y,65,null);W.s(33,y,65,wall);W.s(35,y,65,wall);W.s(34,y,66,null)}W.s(34,L+3,65,wall)}}
+function stairTop(W){const cx=34,cz=68;
+  for(let dz=-2;dz<=2;dz++)for(let dx=-2;dx<=2;dx++)if(Math.max(Math.abs(dx),Math.abs(dz))===2)W.s(cx+dx,63,cz+dz,'polished_andesite');
+  for(const [dx,dz] of [[0,-1],[-1,-1],[-1,0],[-1,1],[0,1]])W.s(cx+dx,63,cz+dz,'polished_andesite');W.s(cx+1,63,cz-1,null);W.s(cx+1,63,cz,null);W.s(cx+1,63,cz+1,'quartz_stairs',3);W.s(cx,63,cz,'quartz_pillar');
+  for(let y=64;y<=65;y++){for(let z=67;z<=69;z++)for(let x=33;x<=35;x++)W.s(x,y,z,null);for(let z=63;z<=66;z++)W.s(34,y,z,null)}
+  for(let z=63;z<=66;z++)W.s(34,63,z,'polished_andesite');W.s(34,64,62,'iron_door',0);W.s(34,65,62,'iron_door',1);W.s(34,66,68,'sea_lantern')}
+
+// ---- Tempel & Statue ----
 const STATUE=['.........ggg.......s.','........ggggg......s.','........gbbbg......s.','........gbbbg......s.','.........bbb.......s.',
  '.g....wwwwwwwww....s.','ggg..bwwwwgwwwwb...s.','.g..bbwwwwgwwwwbb..s.','.bbbb.wwwwwwwww.b..s.','......wwwwwwwww..b.s.','......wwwwwwwww.bbbs.',
  '......wwwwwwwww..hhh.','......wwwwwwwww.hhhhh','......wwwwwwwww.hhghh','......wwwwwwwww.hgggh','......wwwwwwwww.hhghh','.....wwwwwwwwwwwhhhhh',
  '.....wvwwvwvwwvw.hhh.','.....wvwwvwvwwvw...s.','.....wvwwvwvwwvw...s.','.....wvwwvwvwwvw...s.','.....wvwwvwvwwvw...s.','.....wvwwvwvwwvw...s.',
  '......bb....bb.....s.','...ppppppppppppppp.s.','...ppppppppppppppp.s.','.ppppppppppppppppppp.','.ppppppppppppppppppp.'];
-function genTemple(){const W=new World(0,0,0,48,38,72);
-  for(let x=0;x<48;x++)for(let z=0;z<72;z++)for(let y=0;y<=5;y++)W.s(x,y,z,y===5?'grass_block':y>=3?'dirt':'stone');
-  W.box(8,5,4,39,5,50,'polished_diorite');W.box(11,5,52,35,5,67,'polished_diorite');W.box(21,5,51,25,5,51,'polished_diorite');W.box(22,5,68,24,5,71,'dirt_path');
-  const ox=10,oz=6,T=(rx,y,rz,k,m)=>W.s(ox+rx,y,oz+rz,k,m);
+function temple(W){const Y=64,T=(rx,y,rz,k,m)=>W.s(20+rx,y,13+rz,k,m);
+  W.box(18,63,11,49,63,57,'polished_diorite');W.box(21,63,58,47,63,75,'polished_diorite');W.box(32,63,76,36,63,90,'dirt_path');
   for(let rz=0;rz<=42;rz++)for(let rx=0;rx<=27;rx++){const e=Math.min(rx,rz,27-rx,42-rz);
     const inward=()=>{const c=[];if(rx===e)c.push(1);if(27-rx===e)c.push(3);if(rz===e)c.push(2);if(42-rz===e)c.push(0);return c.length===1?c[0]:-1};
-    for(let lvl=0;lvl<=2;lvl++){if(e<lvl)break;const y=6+lvl;if(e===lvl&&lvl<2){const f=inward();if(f>=0)T(rx,y,rz,'quartz_stairs',f);else T(rx,y,rz,'smooth_quartz')}else T(rx,y,rz,'smooth_quartz')}
-    if(rx>=8&&rx<=19&&rz>=10&&rz<=32)T(rx,8,rz,'polished_diorite')}
-  const col=(rx,rz,y0,y1)=>{T(rx,y0,rz,'chiseled_quartz');for(let y=y0+1;y<y1;y++)T(rx,y,rz,'quartz_pillar');T(rx,y1,rz,'chiseled_quartz')};
-  for(let rz=3;rz<=39;rz+=3){col(3,rz,9,18);col(24,rz,9,18)}for(let rx=6;rx<=21;rx+=3){col(rx,3,9,18);col(rx,39,9,18)}
-  for(let rz=9;rz<=33;rz++)for(let rx=7;rx<=20;rx++){if(!(rx===7||rx===20||rz===9||rz===33))continue;for(let y=9;y<=18;y++){if(rz===33&&rx>=12&&rx<=15&&y<=14)continue;T(rx,y,rz,'quartz_bricks')}}
-  for(let rz=12;rz<=30;rz+=3)for(const rx of [10,17])for(let y=9;y<=18;y++)T(rx,y,rz,'quartz_pillar');
-  T(13,9,13,'gold_block');T(14,9,13,'gold_block');T(13,10,13,'campfire');T(14,10,13,'campfire');
-  for(const [rx,rz] of [[9,11],[18,11],[9,31],[18,31],[12,14],[15,14],[11,34],[16,34]])T(rx,9,rz,'decorated_pot');
-  T(13,18,20,'lantern',1);T(13,18,26,'lantern',1);T(14,18,23,'lantern',1);
-  for(let rz=3;rz<=39;rz++)for(let rx=3;rx<=24;rx++){T(rx,19,rz,'smooth_quartz');if(rx===3||rx===24||rz===3||rz===39){const tri=(rx===3||rx===24)?(rz-3)%3===0:(rx-3)%3===0;T(rx,20,rz,tri?'blue_terracotta':'quartz_bricks')}}
-  for(let rz=2;rz<=40;rz++)for(let rx=2;rx<=25;rx++)if(rx===2||rx===25||rz===2||rz===40)T(rx,21,rz,'smooth_quartz');
-  for(let i=0;i<=11;i++){const y=22+(i>>1),k=i%2?'granite_slab_top':'granite_slab';for(let rz=2;rz<=40;rz++){T(2+i,y,rz,k);T(25-i,y,rz,k)}
-    for(const rz of [3,39])for(let yy=22;yy<y;yy++){T(2+i,yy,rz,'quartz_bricks');T(25-i,yy,rz,'quartz_bricks')}}
-  for(const rz of [2,40]){T(13,28,rz,'gold_block');T(14,28,rz,'gold_block')}
-  STATUE.forEach((row,r)=>{const y=6+(27-r);[...row].forEach((ch,c)=>{if(ch==='.')return;const x=13+c;let z0,z1;
-    if(ch==='p'){const d=r>=26?4:3;z0=59-d;z1=59+d}else if(ch==='h'||(ch==='g'&&c>=16&&r>=11)){z0=z1=61}else if(ch==='s'){z0=z1=60}
-    else if(r<=4){z0=58;z1=60}else if(c<=4&&r<=8){z0=59;z1=60}else if(ch==='b'&&r<=10){z0=59;z1=60}else if(r===23){z0=61;z1=62}
-    else if(r<=10){z0=58;z1=61}else if(r<=16){z0=57;z1=61}else{z0=57;z1=62}
+    for(let l=0;l<=2;l++){if(e<l)break;if(e===l&&l<2){const f=inward();T(rx,Y+l,rz,f>=0?'quartz_stairs':'smooth_quartz',f>=0?f:0)}else T(rx,Y+l,rz,'smooth_quartz')}
+    if(rx>=8&&rx<=19&&rz>=10&&rz<=32)T(rx,Y+2,rz,'polished_diorite')}
+  const col=(rx,rz,a,b)=>{T(rx,a,rz,'chiseled_quartz');for(let y=a+1;y<b;y++)T(rx,y,rz,'quartz_pillar');T(rx,b,rz,'chiseled_quartz')};
+  for(let rz=3;rz<=39;rz+=3){col(3,rz,Y+3,Y+12);col(24,rz,Y+3,Y+12)}for(let rx=6;rx<=21;rx+=3){col(rx,3,Y+3,Y+12);col(rx,39,Y+3,Y+12)}
+  for(let rz=9;rz<=33;rz++)for(let rx=7;rx<=20;rx++){if(!(rx===7||rx===20||rz===9||rz===33))continue;for(let y=Y+3;y<=Y+12;y++){if(rz===33&&rx>=12&&rx<=15&&y<=Y+8)continue;T(rx,y,rz,'quartz_bricks')}}
+  for(let rz=12;rz<=30;rz+=3)for(const rx of [10,17])for(let y=Y+3;y<=Y+12;y++)T(rx,y,rz,'quartz_pillar');
+  T(13,Y+3,13,'gold_block');T(14,Y+3,13,'gold_block');T(13,Y+4,13,'campfire');T(14,Y+4,13,'campfire');
+  for(const [rx,rz] of [[9,11],[18,11],[9,31],[18,31],[12,14],[15,14],[11,34],[16,34]])T(rx,Y+3,rz,'decorated_pot');
+  T(13,Y+12,20,'lantern',1);T(14,Y+12,26,'lantern',1);T(13,Y+12,29,'lantern',1);
+  for(let rz=3;rz<=39;rz++)for(let rx=3;rx<=24;rx++){T(rx,Y+13,rz,'smooth_quartz');if(rx===3||rx===24||rz===3||rz===39){const tri=(rx===3||rx===24)?(rz-3)%3===0:(rx-3)%3===0;T(rx,Y+14,rz,tri?'blue_terracotta':'quartz_bricks')}}
+  for(let rz=2;rz<=40;rz++)for(let rx=2;rx<=25;rx++)if(rx===2||rx===25||rz===2||rz===40)T(rx,Y+15,rz,'smooth_quartz');
+  for(let i=0;i<=11;i++){const y=Y+16+(i>>1),k=i%2?'granite_slab_top':'granite_slab';for(let rz=2;rz<=40;rz++){T(2+i,y,rz,k);T(25-i,y,rz,k)}
+    for(const rz of [3,39])for(let yy=Y+16;yy<y;yy++){T(2+i,yy,rz,'quartz_bricks');T(25-i,yy,rz,'quartz_bricks')}}
+  for(const rz of [2,40]){T(13,Y+22,rz,'gold_block');T(14,Y+22,rz,'gold_block')}
+  STATUE.forEach((row,r)=>{const y=64+(27-r);[...row].forEach((ch,c)=>{if(ch==='.')return;const x=24+c,zc=66;let z0,z1;
+    if(ch==='p'){const d=r>=26?4:3;z0=zc-d;z1=zc+d}else if(ch==='h'||(ch==='g'&&c>=16&&r>=11)){z0=z1=zc+2}else if(ch==='s'){z0=z1=zc+1}
+    else if(r<=4){z0=zc-1;z1=zc+1}else if(c<=4&&r<=8){z0=zc;z1=zc+1}else if(ch==='b'&&r<=10){z0=zc;z1=zc+1}else if(r===23){z0=zc+2;z1=zc+3}
+    else if(r<=10){z0=zc-1;z1=zc+2}else if(r<=16){z0=zc-2;z1=zc+2}else{z0=zc-2;z1=zc+3}
     const k={g:'gold_block',b:'calcite',w:'smooth_quartz',v:'quartz_pillar',h:'raw_gold_block',s:r===0?'lightning_rod':'oak_fence',p:'polished_deepslate'}[ch];
     for(let z=z0;z<=z1;z++)W.s(x,y,z,k)})});
-  const olive=(x,z)=>{for(let y=6;y<=8;y++)W.s(x,y,z,'olive_log');W.s(x+1,9,z,'olive_log');W.s(x+1,10,z,'olive_log');
-    for(let y=9;y<=12;y++){const r=y===12?1:2;for(let dx=-r;dx<=r;dx++)for(let dz=-r;dz<=r;dz++){if(Math.abs(dx)===r&&Math.abs(dz)===r)continue;if(!W.g(x+1+dx,y,z+dz))W.s(x+1+dx,y,z+dz,'azalea_leaves')}}};
-  const cypress=(x,z)=>{W.s(x,6,z,'olive_log');for(let y=7;y<=15;y++){W.s(x,y,z,'cypress_leaves');if(y>=8&&y<=12)for(const [dx,dz] of [[1,0],[-1,0],[0,1],[0,-1]])W.s(x+dx,y,z+dz,'cypress_leaves')}W.s(x,16,z,'cypress_leaves')};
-  for(const [x,z] of [[3,10],[42,14],[3,40],[42,44],[5,60],[40,62],[2,68]])olive(x,z);
-  for(const [x,z] of [[2,25],[45,28],[44,52],[2,52],[45,6],[3,2]])cypress(x,z);
-  const FL=['poppy','cornflower','oxeye_daisy','torchflower','pink_petals','pink_petals'];
-  for(let x=0;x<48;x++)for(let z=0;z<72;z++){if(W.g(x,5,z)!==BK.grass_block||W.g(x,6,z))continue;const r=h3(x,77,z);if(r<.2)W.s(x,6,z,'short_grass');else if(r<.27)W.s(x,6,z,FL[h3(x,8,z)*6|0])}
-  return W}
-const TEMPLE_GROUPS={tempel:'Tempel',statue:'Statue',garten:'Platz und Garten'};
-function templeGroup(x,y,z){if(y>=6&&x>=10&&x<=37&&z>=6&&z<=48)return'tempel';if(y>=6&&x>=13&&x<=33&&z>=54&&z<=64)return'statue';return'garten'}
+  // heilige Quelle = Aufzugsbecken
+  for(let z=32;z<=36;z++)for(let x=33;x<=35;x++)W.s(x,66,z,'chiseled_quartz');
+  for(let y=63;y<=66;y++){W.s(34,y,33,'water');W.s(34,y,35,'water')}
+  for(const [x,z] of [[32,31],[36,31],[32,37],[36,37]])W.s(x,67,z,'decorated_pot')}
+function garden(W){
+  const olive=(x,z)=>{for(let y=64;y<=66;y++)W.s(x,y,z,'olive_log');W.s(x+1,67,z,'olive_log');W.s(x+1,68,z,'olive_log');
+    for(let y=67;y<=70;y++){const r=y===70?1:2;for(let dx=-r;dx<=r;dx++)for(let dz=-r;dz<=r;dz++){if(Math.abs(dx)===r&&Math.abs(dz)===r)continue;if(!W.g(x+1+dx,y,z+dz))W.s(x+1+dx,y,z+dz,'azalea_leaves')}}};
+  const cypress=(x,z)=>{W.s(x,64,z,'olive_log');for(let y=65;y<=73;y++){W.s(x,y,z,'cypress_leaves');if(y>=66&&y<=70)for(const [dx,dz] of D4)W.s(x+dx,y,z+dz,'cypress_leaves')}W.s(x,74,z,'cypress_leaves')};
+  for(const [x,z] of [[6,18],[60,22],[6,48],[60,52],[9,72],[57,72],[6,84],[58,86]])olive(x,z);
+  for(const [x,z] of [[4,33],[64,36],[62,62],[4,62],[63,10],[5,6],[13,8],[54,8]])cypress(x,z);
+  const FL=['poppy','cornflower','oxeye_daisy','torchflower','pink_petals','pink_petals','dandelion'];
+  for(let x=0;x<69;x++)for(let z=0;z<91;z++){if(W.g(x,63,z)!==BK.grass_block||W.g(x,64,z))continue;const r=h3(x,77,z);if(r<.2)W.s(x,64,z,'short_grass');else if(r<.27)W.s(x,64,z,FL[h3(x,8,z)*7|0])}}
 
-// ---------- Meshing ----------
+function genWorld(){const W=new World(0,-14,0,69,109,91);
+  for(let x=0;x<69;x++)for(let z=0;z<91;z++)for(let y=-14;y<=63;y++)W.s(x,y,z,y===63?'grass_block':y>=60?'dirt':(y<=0||(y<8&&h3(x,y,z)<(8-y)/8))?'deepslate':'stone');
+  const R=rng(1337),ST=BK.stone,DS=BK.deepslate,DI=BK.dirt;
+  const blob=(k,rep,n,y0,y1,rad)=>{for(let i=0;i<n;i++){const cx=R()*69|0,cy=y0+R()*(y1-y0)|0,cz=R()*91|0,r=rad[0]+R()*(rad[1]-rad[0]);
+    for(let y=Math.floor(cy-r);y<=cy+r;y++)for(let z=Math.floor(cz-r);z<=cz+r;z++)for(let x=Math.floor(cx-r);x<=cx+r;x++){if((x-cx)**2+(y-cy)**2*1.4+(z-cz)**2>r*r)continue;if(rep.includes(W.g(x,y,z)))W.s(x,y,z,k)}}};
+  blob('granite',[ST],40,4,58,[1.5,3]);blob('diorite',[ST],40,4,58,[1.5,3]);blob('andesite',[ST],40,4,58,[1.5,3]);blob('tuff',[DS],30,-14,0,[1.5,3]);blob('gravel',[ST,DI],20,40,62,[1.2,2.2]);
+  const ore=(k,rep,n,y0,y1,len)=>{for(let i=0;i<n;i++){let x=R()*69|0,y=y0+R()*(y1-y0)|0,z=R()*91|0;const l=len[0]+(R()*(len[1]-len[0]+1)|0);
+    for(let j=0;j<l;j++){if(rep.includes(W.g(x,y,z)))W.s(x,y,z,k);const d=R()*6|0;if(d===0)x++;else if(d===1)x--;else if(d===2)y++;else if(d===3)y--;else if(d===4)z++;else z--}}};
+  ore('coal_ore',[ST],380,5,60,[4,8]);ore('iron_ore',[ST],240,0,55,[3,6]);ore('copper_ore',[ST],180,0,55,[3,7]);ore('d_redstone_ore',[DS],80,-14,2,[3,6]);ore('d_gold_ore',[DS],45,-14,2,[2,5]);ore('d_lapis_ore',[DS],35,-14,2,[2,4]);ore('d_diamond_ore',[DS],30,-14,-6,[2,4]);
+  for(const lv of LEVELS)buildLevel(W,lv);
+  atrium(W);reactor(W);station(W);stairwell(W);temple(W);stairTop(W);garden(W);
+  W.entMap=new Map();for(const e of W.ents){W.entMap.set(rk(e.x,e.z)*256+(e.y+20),e);if(e.type!=='minecart')W.entMap.set(rk(e.x,e.z)*256+(e.y+21),e)}
+  return W}
+
+// ================= Bereiche =================
+const GROUPS={tempel:'Tempel',statue:'Statue & Notausgang',garten:'Platz & Garten',atrium:'Atrium & Aufzug',treppe:'Wendeltreppe',b1:'B1 · Sicherheit',b2:'B2 · Forschung',b3:'B3 · Medizin',b4:'B4 · Red Queen',b5:'B5 · Reaktor',rest:'Sonstiges'};
+function groupOf(x,y,z){const dx=x-C,dz=z-C,d2=dx*dx+dz*dz;
+  if(y>=64){if(x>=24&&x<=44&&z>=61&&z<=71)return'statue';if(x>=20&&x<=47&&z>=13&&z<=55)return'tempel';return'garten'}
+  if(x>=33&&x<=35&&z>=32&&z<=36&&y>=20)return'atrium';
+  if(y===63&&x>=33&&x<=35&&z>=62&&z<=69)return'statue';
+  if(x>=32&&x<=36&&z>=65&&z<=70)return'treppe';
+  if(y===63)return'garten';
+  if(y>=6&&y<=62&&d2<=72)return'atrium';
+  if(y>=6&&y<=19&&d2<=100)return'atrium';
+  for(const lv of LEVELS)if(y>=lv.L&&y<=lv.L+lv.H+1)return lv.key;
+  if(y<=-4)return'b5';return'rest'}
+function roomAt(x,y,z){for(const lv of LEVELS)if(y>=lv.L&&y<=lv.L+lv.H+1){if(zone(lv,x,z)!=='room')return null;const r=roomOf(lv,x,z);return r?r:null}return null}
+
+// ================= Meshing =================
 const FACES=[[0,1,1,.66],[0,-1,3,.66],[1,1,'top',1],[1,-1,'bottom',.5],[2,1,2,.84],[2,-1,0,.84]];
 const CP=[[0,0],[1,0],[1,1],[0,1]],CN=[[0,0],[0,1],[1,1],[1,0]],AOL=[.42,.62,.8,1];
+const FD=FACES.map(([a,s,fk,sh])=>{const u=(a+1)%3,w=(a+2)%3,cs=s>0?CP:CN,co=[],uv=[],ao=[];
+  for(const [cu,cv] of cs){const p=[0,0,0];p[a]=s>0?1:0;p[u]=cu;p[w]=cv;co.push(...p);uv.push(...(a===2?[cu,cv]:[cv,cu]));
+    const q=[0,0,0];q[a]=s;const q1=q.slice();q1[u]+=cu?1:-1;const q2=q.slice();q2[w]+=cv?1:-1;const q3=q1.slice();q3[w]+=cv?1:-1;ao.push([...q1,...q2,...q3])}
+  return{a,s,fk,sh,n:[a===0?s:0,a===1?s:0,a===2?s:0],co,uv,ao}});
 const c01=v=>v<0?0:v>1?1:v;
 function uvt(ti,S,T){const e=.002;return[((ti&15)+e+S*(1-2*e))/16,1-((ti>>4)+1)/16+(e+T*(1-2*e))/16]}
 class Buf{constructor(){this.p=[];this.u=[];this.c=[];this.i=[];this.n=0}
   quad(P,UV,Br,t,flip){const n=this.n;for(let k=0;k<4;k++){const p=P[k];this.p.push(p[0],p[1],p[2]);this.u.push(UV[k][0],UV[k][1]);const c=Br[k]*t;this.c.push(c,c,c)}
     if(flip)this.i.push(n,n+1,n+3,n+1,n+2,n+3);else this.i.push(n,n+1,n+2,n,n+2,n+3);this.n+=4}}
+function aoV(opq,x,y,z,A){const s1=opq(x+A[0],y+A[1],z+A[2]),s2=opq(x+A[3],y+A[4],z+A[5]),c=opq(x+A[6],y+A[7],z+A[8]);return AOL[(s1&&s2)?0:3-s1-s2-c]}
+function cubeFace(buf,x,y,z,F,ti,sh,t,opq){const tx=ti&15,ty=ti>>4,co=F.co,uv=F.uv,n=buf.n;
+  let b0=sh,b1=sh,b2=sh,b3=sh;if(opq){b0*=aoV(opq,x,y,z,F.ao[0]);b1*=aoV(opq,x,y,z,F.ao[1]);b2*=aoV(opq,x,y,z,F.ao[2]);b3*=aoV(opq,x,y,z,F.ao[3])}
+  const P=buf.p,U=buf.u,Cc=buf.c,v0=1-(ty+1)/16;
+  for(let k=0;k<4;k++){P.push(x+co[k*3],y+co[k*3+1],z+co[k*3+2]);U.push((tx+.002+uv[k*2]*.996)/16,v0+(.002+uv[k*2+1]*.996)/16)}
+  b0*=t;b1*=t;b2*=t;b3*=t;Cc.push(b0,b0,b0,b1,b1,b1,b2,b2,b2,b3,b3,b3);
+  if(b0+b2<b1+b3)buf.i.push(n,n+1,n+3,n+1,n+2,n+3);else buf.i.push(n,n+1,n+2,n,n+2,n+3);buf.n+=4}
 function tileOf(b,fk,m,x,y,z){const t=b.tiles;if(fk==='top')return t.top;if(fk==='bottom')return t.bottom;if(t.front&&b.facing&&fk===(m&3))return typeof t.front==='function'?t.front(x,y,z,m):t.front;return t.side}
 const tfB=(b,m,x,y,z)=>fk=>TILE[tileOf(b,fk,m,x,y,z)];
-function cubeFace(buf,x,y,z,a,s,ti,sh,t,opq){const u=(a+1)%3,w=(a+2)%3,cs=s>0?CP:CN,P=[],UV=[],Br=[];
-  for(const [cu,cv] of cs){const p=[x,y,z];p[a]+=s>0?1:0;p[u]+=cu;p[w]+=cv;P.push(p);
-    UV.push(a===2?uvt(ti,cu,cv):uvt(ti,cv,cu));let br=sh;
-    if(opq){const q=[x,y,z];q[a]+=s;const du=cu?1:-1,dv=cv?1:-1;const q1=q.slice();q1[u]+=du;const q2=q.slice();q2[w]+=dv;const q3=q1.slice();q3[w]+=dv;
-      const s1=opq(q1[0],q1[1],q1[2]),s2=opq(q2[0],q2[1],q2[2]),c=opq(q3[0],q3[1],q3[2]);br*=AOL[(s1&&s2)?0:3-s1-s2-c]}
-    Br.push(br)}
-  buf.quad(P,UV,Br,t,Br[0]+Br[2]<Br[1]+Br[3])}
 function addBox(buf,x,y,z,a0,b0,c0,a1,b1,c1,tf,t,light,boxUV){const mn=[a0,b0,c0],mx=[a1,b1,c1];
   for(const [a,s,fk,sh] of FACES){const ti=tf(fk);if(ti==null)continue;const u=(a+1)%3,w=(a+2)%3,cs=s>0?CP:CN,P=[],UV=[];
     for(const [cu,cv] of cs){const p=[0,0,0];p[a]=s>0?mx[a]:mn[a];p[u]=cu?mx[u]:mn[u];p[w]=cv?mx[w]:mn[w];P.push([x+p[0],y+p[1],z+p[2]]);
@@ -790,205 +949,178 @@ function addBox(buf,x,y,z,a0,b0,c0,a1,b1,c1,tf,t,light,boxUV){const mn=[a0,b0,c0
       UV.push(a===1?uvt(ti,f[0],f[2]):a===0?uvt(ti,f[2],f[1]):uvt(ti,f[0],f[1]))}
     const br=light?1:sh;buf.quad(P,UV,[br,br,br,br],t,false)}}
 function addCross(buf,x,y,z,ti,t,h,light){const d=.15,e=.85,br=light?1:.9;
-  const q=(x0,z0,x1,z1)=>buf.quad([[x+x0,y,z+z0],[x+x1,y,z+z1],[x+x1,y+h,z+z1],[x+x0,y+h,z+z0]],[uvt(ti,0,0),uvt(ti,1,0),uvt(ti,1,h),uvt(ti,0,h)],[br,br,br,br],t,false);
-  q(d,d,e,e);q(e,d,d,e)}
+  const q=(x0,z0,x1,z1)=>buf.quad([[x+x0,y,z+z0],[x+x1,y,z+z1],[x+x1,y+h,z+z1],[x+x0,y+h,z+z0]],[uvt(ti,0,0),uvt(ti,1,0),uvt(ti,1,h),uvt(ti,0,h)],[br,br,br,br],t,false);q(d,d,e,e);q(e,d,d,e)}
 const SH={
   slab_top(B,buf,x,y,z,b,m,t){addBox(buf,x,y,z,0,.5,0,1,1,1,tfB(b,m,x,y,z),t)},
   slab(B,buf,x,y,z,b,m,t){addBox(buf,x,y,z,0,0,0,1,.5,1,tfB(b,m,x,y,z),t)},
+  slab_full(B,buf,x,y,z,b,m,t){addBox(buf,x,y,z,.1,0,.1,.9,.9,.9,tfB(b,m,x,y,z),t)},
   stairs(B,buf,x,y,z,b,m,t){const tf=tfB(b,-1,x,y,z);addBox(buf,x,y,z,0,0,0,1,.5,1,tf,t);const bx=[[0,.5,0,1,1,.5],[.5,.5,0,1,1,1],[0,.5,.5,1,1,1],[0,.5,0,.5,1,1]][m&3];addBox(buf,x,y,z,...bx,tf,t)},
   pane(B,buf,x,y,z,b,m,t,at){const ti=TILE[b.tiles.side],tf=()=>ti;let n,s,e,w;
     if(m===1){n=s=1;e=w=0}else if(m===2){e=w=1;n=s=0}else{const c=(dx,dz)=>{const id=at(x+dx,y,z+dz);return id&&(OPQ[id]||BL[id].shape==='pane'||BL[id].shape==='door')?1:0};n=c(0,-1);s=c(0,1);e=c(1,0);w=c(-1,0);if(!(n|s|e|w))n=s=e=w=1}
     const a=7/16,c2=9/16;if(e||w)addBox(buf,x,y,z,w?0:a,0,a,e?1:c2,1,c2,tf,t,b.light);if(n||s)addBox(buf,x,y,z,a,0,n?0:a,c2,1,s?1:c2,tf,t,b.light)},
   door(B,buf,x,y,z,b,m,t){const ti=TILE[m&1?b.tiles.top:b.tiles.side],tf=()=>ti;if((m>>1)&1)addBox(buf,x,y,z,6.5/16,0,0,9.5/16,1,1,tf,t);else addBox(buf,x,y,z,0,0,6.5/16,1,1,9.5/16,tf,t)},
-  ladder(B,buf,x,y,z,b,m,t){const ti=TILE[b.tiles.side];const bx=[[0,0,15/16,1,1,1],[0,0,0,1/16,1,1],[0,0,0,1,1,1/16],[15/16,0,0,1,1,1]][m&3];addBox(buf,x,y,z,...bx,()=>ti,t)},
+  vplate(B,buf,x,y,z,b,m,t){const ti=TILE[b.tiles.side],k=3/16;const bx=[[0,0,1-k,1,1,1],[0,0,0,k,1,1],[0,0,0,1,1,k],[1-k,0,0,1,1,1]][m&3];addBox(buf,x,y,z,...bx,()=>ti,t)},
   rail(B,buf,x,y,z,b,m,t){const ti=TILE[b.tiles.top];addBox(buf,x,y,z,0,0,0,1,1/16,1,fk=>fk==='top'||fk==='bottom'?ti:null,t)},
   rod(B,buf,x,y,z,b,m,t){const r=(b.w||.125)/2;addBox(buf,x,y,z,.5-r,0,.5-r,.5+r,1,.5+r,tfB(b,m,x,y,z),t,b.light)},
   cross(B,buf,x,y,z,b,m,t){addCross(buf,x,y,z,TILE[b.tiles.side],t,b.h||1,b.light)},
   flat(B,buf,x,y,z,b,m,t){const ti=TILE[b.tiles.top];addBox(buf,x,y,z,0,0,0,1,1/16,1,()=>ti,t)},
   plate(B,buf,x,y,z,b,m,t){addBox(buf,x,y,z,0,0,0,1,3/16,1,tfB(b,m,x,y,z),t)},
-  bed(B,buf,x,y,z,b,m,t){const top=TILE[m&1?(m&2?'bed_head_n':'bed_head_s'):'bed_foot'],side=TILE.bed_side,bot=TILE.oak_planks;addBox(buf,x,y,z,0,0,0,1,9/16,1,fk=>fk==='top'?top:fk==='bottom'?bot:side,t)},
+  bed(B,buf,x,y,z,b,m,t){const top=TILE[m&1?['bed_head_n','bed_head_e','bed_head_s','bed_head_w'][(m>>1)&3]:'bed_foot'],side=TILE.bed_side,bot=TILE.oak_planks;addBox(buf,x,y,z,0,0,0,1,9/16,1,fk=>fk==='top'?top:fk==='bottom'?bot:side,t)},
   banner(B,buf,x,y,z,b,m,t){const ti=TILE.banner,lo=-.9,hi=.95,a=1/16,c=15/16;const bx=[[a,lo,c,c,hi,1],[0,lo,a,a,hi,c],[a,lo,0,c,hi,a],[c,lo,a,1,hi,c]][m&3];addBox(buf,x,y,z,...bx,()=>ti,t,false,true)},
   campfire(B,buf,x,y,z,b,m,t){addBox(buf,x,y,z,0,0,0,1,7/16,1,fk=>TILE[fk==='top'?'campfire_top':'campfire_log'],t,true);addCross(B.c,x,y+.25,z,TILE.fire,t,.75,true)},
   lantern(B,buf,x,y,z,b,m,t){const hang=m&1,y0=hang?.3:0;addBox(buf,x,y,z,5/16,y0,5/16,11/16,y0+7/16,11/16,()=>TILE.lantern,t,true);if(hang)addBox(B.c,x,y,z,7/16,y0+7/16,7/16,9/16,1,9/16,fk=>fk==='top'||fk==='bottom'?null:TILE.chain,t)},
-  sign(B,buf,x,y,z,b,m,t){const ti=TILE[b.tiles.side],pl=TILE.spruce_planks;addBox(buf,x,y,z,1/16,.08,7/16,15/16,.68,9/16,fk=>fk===0||fk===2?ti:pl,t,false,true);
-    for(const cx of [.22,.78])addBox(B.c,x,y,z,cx-1/16,.68,7/16,cx+1/16,1,9/16,fk=>fk==='top'||fk==='bottom'?null:TILE.chain,t)},
+  sign(B,buf,x,y,z,b,m,t){const ti=TILE[b.tiles.side],pl=TILE.spruce_planks,ax=m&1;
+    if(ax){addBox(buf,x,y,z,7/16,.08,1/16,9/16,.68,15/16,fk=>fk===1||fk===3?ti:pl,t,false,true);for(const c of [.22,.78])addBox(B.c,x,y,z,7/16,.68,c-1/16,9/16,1,c+1/16,fk=>fk==='top'||fk==='bottom'?null:TILE.chain,t)}
+    else{addBox(buf,x,y,z,1/16,.08,7/16,15/16,.68,9/16,fk=>fk===0||fk===2?ti:pl,t,false,true);for(const c of [.22,.78])addBox(B.c,x,y,z,c-1/16,.68,7/16,c+1/16,1,9/16,fk=>fk==='top'||fk==='bottom'?null:TILE.chain,t)}},
   pot(B,buf,x,y,z,b,m,t){const ti=TILE.decorated_pot;addBox(buf,x,y,z,2/16,0,2/16,14/16,12/16,14/16,()=>ti,t);addBox(buf,x,y,z,5/16,12/16,5/16,11/16,1,11/16,()=>ti,t)},
+  potted(B,buf,x,y,z,b,m,t){addBox(buf,x,y,z,5/16,0,5/16,11/16,6/16,11/16,()=>TILE.flower_pot,t);addBox(B.c,x,y,z,3/16,6/16,3/16,13/16,15/16,13/16,()=>TILE.azalea_leaves,t)},
+  egg(B,buf,x,y,z,b,m,t){addBox(buf,x,y,z,3/16,0,3/16,13/16,12/16,13/16,()=>TILE.sniffer_egg,t)},
+  chest(B,buf,x,y,z,b,m,t){addBox(buf,x,y,z,1/16,0,1/16,15/16,14/16,15/16,tfB(b,m,x,y,z),t)},
   fence(B,buf,x,y,z,b,m,t){addBox(buf,x,y,z,6/16,0,6/16,10/16,1,10/16,()=>TILE[b.tiles.side],t)},
 };
 const EPARTS={
-  zombie:e=>[[[-.25,0,-.125,.25,.75,.125],'zombie_pants'],[[-.25,.75,-.125,.25,1.5,.125],'zombie_shirt'],[[-.25,1.5,-.25,.25,2,.25],'zombie_skin','zombie_face'],
-    [[-.375,1.25,-.125,-.25,1.5,.625],'zombie_skin'],[[.25,1.25,-.125,.375,1.5,.625],'zombie_skin']],
+  zombie:e=>[[[-.25,0,-.125,.25,.75,.125],'zombie_pants'],[[-.25,.75,-.125,.25,1.5,.125],'zombie_shirt'],[[-.25,1.5,-.25,.25,2,.25],'zombie_skin','zombie_face'],[[-.375,1.25,-.125,-.25,1.5,.625],'zombie_skin'],[[.25,1.25,-.125,.375,1.5,.625],'zombie_skin']],
   armor_stand:e=>{const p=[[[-.375,0,-.375,.375,.0625,.375],'smooth_stone'],[[-.0625,0,-.0625,.0625,1.45,.0625],'oak_planks'],[[-.32,1.35,-.06,.32,1.42,.06],'oak_planks']];
     if(e.kit==='coat')p.push([[-.3,.5,-.17,.3,1.42,.17],'lab_coat']);else p.push([[-.25,.35,-.13,.25,.8,.13],'iron_armor'],[[-.29,.8,-.16,.29,1.42,.16],'iron_armor'],[[-.27,1.42,-.27,.27,1.95,.27],'iron_armor']);return p},
-  minecart:e=>[[[-.45,.06,-.32,.45,.62,.32],'iron_block']],
-};
-function rotBox(f,b){const r=(lx,lz)=>f===2?[lx,lz]:f===0?[-lx,-lz]:f===1?[lz,-lx]:[-lz,lx];const p=r(b[0],b[2]),q=r(b[3],b[5]);
-  return[Math.min(p[0],q[0])+.5,b[1],Math.min(p[1],q[1])+.5,Math.max(p[0],q[0])+.5,b[4],Math.max(p[1],q[1])+.5]}
+  minecart:e=>[[[-.45,.06,-.32,.45,.62,.32],'iron_block']]};
+function rotBox(f,b){const r=(lx,lz)=>f===2?[lx,lz]:f===0?[-lx,-lz]:f===1?[lz,-lx]:[-lz,lx];const p=r(b[0],b[2]),q=r(b[3],b[5]);return[Math.min(p[0],q[0])+.5,b[1],Math.min(p[1],q[1])+.5,Math.max(p[0],q[0])+.5,b[4],Math.max(p[1],q[1])+.5]}
 function drawEnt(B,e,t){for(const [bx,tile,face] of EPARTS[e.type](e)){const r=rotBox(e.f,bx),ti=TILE[tile],fi=face?TILE[face]:ti;addBox(B.o,e.x,e.y,e.z,...r,fk=>fk===e.f?fi:ti,t,false,true)}}
-
-function visFns(W,st){const hid=new Uint8Array(BL.length);for(let i=1;i<BL.length;i++){const c=BL[i].cat;hid[i]=(!st.terrain||st.layer||st.hl)&&(c===TER||c===NAT)?1:0}
+function visFns(W,st){const hide=!st.terrain||st.layer||!!st.hl,hid=new Uint8Array(BL.length);for(let i=1;i<BL.length;i++){const c=BL[i].cat;hid[i]=hide&&(c===TER||c===NAT)?1:0}
   const {x0,y0,z0,nx,ny,nz,v}=W,yMax=Math.min(y0+ny-1,st.yCut),zMax=Math.min(z0+nz-1,st.zCut);
   const at=(x,y,z)=>{if(x<x0||x>=x0+nx||y<y0||y>yMax||z<z0||z>zMax)return 0;const id=v[((y-y0)*nz+(z-z0))*nx+(x-x0)];return hid[id]?0:id};
-  return{hid,at,yMax,zMax}}
+  return{hid,at,yMax,zMax,hide}}
 function tintFor(ck,y,st){let t=1;if(st.layer&&y<st.yCut)t=.36;if(st.hl&&ck!==st.hl)t*=.16;return t}
-function meshWorld(W,st){const B={o:new Buf(),c:new Buf(),b:new Buf()};const {hid,at,yMax,zMax}=visFns(W,st);
-  const opq=(x,y,z)=>OPQ[at(x,y,z)];const {x0,y0,z0,nx,nz,v,m}=W;
-  for(let y=y0;y<=yMax;y++)for(let z=z0;z<=zMax;z++)for(let x=x0;x<x0+nx;x++){const i=((y-y0)*nz+(z-z0))*nx+(x-x0),id=v[i];if(!id||hid[id])continue;
+function meshRange(W,st,vf,ylo,yhi,zlo,zhi){const B={o:new Buf(),c:new Buf(),b:new Buf()},{hid,at}=vf,opq=(x,y,z)=>OPQ[at(x,y,z)],{x0,y0,z0,nx,nz,v,m}=W;
+  for(let y=ylo;y<=yhi;y++)for(let z=zlo;z<=zhi;z++){const row=((y-y0)*nz+(z-z0))*nx;for(let x=x0;x<x0+nx;x++){const i=row+x-x0,id=v[i];if(!id||hid[id])continue;
     const b=BL[id],t=tintFor(b.ck,y,st),buf=b.alpha==='opaque'?B.o:b.alpha==='cutout'?B.c:B.b;
-    if(b.shape==='cube'){for(const [a,s,fk,sh] of FACES){const dx=a===0?s:0,dy=a===1?s:0,dz=a===2?s:0,nid=at(x+dx,y+dy,z+dz);
+    if(b.shape==='cube'){for(let f=0;f<6;f++){const F=FD[f],nid=at(x+F.n[0],y+F.n[1],z+F.n[2]);
         if(nid&&(OPQ[nid]||nid===id||(b.key==='water'&&BL[nid].alpha==='blend'&&BL[nid].shape==='cube')))continue;
-        cubeFace(buf,x,y,z,a,s,TILE[tileOf(b,fk,m[i],x,y,z)],b.light?1:sh,t,(b.light||b.alpha!=='opaque')?null:opq)}}
-    else SH[b.shape](B,buf,x,y,z,b,m[i],t,at)}
-  for(const e of W.ents){if(e.y>yMax||e.z>zMax)continue;drawEnt(B,e,tintFor('e_'+e.type,e.y,st))}
+        cubeFace(buf,x,y,z,F,TILE[tileOf(b,F.fk,m[i],x,y,z)],b.light?1:F.sh,t,(b.light||b.alpha!=='opaque')?null:opq)}}
+    else SH[b.shape](B,buf,x,y,z,b,m[i],t,at)}}
+  for(const e of W.ents)if(e.y>=ylo&&e.y<=yhi&&e.z>=zlo&&e.z<=zhi)drawEnt(B,e,tintFor('e_'+e.type,e.y,st));
   return B}
 
-// ---------- Zählen ----------
-function countWorld(W,groupFn){const tot={},grp={};const add=(g,ck,n)=>{tot[ck]=(tot[ck]||0)+n;(grp[g]=grp[g]||{})[ck]=(grp[g][ck]||0)+n};
-  const {x0,y0,z0,nx,ny,nz,v}=W;
-  for(let y=y0;y<y0+ny;y++)for(let z=z0;z<z0+nz;z++)for(let x=x0;x<x0+nx;x++){const id=v[((y-y0)*nz+(z-z0))*nx+(x-x0)];if(!id)continue;const b=BL[id];if(b.cat!=='build')continue;add(groupFn(x,y,z),b.ck,1/b.per)}
-  for(const e of W.ents)add(groupFn(e.x,e.y,e.z),'e_'+e.type,1);
+// ================= Zählen =================
+function countWorld(W){const tot={},grp={};const add=(g,ck,n)=>{tot[ck]=(tot[ck]||0)+n;(grp[g]=grp[g]||{})[ck]=(grp[g][ck]||0)+n};const {x0,y0,z0,nx,ny,nz,v}=W;
+  for(let y=y0;y<y0+ny;y++)for(let z=z0;z<z0+nz;z++)for(let x=x0;x<x0+nx;x++){const id=v[((y-y0)*nz+(z-z0))*nx+(x-x0)];if(!id)continue;const b=BL[id];if(b.cat!=='build')continue;add(groupOf(x,y,z),b.ck,1/b.per)}
+  for(const e of W.ents)add(groupOf(e.x,e.y,e.z),'e_'+e.type,1);
   const rnd=o=>{for(const k in o)o[k]=Math.round(o[k])};rnd(tot);for(const g in grp)rnd(grp[g]);return{tot,grp}}
 const fmtN=n=>n.toLocaleString('de-DE');
 const stacks=n=>{const s=Math.floor(n/64),r=n%64;return s?(r?`${s} St. + ${r}`:`${s} St.`):''};
 
-// ---------- Szenen ----------
-const SC={
- labor:{title:'Untergrundlabor',gen:genLab,groupFn:labGroup,groups:LAB_GROUPS,yr:[-12,82],zr:[-6,20],origin:'NW-Ecke des Labors',
-  presets:[
-   {id:'gesamt',label:'Gesamt',terrain:1,y:82,z:7,tg:[13,31,4],off:[80,22,130]},
-   {id:'haus',label:'Tarnhaus',terrain:1,y:82,z:20,tg:[12,67,9],off:[26,18,36]},
-   {id:'bau',label:'Nur Bau',terrain:0,y:82,z:20,tg:[13,31,7],off:[80,22,126]},
-   {id:'b1',label:'B1',terrain:1,y:45,z:20,tg:[13,41,7.5],off:[3,35,20],lv:'b1'},
-   {id:'b2',label:'B2',terrain:1,y:35,z:20,tg:[13,31,7.5],off:[3,35,20],lv:'b2'},
-   {id:'b3',label:'B3',terrain:1,y:25,z:20,tg:[13,21,7.5],off:[3,35,20],lv:'b3'},
-   {id:'b4',label:'B4',terrain:1,y:-5,z:20,tg:[15,-9,7.5],off:[3,35,20],lv:'b4'}]},
- tempel:{title:'Athena-Tempel',gen:genTemple,groupFn:templeGroup,groups:TEMPLE_GROUPS,yr:[0,37],zr:[0,71],origin:'NW-Ecke des Bauplatzes',greek:1,
-  presets:[
-   {id:'gesamt',label:'Gesamt',terrain:1,y:37,z:71,tg:[24,12,38],off:[48,36,72]},
-   {id:'innen',label:'Ohne Dach',terrain:1,y:18,z:71,tg:[24,9,27],off:[0,42,30]},
-   {id:'schnitt',label:'Schnitt',terrain:1,y:37,z:24,tg:[24,13,24],off:[34,14,46]},
-   {id:'statue',label:'Statue',terrain:1,y:37,z:71,tg:[23,20,58],off:[16,6,46]},
-   {id:'front',label:'Front',terrain:1,y:37,z:71,tg:[24,16,46],off:[0,4,52]},
-   {id:'bau',label:'Nur Bau',terrain:0,y:37,z:71,tg:[24,12,38],off:[48,36,72]}]},
-};
+// ================= Ansichten =================
+const YR=[-12,94],ZR=[0,90];
+const PRESETS=[
+ {id:'gesamt',label:'Gesamt',terrain:1,y:94,z:34,tg:[34,36,30],off:[90,26,146]},
+ {id:'tempel',label:'Tempel',g:1,terrain:1,y:94,z:90,tg:[34,72,40],off:[62,30,86]},
+ {id:'statue',label:'Statue',g:1,terrain:1,y:94,z:90,tg:[34,77,66],off:[22,8,54]},
+ {id:'atrium',label:'Atrium',terrain:1,y:94,z:34,tg:[34,30,34],off:[30,6,70]},
+ {id:'treppe',label:'Treppe',terrain:1,y:94,z:68,tg:[34,46,68],off:[38,8,50]},
+ {id:'bau',label:'Nur Bau',terrain:0,y:94,z:90,tg:[34,40,40],off:[104,30,168]},
+ ...LEVELS.map(lv=>({id:lv.key,label:lv.key.toUpperCase(),terrain:1,y:lv.L+lv.H,z:90,tg:[34,lv.L+1,36],off:[6,60,44],lv:lv.key}))];
 
-// ---------- Three.js ----------
-let renderer,scene,cam,ctl,tex,mats,meshes=[],selBox,cur=null,dirty=true,anim=null;
-const st={terrain:true,layer:false,yCut:82,zCut:7,hl:null,preset:'gesamt'};
+// ================= Three.js =================
+let renderer,scene,cam,ctl,tex,mats,selBox,world=null,counts=null,dirty=true,anim=null,lastMs=0;const chunks=new Map();
+const st={terrain:true,layer:false,yCut:94,zCut:34,hl:null,preset:'gesamt'};
 const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
-function init3D(){
-  const cv=$('cv');renderer=new THREE.WebGLRenderer({canvas:cv,antialias:true,alpha:true});renderer.setPixelRatio(Math.min(devicePixelRatio,2));renderer.setClearColor(0x000000,0);
-  scene=new THREE.Scene();cam=new THREE.PerspectiveCamera(40,1,.1,2000);
-  ctl=new THREE.OrbitControls(cam,cv);ctl.enableDamping=!reduce;ctl.dampingFactor=.12;ctl.maxDistance=420;ctl.minDistance=3;ctl.screenSpacePanning=true;
+function init3D(){const cv=$('cv');renderer=new THREE.WebGLRenderer({canvas:cv,antialias:true,alpha:true});renderer.setPixelRatio(Math.min(devicePixelRatio,2));renderer.setClearColor(0x000000,0);
+  scene=new THREE.Scene();cam=new THREE.PerspectiveCamera(40,1,.1,3000);
+  ctl=new THREE.OrbitControls(cam,cv);ctl.enableDamping=!reduce;ctl.dampingFactor=.12;ctl.maxDistance=520;ctl.minDistance=3;ctl.screenSpacePanning=true;
   tex=new THREE.CanvasTexture(cvA);tex.magFilter=THREE.NearestFilter;tex.minFilter=THREE.NearestFilter;tex.generateMipmaps=false;
-  mats={o:new THREE.MeshBasicMaterial({map:tex,vertexColors:true}),c:new THREE.MeshBasicMaterial({map:tex,vertexColors:true,alphaTest:.5,side:THREE.DoubleSide}),
-    b:new THREE.MeshBasicMaterial({map:tex,vertexColors:true,transparent:true,depthWrite:false})};
+  mats={o:new THREE.MeshBasicMaterial({map:tex,vertexColors:true}),c:new THREE.MeshBasicMaterial({map:tex,vertexColors:true,alphaTest:.5,side:THREE.DoubleSide}),b:new THREE.MeshBasicMaterial({map:tex,vertexColors:true,transparent:true,depthWrite:false})};
   selBox=new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.BoxGeometry(1.04,1.04,1.04)),new THREE.LineBasicMaterial({color:0xff3344}));selBox.visible=false;scene.add(selBox);
   const resize=()=>{const r=$('viewer').getBoundingClientRect();renderer.setSize(r.width,r.height,false);cam.aspect=r.width/Math.max(1,r.height);cam.updateProjectionMatrix();dirty=true};
   new ResizeObserver(resize).observe($('viewer'));resize();
-  let down=null;cv.addEventListener('pointerdown',e=>{down=[e.clientX,e.clientY];document.querySelector('.chip.hint').hidden=true});
+  let down=null;cv.addEventListener('pointerdown',e=>{down=[e.clientX,e.clientY];const h=document.querySelector('.chip.hint');if(h)h.hidden=true});
   cv.addEventListener('pointerup',e=>{if(down&&Math.hypot(e.clientX-down[0],e.clientY-down[1])<6)pickAt(e);down=null});
-  (function loop(now){requestAnimationFrame(loop);if(anim){const k=anim.d?Math.min(1,(now-anim.t0)/anim.d):1,e=k<.5?2*k*k:1-Math.pow(-2*k+2,2)/2;
-      ctl.target.lerpVectors(anim.T0,anim.T1,e);cam.position.lerpVectors(anim.P0,anim.P1,e);if(k>=1)anim=null;dirty=true}
-    if(ctl.update())dirty=true;if(dirty){renderer.render(scene,cam);dirty=false}})(performance.now());
-}
-function camTo(tg,off,instant){const T1=new THREE.Vector3(...tg),P1=T1.clone().add(new THREE.Vector3(...off));
-  if(instant||reduce){ctl.target.copy(T1);cam.position.copy(P1);anim=null;dirty=true;return}
-  anim={t0:performance.now(),d:750,T0:ctl.target.clone(),P0:cam.position.clone(),T1,P1}}
-function rebuild(){if(!cur)return;const t0=performance.now();const B=meshWorld(cur.W,st);
-  for(const m of meshes){scene.remove(m);m.geometry.dispose()}meshes=[];
-  for(const k of ['o','c','b']){const b=B[k];if(!b.n)continue;const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute(b.p,3));g.setAttribute('uv',new THREE.Float32BufferAttribute(b.u,2));g.setAttribute('color',new THREE.Float32BufferAttribute(b.c,3));g.setIndex(b.i);
-    const mesh=new THREE.Mesh(g,mats[k]);if(k==='b')mesh.renderOrder=2;scene.add(mesh);meshes.push(mesh)}
-  dirty=true;cur.lastMs=performance.now()-t0;updateHud()}
-let rbQueued=false;function queueRebuild(){if(rbQueued)return;rbQueued=true;requestAnimationFrame(()=>{rbQueued=false;rebuild()})}
+  (function loop(now){requestAnimationFrame(loop);if(anim){const k=anim.d?Math.min(1,(now-anim.t0)/anim.d):1,e=k<.5?2*k*k:1-Math.pow(-2*k+2,2)/2;ctl.target.lerpVectors(anim.T0,anim.T1,e);cam.position.lerpVectors(anim.P0,anim.P1,e);if(k>=1)anim=null;dirty=true}
+    if(ctl.update())dirty=true;if(dirty){renderer.render(scene,cam);dirty=false}})(performance.now())}
+function camTo(tg,off,instant){const T1=new THREE.Vector3(...tg),P1=T1.clone().add(new THREE.Vector3(...off));if(instant||reduce){ctl.target.copy(T1);cam.position.copy(P1);anim=null;dirty=true;return}anim={t0:performance.now(),d:800,T0:ctl.target.clone(),P0:cam.position.clone(),T1,P1}}
+const clampI=(v,a,b)=>v<a?a:v>b?b:v;
+function rebuild(){if(!world)return;const t0=performance.now(),W=world,vf=visFns(W,st),CH=16;
+  for(let cy=0;cy*CH<W.ny;cy++)for(let cz=0;cz*CH<W.nz;cz++){const y0=W.y0+cy*CH,y1=Math.min(y0+CH-1,W.y0+W.ny-1),z0=W.z0+cz*CH,z1=Math.min(z0+CH-1,W.z0+W.nz-1);
+    const sig=(vf.hide?1:0)+'|'+(st.hl||'')+'|'+(st.layer?1:0)+'|'+clampI(st.yCut,y0-1,y1+1)+'|'+clampI(st.zCut,z0-1,z1+1),id=cy+','+cz,c=chunks.get(id);if(c&&c.sig===sig)continue;
+    if(c)for(const m of c.meshes){scene.remove(m);m.geometry.dispose()}const meshes=[];
+    const yh=Math.min(y1,vf.yMax),zh=Math.min(z1,vf.zMax);
+    if(yh>=y0&&zh>=z0){const B=meshRange(W,st,vf,y0,yh,z0,zh);for(const k of ['o','c','b']){const b=B[k];if(!b.n)continue;const g=new THREE.BufferGeometry();
+      g.setAttribute('position',new THREE.Float32BufferAttribute(b.p,3));g.setAttribute('uv',new THREE.Float32BufferAttribute(b.u,2));g.setAttribute('color',new THREE.Float32BufferAttribute(b.c,3));g.setIndex(b.i);
+      const mesh=new THREE.Mesh(g,mats[k]);if(k==='b')mesh.renderOrder=2;scene.add(mesh);meshes.push(mesh)}}
+    chunks.set(id,{sig,meshes})}
+  dirty=true;lastMs=performance.now()-t0;updateHud()}
+let rbQ=false;function queueRebuild(){if(rbQ)return;rbQ=true;requestAnimationFrame(()=>{rbQ=false;rebuild()})}
 
-// ---------- Auswahl ----------
+// ================= Auswahl =================
 let sel=null;
-function entAt(x,y,z){if(!cur)return null;for(const e of cur.W.ents){const tall=e.type!=='minecart';if(e.x===x&&e.z===z&&(e.y===y||(tall&&e.y+1===y)))return e}return null}
-function pickAt(ev){if(!cur)return;const r=$('cv').getBoundingClientRect(),nd=new THREE.Vector2((ev.clientX-r.left)/r.width*2-1,-(ev.clientY-r.top)/r.height*2+1);
-  const rc=new THREE.Raycaster();rc.setFromCamera(nd,cam);const o=rc.ray.origin,d=rc.ray.direction;const {at}=visFns(cur.W,st);
-  let x=Math.floor(o.x),y=Math.floor(o.y),z=Math.floor(o.z);const sx=Math.sign(d.x),sy=Math.sign(d.y),sz=Math.sign(d.z);
-  const td=v=>v===0?Infinity:Math.abs(1/v);const tDx=td(d.x),tDy=td(d.y),tDz=td(d.z);
+function entAt(x,y,z){return world.entMap.get(rk(x,z)*256+(y+20))||null}
+function pickAt(ev){if(!world)return;const r=$('cv').getBoundingClientRect(),nd=new THREE.Vector2((ev.clientX-r.left)/r.width*2-1,-(ev.clientY-r.top)/r.height*2+1);
+  const rc=new THREE.Raycaster();rc.setFromCamera(nd,cam);const o=rc.ray.origin,d=rc.ray.direction,{at,yMax,zMax}=visFns(world,st);
+  let x=Math.floor(o.x),y=Math.floor(o.y),z=Math.floor(o.z);const sx=Math.sign(d.x),sy=Math.sign(d.y),sz=Math.sign(d.z),td=v=>v===0?Infinity:Math.abs(1/v),tDx=td(d.x),tDy=td(d.y),tDz=td(d.z);
   const first=(p,dd,c)=>dd>0?(c+1-p)/dd:dd<0?(p-c)/-dd:Infinity;let tx=first(o.x,d.x,x),ty=first(o.y,d.y,y),tz=first(o.z,d.z,z);
-  for(let i=0;i<1200;i++){const id=at(x,y,z);const e=entAt(x,y,z);const ev2=e&&e.y<=st.yCut&&e.z<=st.zCut;
-    if(id||ev2){select({x,y,z,id:ev2&&!id?0:id,ent:ev2?e:null});return}
-    if(tx<ty&&tx<tz){x+=sx;tx+=tDx}else if(ty<tz){y+=sy;ty+=tDy}else{z+=sz;tz+=tDz}}
-  select(null)}
+  for(let i=0;i<1600;i++){const id=at(x,y,z),e=(y<=yMax&&z<=zMax)?entAt(x,y,z):null;if(id||e){select({x,y,z,id:e&&!id?0:id,ent:e});return}
+    if(tx<ty&&tx<tz){x+=sx;tx+=tDx}else if(ty<tz){y+=sy;ty+=tDy}else{z+=sz;tz+=tDz}}select(null)}
 function select(s){sel=s;if(!s){selBox.visible=false;dirty=true;$('info').innerHTML='<p class="small">Hier ist kein Block. Tippe auf einen sichtbaren Block.</p>';return}
   selBox.position.set(s.x+.5,s.y+.5,s.z+.5);selBox.visible=true;dirty=true;
-  let ck,b=null;if(s.id){b=BL[s.id];ck=b.ck}else{ck='e_'+s.ent.type}
-  const M=MAT[ck],natural=b&&(b.cat===TER||b.cat===NAT),g=cur.groupFn(s.x,s.y,s.z),tot=cur.counts.tot[ck]||0,ing=(cur.counts.grp[g]||{})[ck]||0;
-  const ti=TILE[M.tile];const icoPos=`background-position:${-(ti&15)*40}px ${-(ti>>4)*40}px`;
-  $('info').innerHTML=`<div class="head"><span class="ico big" style="${icoPos}"></span><div><b>${M.n}</b><small>minecraft:${M.mc}</small></div></div>
-   ${M.note?`<p class="note">${M.note}</p>`:''}
-   <dl><dt>Position</dt><dd>x ${s.x} · y ${s.y} · z ${s.z}</dd><dt>Bereich</dt><dd>${natural?'natürlich':cur.groups[g]}</dd>
-   ${natural?'<dt>Bauen</dt><dd>nicht nötig, ist schon da</dd>':`<dt>Hier</dt><dd>${fmtN(ing)} ${stacks(ing)?'('+stacks(ing)+')':''}</dd><dt>Gesamt</dt><dd>${fmtN(tot)} ${stacks(tot)?'('+stacks(tot)+')':''}</dd>`}</dl>
+  const b=s.id?BL[s.id]:null,ck=b?b.ck:'e_'+s.ent.type,M=MAT[ck],natural=b&&(b.cat===TER||b.cat===NAT),g=groupOf(s.x,s.y,s.z),tot=counts.tot[ck]||0,ing=(counts.grp[g]||{})[ck]||0,room=roomAt(s.x,s.y,s.z),ti=TILE[M.tile];
+  $('info').innerHTML=`<div class="head"><span class="ico big" style="background-position:${-(ti&15)*40}px ${-(ti>>4)*40}px"></span><div><b>${M.n}</b><small>minecraft:${M.mc}</small></div></div>${M.note?`<p class="note">${M.note}</p>`:''}
+   <dl><dt>Position</dt><dd>x ${s.x} · y ${s.y} · z ${s.z}</dd><dt>Bereich</dt><dd>${natural?'natürlich':GROUPS[g]}</dd>${room?`<dt>Raum</dt><dd>${room.name} (${QN[room.q]})</dd>`:''}
+   ${natural?'<dt>Bauen</dt><dd>nicht nötig, ist schon da</dd>':`<dt>Im Bereich</dt><dd>${fmtN(ing)} ${stacks(ing)?'('+stacks(ing)+')':''}</dd><dt>Gesamt</dt><dd>${fmtN(tot)} ${stacks(tot)?'('+stacks(tot)+')':''}</dd>`}</dl>
    ${natural?'':`<button class="btn" type="button" id="hlBtn" aria-pressed="${st.hl===ck}">${st.hl===ck?'Markierung aufheben':'Alle davon markieren'}</button>`}`;
   const hb=$('hlBtn');if(hb)hb.onclick=()=>setHl(st.hl===ck?null:ck)}
 function setHl(ck){st.hl=ck;renderMats();if(sel)select(sel);queueRebuild()}
 
-// ---------- Panel ----------
-function renderMats(){const g=$('grp').value,src=g==='all'?cur.counts.tot:(cur.counts.grp[g]||{});const rows=Object.entries(src).filter(([,n])=>n>0).sort((a,b)=>b[1]-a[1]);
-  let sum=0;$('mats').innerHTML=rows.map(([ck,n])=>{sum+=n;const M=MAT[ck],ti=TILE[M.tile];
-    return`<button type="button" class="mat" data-ck="${ck}" aria-pressed="${st.hl===ck}"><span class="ico" style="background-position:${-(ti&15)*20}px ${-(ti>>4)*20}px"></span><span><span>${M.n}</span><small>${M.mc}</small></span><span class="cnt">${fmtN(n)}<small>${stacks(n)}</small></span></button>`}).join('');
+// ================= Panel =================
+function renderMats(){const g=$('grp').value,src=g==='all'?counts.tot:(counts.grp[g]||{}),rows=Object.entries(src).filter(([,n])=>n>0).sort((a,b)=>b[1]-a[1]);let sum=0;
+  $('mats').innerHTML=rows.map(([ck,n])=>{sum+=n;const M=MAT[ck],ti=TILE[M.tile];return`<button type="button" class="mat" data-ck="${ck}" aria-pressed="${st.hl===ck}"><span class="ico" style="background-position:${-(ti&15)*20}px ${-(ti>>4)*20}px"></span><span><span>${M.n}</span><small>${M.mc}</small></span><span class="cnt">${fmtN(n)}<small>${stacks(n)}</small></span></button>`}).join('');
   $('matTotal').innerHTML=`<span>${rows.length} Sorten</span><span>${fmtN(sum)} Teile</span>`}
 $('mats').addEventListener('click',e=>{const b=e.target.closest('.mat');if(b)setHl(st.hl===b.dataset.ck?null:b.dataset.ck)});
 $('grp').addEventListener('change',renderMats);
-function updateHud(){if(!cur)return;let txt;
-  if(st.layer){const {at}=visFns(cur.W,{...st,yCut:st.yCut,zCut:999});const c={};let n=0;const W=cur.W,y=st.yCut;
+function updateHud(){if(!world)return;let txt;
+  if(st.layer){const {at}=visFns(world,{...st,zCut:999}),c={},W=world,y=st.yCut;let n=0;
     for(let z=W.z0;z<W.z0+W.nz;z++)for(let x=W.x0;x<W.x0+W.nx;x++){const id=at(x,y,z);if(id&&BL[id].cat==='build'){c[BL[id].ck]=(c[BL[id].ck]||0)+1/BL[id].per;n++}}
-    const top=Object.entries(c).sort((a,b)=>b[1]-a[1]).slice(0,5).map(([k,v])=>`${MAT[k].n} ${Math.round(v)}`).join(' · ');
-    txt=`Schicht Y ${y} · ${n} Blöcke`;$('layerInfo').hidden=false;$('layerInfo').textContent=n?`In dieser Schicht: ${top}${Object.keys(c).length>5?' …':''}`:'In dieser Schicht ist nichts zu bauen.'}
-  else{$('layerInfo').hidden=true;const p=cur.presets.find(p=>p.id===st.preset);txt=p&&p.lv?cur.groups[p.lv]+' · Boden Y '+LV.find(l=>l.key===p.lv).L:(st.zCut<cur.zr[1]?'Aufgeschnitten bei z '+st.zCut:'Ganzes Modell')}
+    const top=Object.entries(c).sort((a,b)=>b[1]-a[1]).slice(0,6).map(([k,v])=>`${MAT[k].n} ${Math.round(v)}`).join(' · ');
+    txt=`Schicht Y ${y} · ${fmtN(n)} Blöcke`;$('layerInfo').hidden=false;$('layerInfo').textContent=n?`In dieser Schicht: ${top}${Object.keys(c).length>6?' …':''}`:'In dieser Schicht ist nichts zu bauen.'}
+  else{$('layerInfo').hidden=true;const p=PRESETS.find(p=>p.id===st.preset),lv=p&&p.lv&&LEVELS.find(l=>l.key===p.lv);txt=lv?`${lv.key.toUpperCase()} · ${lv.n} · Boden Y ${lv.L}`:st.zCut<ZR[1]?'Aufgeschnitten bei z '+st.zCut:'Ganzes Modell'}
   $('hudStat').textContent=txt}
-function syncSliders(){const y=$('ycut'),z=$('zcut');y.min=cur.yr[0];y.max=cur.yr[1];y.value=st.yCut;z.min=cur.zr[0];z.max=cur.zr[1];z.value=st.zCut;
-  $('yVal').textContent=st.layer?'Y '+st.yCut:(st.yCut>=cur.yr[1]?'alles':'bis Y '+st.yCut);$('zVal').textContent=st.zCut>=cur.zr[1]?'aus':'bis z '+st.zCut;
+function syncSliders(){const y=$('ycut'),z=$('zcut');y.min=YR[0];y.max=YR[1];y.value=st.yCut;z.min=ZR[0];z.max=ZR[1];z.value=st.zCut;
+  $('yVal').textContent=st.layer?'Y '+st.yCut:(st.yCut>=YR[1]?'alles':'bis Y '+st.yCut);$('zVal').textContent=st.zCut>=ZR[1]?'aus':'bis z '+st.zCut;
   $('yLabel').textContent=st.layer?'Schicht (Y-Höhe)':'Höhe (von oben abschneiden)';$('optTerrain').checked=st.terrain;$('optTerrain').disabled=st.layer;$('optLayer').checked=st.layer;
   [...$('presets').children].forEach(b=>b.setAttribute('aria-pressed',b.dataset.id===st.preset))}
-function applyPreset(p,instant){st.preset=p.id;st.terrain=!!p.terrain;st.yCut=p.y;st.zCut=p.z;if(st.layer){st.layer=false}syncSliders();queueRebuild();camTo(p.tg,p.off,instant)}
-$('presets').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;applyPreset(cur.presets.find(p=>p.id===b.dataset.id))});
+function applyPreset(p,instant){st.preset=p.id;st.terrain=!!p.terrain;st.yCut=p.y;st.zCut=p.z;st.layer=false;syncSliders();queueRebuild();camTo(p.tg,p.off,instant);if(p.lv){$('lvSel').value=p.lv;renderRooms()}}
+$('presets').innerHTML=PRESETS.map(p=>`<button type="button" data-id="${p.id}"${p.g?' class="g"':''}>${p.label}</button>`).join('');
+$('presets').addEventListener('click',e=>{const b=e.target.closest('button');if(b)applyPreset(PRESETS.find(p=>p.id===b.dataset.id))});
 const onSlide=()=>{st.yCut=+$('ycut').value;st.zCut=+$('zcut').value;st.preset='';syncSliders();queueRebuild()};
 $('ycut').addEventListener('input',onSlide);$('zcut').addEventListener('input',onSlide);
 const step=(id,d)=>{const el=$(id);el.value=Math.max(+el.min,Math.min(+el.max,+el.value+d));onSlide()};
 $('yDown').onclick=()=>step('ycut',-1);$('yUp').onclick=()=>step('ycut',1);$('zDown').onclick=()=>step('zcut',-1);$('zUp').onclick=()=>step('zcut',1);
 $('optTerrain').addEventListener('change',e=>{st.terrain=e.target.checked;queueRebuild()});
-$('optLayer').addEventListener('change',e=>{st.layer=e.target.checked;if(st.layer){const p=cur.presets.find(p=>p.id===st.preset);st.yCut=p&&p.lv?LV.find(l=>l.key===p.lv).L+1:Math.min(st.yCut,cur.layerStart);st.zCut=cur.zr[1]}syncSliders();queueRebuild()});
-$('btnReset').onclick=()=>{const p=cur.presets.find(p=>p.id===st.preset)||cur.presets[0];camTo(p.tg,p.off)};
+$('optLayer').addEventListener('change',e=>{st.layer=e.target.checked;if(st.layer){const p=PRESETS.find(p=>p.id===st.preset),lv=p&&p.lv?LEVELS.find(l=>l.key===p.lv):null;st.yCut=lv?lv.L+1:LEVELS[0].L+1;st.zCut=ZR[1]}syncSliders();queueRebuild()});
+$('btnReset').onclick=()=>{const p=PRESETS.find(p=>p.id===st.preset)||PRESETS[0];camTo(p.tg,p.off)};
 $('btnTop').onclick=()=>{const t=ctl.target.clone(),d=Math.max(30,cam.position.distanceTo(t));camTo([t.x,t.y,t.z],[0,d,.01])};
+$('lvSel').innerHTML=LEVELS.map(l=>`<option value="${l.key}">${l.key.toUpperCase()} · ${l.n}</option>`).join('');
+$('lvSel').addEventListener('change',renderRooms);
+function renderRooms(){if(!world)return;const lv=LEVELS.find(l=>l.key===$('lvSel').value);
+  $('roomList').innerHTML=lv.list.map((r,i)=>`<button type="button" data-i="${i}">${r.name}<small>${QN[r.q]} · ${r.letter}</small></button>`).join('')}
+$('roomList').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;const lv=LEVELS.find(l=>l.key===$('lvSel').value),r=lv.list[+b.dataset.i];
+  st.preset='';st.terrain=true;st.layer=false;st.yCut=lv.L+lv.H;st.zCut=ZR[1];syncSliders();queueRebuild();camTo([r.cx+.5,lv.L+1,r.cz+.5],[0,28,19])});
+$('grp').innerHTML='<option value="all">Ganzer Bau</option>'+Object.entries(GROUPS).filter(([k])=>k!=='rest').map(([k,v])=>`<option value="${k}">${v}</option>`).join('');
 
-function loadScene(key){const sc=SC[key];
-  if(!sc.W){sc.W=sc.gen();sc.counts=countWorld(sc.W,sc.groupFn);sc.layerStart=key==='labor'?41:6}
-  cur=sc;document.body.classList.toggle('greekmode',!!sc.greek);$('hudTitle').textContent=sc.title;
-  $('presets').innerHTML=sc.presets.map(p=>`<button type="button" data-id="${p.id}">${p.label}</button>`).join('');
-  $('grp').innerHTML='<option value="all">Ganzer Bau</option>'+Object.entries(sc.groups).map(([k,v])=>`<option value="${k}">${v}</option>`).join('');
-  st.hl=null;st.layer=false;sel=null;if(selBox)selBox.visible=false;
-  $('info').innerHTML='<p class="small">Tippe im Modell auf einen Block. Du siehst Name, Minecraft-ID, Position und wie viele davon im ganzen Bau stecken.</p>';
-  renderMats();applyPreset(sc.presets[0],true);
-  $('text-labor').hidden=key!=='labor';$('text-tempel').hidden=key!=='tempel';
-  document.querySelectorAll('nav a').forEach(a=>{if(a.dataset.scene===key)a.setAttribute('aria-current','page');else a.removeAttribute('aria-current')})}
-function route(){const key=location.hash==='#tempel'?'tempel':'labor';if(cur===SC[key])return;
-  $('loading').hidden=false;setTimeout(()=>{loadScene(key);$('loading').hidden=true},30)}
+// ================= Text: Ebenen =================
+function levelDocs(){$('levelDocs').innerHTML=LEVELS.map((lv,i)=>`<details class="lvl"${i===0?' open':''}><summary><span class="badge">${lv.key.toUpperCase()}</span><div><h3>${lv.n}</h3><p>${lv.desc}</p></div><span class="y">Boden Y ${lv.L}<br>Raumhöhe ${lv.H}</span></summary>
+  <div class="body"><div class="quads">${Object.keys(lv.rooms).map(q=>`<div class="quad"><h4>${QN[q]}</h4><ul>${lv.rooms[q].map((t,j)=>`<li><b>${LET[j]} · ${FUR[t].n}</b><span>${FUR[t].desc}</span></li>`).join('')}</ul></div>`).join('')}</div>
+  ${lv.kind==='hall'?'<p class="muted">Mitte: runde Reaktorhalle mit Warnring, Geländer, Blitzableitern und vier Pulten. Ostgang: Bahnsteig mit Gleis und Tunnel. Südgang: Wendeltreppe.</p>':'<p class="muted">Mitte: Balkon um das Atrium mit 8 Quarzsäulen, 8 Bannern, Glasgeländer und Lichtring. Gänge mit roter Mittellinie und Hängeschild „'+lv.key.toUpperCase()+'“. Südgang: Tür zur Wendeltreppe.</p>'}</div></details>`).join('')}
+levelDocs();
 
-// ---------- Checklisten ----------
-function makeChecks(prefix,groups){const key='hive3d-checks-'+prefix;let saved={};try{saved=JSON.parse(localStorage.getItem(key)||'{}')}catch(e){}
-  const el=$(prefix+'-checks'),prog=$(prefix+'-progress');
-  el.innerHTML=groups.map((g,gi)=>`<div class="checkgroup"><h3>${g[0]}</h3>${g[1].map((t,ti)=>{const id=`${prefix}-c-${gi}-${ti}`;return`<label for="${id}"><input type="checkbox" id="${id}" ${saved[id]?'checked':''}><span>${t}</span></label>`}).join('')}</div>`).join('');
+// ================= Checkliste =================
+(function(){const groups=[['Oberfläche',['Bauplatz 69 × 91 markieren','Tempel: Stufen, 38 Säulen, Cella','Fries, Giebel, Granitdach','Statue mit Sockel','Heilige Quelle (2 Becken)','Olivenhain, Zypressen, Blumen']],
+  ['Schächte',['Atrium-Schacht rund ausheben','Aufzugsröhre mit 2 Wassersäulen','Brücken auf B1 bis B3','Wendeltreppe Y −4 bis 63','Tür im Statuensockel']],
+  ...LEVELS.map(lv=>[lv.key.toUpperCase()+' · '+lv.n,['Boden, Außenwand, Decke','Balkon, Glaswand, Gänge'.replace('Balkon, Glaswand',lv.kind==='hall'?'Reaktorhalle':'Balkon, Glaswand'),...Object.keys(lv.rooms).map(q=>QN[q]+': '+lv.rooms[q].map(t=>FUR[t].n).join(', '))]])];
+  const key='hive3d-checks-v3';let saved={};try{saved=JSON.parse(localStorage.getItem(key)||'{}')}catch(e){}const el=$('lab-checks'),prog=$('lab-progress');
+  el.innerHTML=groups.map((g,gi)=>`<div class="checkgroup"><h3>${g[0]}</h3>${g[1].map((t,ti)=>{const id=`c-${gi}-${ti}`;return`<label for="${id}"><input type="checkbox" id="${id}" ${saved[id]?'checked':''}><span>${t}</span></label>`}).join('')}</div>`).join('');
   const upd=()=>{const all=el.querySelectorAll('input'),done=[...all].filter(i=>i.checked).length;prog.innerHTML=`· <b>${done}</b> von ${all.length}`};
-  el.onchange=e=>{saved[e.target.id]=e.target.checked;try{localStorage.setItem(key,JSON.stringify(saved))}catch(err){}upd()};upd()}
-makeChecks('lab',[
- ['Oberfläche',['Nordwest-Ecke notiert (F3)','Tarnhaus mit Dach und Schornstein','Glasring über dem Aufzug im Haus','Weg und Laternen am Eingang']],
- ['Schächte',['Aufzugsschacht bis Y −10 gegraben','Seelensand und Wassersäule','Leiterschacht bis B4','Andesit-Verkleidung zwischen den Ebenen']],
- ['Ebenen',['B1 Sicherheit','B2 Labore mit Probentanks','B3 Red Queen und Laser-Korridor','B4 Reaktor, Kühlung und Bahnsteig','Tunnel nach Osten']],
- ['Feinschliff',['Umbrella-Banner in jeder Halle','Hängeschilder B1 bis B4','Rote Streifen in Boden und Wand','Zombies mit Namensschild eingesperrt','Redstone-Takt für die Red Queen']],
-]);
-makeChecks('gr',[
- ['Tempel',['Stufen und Stylobat','Alle 38 Außensäulen','Cella mit Portal und Innensäulen','Decke, Fries und Gesims','Granit-Dach und Giebel','Gold-Akroterien auf den Giebeln']],
- ['Statue',['Sockel','Gewand und Faltenwurf','Arme, Hände, Nike','Kopf und goldener Helm','Schild und Speer']],
- ['Umgebung',['Altar mit Feuer','Amphoren aufgestellt','Olivenbäume und Zypressen','Platz gepflastert']],
-]);
+  el.onchange=e=>{saved[e.target.id]=e.target.checked;try{localStorage.setItem(key,JSON.stringify(saved))}catch(err){}upd()};upd()})();
 
-// ---------- Start ----------
-window.addEventListener('hashchange',route);
+// ================= Start =================
 if(!window.THREE||!THREE.OrbitControls){$('loading').textContent='Das 3D-Modell konnte nicht geladen werden. Prüfe die Internetverbindung und lade die Seite neu.'}
-else{init3D();route()}
+else{init3D();setTimeout(()=>{try{world=genWorld();counts=countWorld(world);renderMats();renderRooms();applyPreset(PRESETS[0],true);$('loading').hidden=true}
+  catch(err){$('loading').textContent='Fehler beim Bauen des Modells: '+err.message;console.error(err)}},40)}
 </script>
