@@ -116,6 +116,31 @@ select{font:inherit;font-size:13px;padding:6px 8px;border:1px solid var(--line);
 .mat .cnt small{font-weight:400;text-align:right}
 .total{display:flex;justify-content:space-between;font:600 12.5px var(--f-mono);color:var(--muted);border-top:1px solid var(--line);padding-top:8px}
 
+/* ---- Ego-Modus ---- */
+.viewer:fullscreen{height:100vh;border:0;border-radius:0}
+.crosshair{position:absolute;left:50%;top:50%;width:22px;height:22px;margin:-11px 0 0 -11px;pointer-events:none}
+.crosshair::before,.crosshair::after{content:"";position:absolute;background:#fff;box-shadow:0 0 0 1px rgba(0,0,0,.6)}
+.crosshair::before{left:10px;top:2px;width:2px;height:18px}
+.crosshair::after{top:10px;left:2px;height:2px;width:18px}
+.flyhelp{position:absolute;inset:0;display:grid;place-items:center;pointer-events:none;padding:16px}
+.flyhelp .box{background:var(--hud-bg);color:var(--hud-fg);border:1px solid var(--hud-line);border-radius:4px;padding:16px 18px;max-width:380px;font:13px/1.75 var(--f-mono);backdrop-filter:blur(4px)}
+.flyhelp .box b{font:700 19px/1.2 var(--f-display);letter-spacing:.05em;text-transform:uppercase;display:block;margin-bottom:8px}
+.flyhelp kbd{display:inline-block;min-width:24px;text-align:center;padding:0 5px;border:1px solid var(--hud-line);border-radius:3px;margin-right:6px;background:rgba(255,255,255,.08);font:inherit}
+.chip.go{background:var(--red);border-color:var(--red);color:#fff}
+.chip.fly{font-weight:400;max-width:min(520px,70%)}
+.touchui{position:absolute;left:0;right:0;bottom:0;height:0}
+.joy{position:absolute;left:max(18px,env(safe-area-inset-left,0px));bottom:62px;width:124px;height:124px;border-radius:50%;background:rgba(10,14,16,.42);border:1px solid var(--hud-line);touch-action:none}
+.knob{position:absolute;left:37px;top:37px;width:50px;height:50px;border-radius:50%;background:rgba(255,255,255,.4);pointer-events:none}
+.updown{position:absolute;right:max(18px,env(safe-area-inset-right,0px));bottom:62px;display:grid;gap:10px}
+.updown button{width:58px;height:58px;border-radius:50%;border:1px solid var(--hud-line);background:rgba(10,14,16,.42);color:#fff;font:700 20px/1 var(--f-mono);touch-action:none}
+.texrow{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+label.btn{display:inline-block}
+.btn.primary{background:var(--red);border-color:var(--red);color:#fff}
+.where{font-size:12.5px;color:var(--muted)}
+.where summary{cursor:pointer;color:var(--fg)}
+.where code{font:11.5px/1.5 var(--f-mono);word-break:break-all;color:var(--fg)}
+.where ul{margin:6px 0 0;padding-left:18px;display:grid;gap:4px}
+
 /* ---- Text ---- */
 .text{display:grid;gap:36px;padding-top:30px}
 .block{display:grid;gap:12px;scroll-margin-top:60px}
@@ -162,7 +187,7 @@ footer{margin-top:44px;padding-top:14px;border-top:1px solid var(--line);font-si
   <div>
     <div class="eyebrow">3D-Bauplan · Minecraft Java 1.20.1 · Forge</div>
     <h1>Projekt <span>Hive</span><em>unter dem Tempel der Athena</em></h1>
-    <div class="meta"><span>Tempel als getarnter Eingang</span><span>Atrium mit 5 Ebenen · <b>80 Räume</b></span><span>nur Vanilla-Blöcke aus 1.20.1</span></div>
+    <div class="meta"><span>Tempel als getarnter Eingang</span><span>Atrium mit 5 Ebenen · <b>80 Räume</b></span><span>Ego-Modus: mit WASD durchfliegen</span><span>echte Texturen aus deinem Spiel ladbar</span></div>
   </div>
 </header>
 
@@ -176,17 +201,26 @@ footer{margin-top:44px;padding-top:14px;border-top:1px solid var(--line);font-si
 
 <section class="app" id="modell">
   <div class="viewer" id="viewer">
-    <canvas id="cv" aria-label="3D-Modell, mit Maus oder Finger drehbar"></canvas>
+    <canvas id="cv" tabindex="0" aria-label="3D-Modell, mit Maus oder Finger drehbar"></canvas>
+    <div class="crosshair" id="crosshair" hidden></div>
     <div class="hud top">
       <div class="chip title">Projekt Hive</div>
-      <div class="chip hint">Ziehen: drehen · Rechte Maustaste oder 2 Finger: schieben · Mausrad oder Pinch: zoomen · Tippen: Block-Info</div>
+      <div class="chip hint">Ziehen: drehen · Rechte Maustaste oder 2 Finger: schieben · Mausrad oder Pinch: zoomen · Tippen: Block-Info · Ego-Modus unten rechts</div>
+      <div class="chip fly" id="flyInfo" hidden></div>
     </div>
     <div class="hud bottom">
       <div class="chip" id="hudStat">…</div>
       <div class="hudbtns">
         <button class="chip" type="button" id="btnTop">Draufsicht</button>
         <button class="chip" type="button" id="btnReset">Kamera zurück</button>
+        <button class="chip" type="button" id="btnFull" hidden>Vollbild</button>
+        <button class="chip go" type="button" id="btnFly">Ego-Modus (WASD)</button>
       </div>
+    </div>
+    <div class="flyhelp" id="flyHelp" hidden><div class="box" id="flyHelpBox"></div></div>
+    <div class="touchui" id="touchUI" hidden>
+      <div class="joy" id="joy"><div class="knob" id="knob"></div></div>
+      <div class="updown"><button type="button" id="flyUp" aria-label="hoch fliegen">▲</button><button type="button" id="flyDown" aria-label="runter fliegen">▼</button></div>
     </div>
     <div class="loading" id="loading">Baue Tempel und Labor Block für Block …</div>
   </div>
@@ -209,7 +243,21 @@ footer{margin-top:44px;padding-top:14px;border-top:1px solid var(--line);font-si
     </div>
 
     <div class="pblock">
-      <h3>Räume anfliegen</h3>
+      <h3>Echte Minecraft-Texturen</h3>
+      <p class="small">Lade deine eigene Minecraft-Datei. Dann sieht jeder Block 1:1 aus wie im Spiel. Die Datei bleibt auf deinem Gerät und wird nirgends hochgeladen.</p>
+      <div class="texrow"><label class="btn primary" for="texFile">Datei wählen (.jar oder .zip)</label><button class="btn" type="button" id="texReset" hidden>Zurücksetzen</button></div>
+      <input type="file" id="texFile" accept=".jar,.zip,application/zip,application/java-archive" hidden>
+      <p class="small" id="texStatus">Aktiv: nachgezeichnete Texturen. Du kannst die Datei auch direkt ins 3D-Bild ziehen.</p>
+      <details class="where"><summary>Wo finde ich die Datei?</summary><ul>
+        <li>Minecraft Launcher, Windows: <code>%appdata%\.minecraft\versions\1.20.1\1.20.1.jar</code> (im Dateifenster oben in die Adresszeile einfügen)</li>
+        <li>Mac: <code>~/Library/Application Support/minecraft/versions/1.20.1/1.20.1.jar</code></li>
+        <li>CurseForge-App: <code>curseforge\minecraft\Install\versions\1.20.1\1.20.1.jar</code></li>
+        <li>Oder ein Ressourcenpaket als .zip, z. B. von CurseForge oder Modrinth. Danach geladen überschreibt es die Spieltexturen, 32× und 64× bleiben scharf.</li>
+      </ul></details>
+    </div>
+
+    <div class="pblock">
+      <h3 id="roomTitle">Räume anfliegen</h3>
       <select id="lvSel" aria-label="Ebene wählen"></select>
       <div class="roomlist" id="roomList"></div>
     </div>
@@ -258,6 +306,8 @@ footer{margin-top:44px;padding-top:14px;border-top:1px solid var(--line);font-si
     <div class="eyebrow">Bau-Tipps</div>
     <h2>So funktionieren die Details</h2>
     <div class="tricks">
+      <div class="card"><h3>Ego-Modus</h3><p>Wie im Creative-Flug, nur ohne Kollision: du fliegst durch jede Wand.</p><ul><li><b>WASD</b> fliegen, <b>Leertaste</b> hoch, <b>Shift</b> runter</li><li><b>Maus</b> umsehen, <b>Mausrad</b> Tempo, <b>R</b> halten für schnell</li><li><b>Klick</b> auf einen Block zeigt Name und Anzahl, <b>Esc</b> gibt die Maus frei</li><li>Am Handy: linker Stick fliegen, wischen umsehen, ▲▼ hoch und runter</li><li>Die Knöpfe B1 bis B5, Tempel und die Raumliste teleportieren dich im Ego-Modus direkt hin.</li></ul></div>
+      <div class="card"><h3>Echte Texturen</h3><p>Die Original-Texturen von Mojang darf man nicht einfach auf eine Webseite stellen. Darum lädt die Seite sie aus deiner eigenen Spieldatei, nur in deinem Browser. Ein Ressourcenpaket von CurseForge geht genauso. Mod-Dateien enthalten Blöcke, die im Modell nicht vorkommen, die werden ignoriert.</p></div>
       <div class="card"><h3>Reihenfolge</h3><ol><li>Bauplatz markieren, Nordwest-Ecke notieren.</li><li>Von oben nach unten graben: erst das Atrium als runden Schacht, dann Ebene für Ebene.</li><li>Pro Ebene erst Boden, Außenwand und Decke, dann Innenwände, dann Möbel.</li><li>Tempel und Statue ganz zum Schluss.</li></ol></div>
       <div class="card"><h3>Kreise bauen</h3><p>Im Schicht-Modus bei B1 siehst du jeden Block des Kreises. Atrium: alle Felder bis Abstand 8,5 zur Mitte. Balkon bis 12, Glaswand bis 13. Es lohnt sich, den Kreis einmal mit Wolle auf dem Boden vorzuzeichnen.</p></div>
       <div class="card"><h3>Wassersäulen</h3><p>Wasser oben einfüllen, die Säule mit Seetang vollsetzen und den Seetang abbauen. Dann ist jeder Block eine Quelle. Erst danach Seelensand bzw. Magmablock unten einsetzen.</p></div>
@@ -1031,10 +1081,26 @@ function init3D(){const cv=$('cv');renderer=new THREE.WebGLRenderer({canvas:cv,a
   selBox=new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.BoxGeometry(1.04,1.04,1.04)),new THREE.LineBasicMaterial({color:0xff3344}));selBox.visible=false;scene.add(selBox);
   const resize=()=>{const r=$('viewer').getBoundingClientRect();renderer.setSize(r.width,r.height,false);cam.aspect=r.width/Math.max(1,r.height);cam.updateProjectionMatrix();dirty=true};
   new ResizeObserver(resize).observe($('viewer'));resize();
-  let down=null;cv.addEventListener('pointerdown',e=>{down=[e.clientX,e.clientY];const h=document.querySelector('.chip.hint');if(h)h.hidden=true});
-  cv.addEventListener('pointerup',e=>{if(down&&Math.hypot(e.clientX-down[0],e.clientY-down[1])<6)pickAt(e);down=null});
-  (function loop(now){requestAnimationFrame(loop);if(anim){const k=anim.d?Math.min(1,(now-anim.t0)/anim.d):1,e=k<.5?2*k*k:1-Math.pow(-2*k+2,2)/2;ctl.target.lerpVectors(anim.T0,anim.T1,e);cam.position.lerpVectors(anim.P0,anim.P1,e);if(k>=1)anim=null;dirty=true}
-    if(ctl.update())dirty=true;if(dirty){renderer.render(scene,cam);dirty=false}})(performance.now())}
+  fly.pos=new THREE.Vector3();fly.vel=new THREE.Vector3();
+  let down=null;
+  cv.addEventListener('pointerdown',e=>{const h=document.querySelector('.chip.hint');if(h)h.hidden=true;
+    if(fly.on){fly.helpDismissed=true;updFlyUI();if(e.pointerType==='mouse'&&e.button===0){if(fly.locked){pickCenter();return}if(!fly.noLock){reqLock();return}}
+      try{cv.setPointerCapture(e.pointerId)}catch(err){}}
+    down={x:e.clientX,y:e.clientY,lx:e.clientX,ly:e.clientY,id:e.pointerId,t:e.pointerType,moved:false}});
+  cv.addEventListener('pointermove',e=>{if(fly.on&&fly.locked&&e.pointerType==='mouse'){look(e.movementX||0,e.movementY||0,.0022);return}
+    if(!down||e.pointerId!==down.id)return;if(Math.hypot(e.clientX-down.x,e.clientY-down.y)>6)down.moved=true;
+    if(fly.on){look(e.clientX-down.lx,e.clientY-down.ly,down.t==='touch'?.006:.004)}down.lx=e.clientX;down.ly=e.clientY});
+  const up=e=>{if(down&&e.pointerId===down.id&&!down.moved&&e.type==='pointerup')pickAt(e);down=null};
+  cv.addEventListener('pointerup',up);cv.addEventListener('pointercancel',up);
+  cv.addEventListener('wheel',e=>{if(!fly.on)return;e.preventDefault();fly.speed=Math.max(1,Math.min(80,fly.speed*(e.deltaY<0?1.2:1/1.2)));updFlyInfo()},{passive:false});
+  document.addEventListener('pointerlockchange',()=>{fly.locked=document.pointerLockElement===cv;if(!fly.locked)fly.keys.clear();updFlyUI()});
+  document.addEventListener('pointerlockerror',()=>{fly.noLock=true;updFlyUI()});
+  let lastT=0,frame=0;
+  (function loop(now){requestAnimationFrame(loop);const dt=lastT?Math.min(.1,(now-lastT)/1000):0;lastT=now;frame++;
+    if(fly.on){if(stepFly(dt))dirty=true;if(frame%6===0)updFlyInfo()}
+    else{if(anim){const k=anim.d?Math.min(1,(now-anim.t0)/anim.d):1,e=k<.5?2*k*k:1-Math.pow(-2*k+2,2)/2;ctl.target.lerpVectors(anim.T0,anim.T1,e);cam.position.lerpVectors(anim.P0,anim.P1,e);if(k>=1)anim=null;dirty=true}
+      if(ctl.update())dirty=true}
+    if(dirty){renderer.render(scene,cam);dirty=false}})(performance.now())}
 function camTo(tg,off,instant){const T1=new THREE.Vector3(...tg),P1=T1.clone().add(new THREE.Vector3(...off));if(instant||reduce){ctl.target.copy(T1);cam.position.copy(P1);anim=null;dirty=true;return}anim={t0:performance.now(),d:800,T0:ctl.target.clone(),P0:cam.position.clone(),T1,P1}}
 const clampI=(v,a,b)=>v<a?a:v>b?b:v;
 function rebuild(){if(!world)return;const t0=performance.now(),W=world,vf=visFns(W,st),CH=16;
@@ -1053,11 +1119,13 @@ let rbQ=false;function queueRebuild(){if(rbQ)return;rbQ=true;requestAnimationFra
 let sel=null;
 function entAt(x,y,z){return world.entMap.get(rk(x,z)*256+(y+20))||null}
 function pickAt(ev){if(!world)return;const r=$('cv').getBoundingClientRect(),nd=new THREE.Vector2((ev.clientX-r.left)/r.width*2-1,-(ev.clientY-r.top)/r.height*2+1);
-  const rc=new THREE.Raycaster();rc.setFromCamera(nd,cam);const o=rc.ray.origin,d=rc.ray.direction,{at,yMax,zMax}=visFns(world,st);
+  const rc=new THREE.Raycaster();rc.setFromCamera(nd,cam);select(pickRay(rc.ray.origin,rc.ray.direction))}
+function pickCenter(){const d=new THREE.Vector3();cam.getWorldDirection(d);select(pickRay(cam.position,d))}
+function pickRay(o,d){const {at,yMax,zMax}=visFns(world,st);
   let x=Math.floor(o.x),y=Math.floor(o.y),z=Math.floor(o.z);const sx=Math.sign(d.x),sy=Math.sign(d.y),sz=Math.sign(d.z),td=v=>v===0?Infinity:Math.abs(1/v),tDx=td(d.x),tDy=td(d.y),tDz=td(d.z);
   const first=(p,dd,c)=>dd>0?(c+1-p)/dd:dd<0?(p-c)/-dd:Infinity;let tx=first(o.x,d.x,x),ty=first(o.y,d.y,y),tz=first(o.z,d.z,z);
-  for(let i=0;i<1600;i++){const id=at(x,y,z),e=(y<=yMax&&z<=zMax)?entAt(x,y,z):null;if(id||e){select({x,y,z,id:e&&!id?0:id,ent:e});return}
-    if(tx<ty&&tx<tz){x+=sx;tx+=tDx}else if(ty<tz){y+=sy;ty+=tDy}else{z+=sz;tz+=tDz}}select(null)}
+  for(let i=0;i<1600;i++){const id=at(x,y,z),e=(y<=yMax&&z<=zMax)?entAt(x,y,z):null;if(id||e)return{x,y,z,id:e&&!id?0:id,ent:e};
+    if(tx<ty&&tx<tz){x+=sx;tx+=tDx}else if(ty<tz){y+=sy;ty+=tDy}else{z+=sz;tz+=tDz}}return null}
 function select(s){sel=s;if(!s){selBox.visible=false;dirty=true;$('info').innerHTML='<p class="small">Hier ist kein Block. Tippe auf einen sichtbaren Block.</p>';return}
   selBox.position.set(s.x+.5,s.y+.5,s.z+.5);selBox.visible=true;dirty=true;
   const b=s.id?BL[s.id]:null,ck=b?b.ck:'e_'+s.ent.type,M=MAT[ck],natural=b&&(b.cat===TER||b.cat===NAT),g=groupOf(s.x,s.y,s.z),tot=counts.tot[ck]||0,ing=(counts.grp[g]||{})[ck]||0,room=roomAt(s.x,s.y,s.z),ti=TILE[M.tile];
@@ -1087,7 +1155,8 @@ function syncSliders(){const y=$('ycut'),z=$('zcut');y.min=YR[0];y.max=YR[1];y.v
   [...$('presets').children].forEach(b=>b.setAttribute('aria-pressed',b.dataset.id===st.preset))}
 function applyPreset(p,instant){st.preset=p.id;st.terrain=!!p.terrain;st.yCut=p.y;st.zCut=p.z;st.layer=false;syncSliders();queueRebuild();camTo(p.tg,p.off,instant);if(p.lv){$('lvSel').value=p.lv;renderRooms()}}
 $('presets').innerHTML=PRESETS.map(p=>`<button type="button" data-id="${p.id}"${p.g?' class="g"':''}>${p.label}</button>`).join('');
-$('presets').addEventListener('click',e=>{const b=e.target.closest('button');if(b)applyPreset(PRESETS.find(p=>p.id===b.dataset.id))});
+$('presets').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;const p=PRESETS.find(p=>p.id===b.dataset.id);
+  if(fly.on){if(p.id==='bau'){st.terrain=!st.terrain;syncSliders();queueRebuild();return}setPose(flyPoseFor(p.id));return}applyPreset(p)});
 const onSlide=()=>{st.yCut=+$('ycut').value;st.zCut=+$('zcut').value;st.preset='';syncSliders();queueRebuild()};
 $('ycut').addEventListener('input',onSlide);$('zcut').addEventListener('input',onSlide);
 const step=(id,d)=>{const el=$(id);el.value=Math.max(+el.min,Math.min(+el.max,+el.value+d));onSlide()};
@@ -1101,6 +1170,7 @@ $('lvSel').addEventListener('change',renderRooms);
 function renderRooms(){if(!world)return;const lv=LEVELS.find(l=>l.key===$('lvSel').value);
   $('roomList').innerHTML=lv.list.map((r,i)=>`<button type="button" data-i="${i}">${r.name}<small>${QN[r.q]} · ${r.letter}</small></button>`).join('')}
 $('roomList').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;const lv=LEVELS.find(l=>l.key===$('lvSel').value),r=lv.list[+b.dataset.i];
+  if(fly.on){setPose([r.cx+.5,lv.L+2.62,r.cz+.5,[0,-Math.PI/2,Math.PI,Math.PI/2][r.back],-.1]);return}
   st.preset='';st.terrain=true;st.layer=false;st.yCut=lv.L+lv.H;st.zCut=ZR[1];syncSliders();queueRebuild();camTo([r.cx+.5,lv.L+1,r.cz+.5],[0,28,19])});
 $('grp').innerHTML='<option value="all">Ganzer Bau</option>'+Object.entries(GROUPS).filter(([k])=>k!=='rest').map(([k,v])=>`<option value="${k}">${v}</option>`).join('');
 
@@ -1119,8 +1189,113 @@ levelDocs();
   const upd=()=>{const all=el.querySelectorAll('input'),done=[...all].filter(i=>i.checked).length;prog.innerHTML=`· <b>${done}</b> von ${all.length}`};
   el.onchange=e=>{saved[e.target.id]=e.target.checked;try{localStorage.setItem(key,JSON.stringify(saved))}catch(err){}upd()};upd()})();
 
+// ================= Ego-Modus =================
+const fly={on:false,yaw:0,pitch:0,pos:null,vel:null,speed:10,keys:new Set(),joy:{x:0,y:0},locked:false,noLock:false,helpDismissed:false,lookDirty:false};
+const coarse=matchMedia('(pointer: coarse)').matches;
+const FLYPOSE={gesamt:[34.5,65.62,88,0,.06],statue:[34.5,65.62,84,0,.14],tempel:[34.5,65.62,59.5,0,.08],atrium:[C+10.5,38.62,C+.5,Math.PI/2,-.12],treppe:[34.5,46.62,65.5,Math.PI,-.25]};
+function flyPoseFor(id){if(FLYPOSE[id])return FLYPOSE[id];const lv=LEVELS.find(l=>l.key===id);if(!lv)return FLYPOSE.gesamt;return lv.kind==='hall'?[C+.5,lv.L+2.62,C-12.5,Math.PI,-.06]:[C+.5,lv.L+2.62,C-11.5,Math.PI,-.1]}
+function setPose(p){fly.pos.set(p[0],p[1],p[2]);fly.yaw=p[3];fly.pitch=p[4]||0;fly.vel.set(0,0,0);fly.lookDirty=true;stepFly(0);updFlyInfo();dirty=true}
+function look(dx,dy,s){fly.yaw-=dx*s;fly.pitch=Math.max(-1.55,Math.min(1.55,fly.pitch-dy*s));fly.lookDirty=true}
+function reqLock(){const cv=$('cv');try{const r=cv.requestPointerLock();if(r&&r.catch)r.catch(()=>{fly.noLock=true;updFlyUI()})}catch(err){fly.noLock=true;updFlyUI()}}
+function stepFly(dt){const k=fly.keys;let f=0,s=0,u=0;
+  if(k.has('KeyW')||k.has('ArrowUp'))f+=1;if(k.has('KeyS')||k.has('ArrowDown'))f-=1;if(k.has('KeyD')||k.has('ArrowRight'))s+=1;if(k.has('KeyA')||k.has('ArrowLeft'))s-=1;
+  if(k.has('Space'))u+=1;if(k.has('ShiftLeft')||k.has('ShiftRight'))u-=1;f-=fly.joy.y;s+=fly.joy.x;
+  const l=Math.hypot(f,s);if(l>1){f/=l;s/=l}const sp=fly.speed*(k.has('KeyR')?3:1),sy=Math.sin(fly.yaw),cy=Math.cos(fly.yaw);
+  const tx=(-sy*f+cy*s)*sp,tz=(-cy*f-sy*s)*sp,ty=u*sp,a=Math.min(1,dt*9),v=fly.vel;
+  v.x+=(tx-v.x)*a;v.y+=(ty-v.y)*a;v.z+=(tz-v.z)*a;fly.pos.addScaledVector(v,dt);
+  cam.position.copy(fly.pos);cam.rotation.set(fly.pitch,fly.yaw,0,'YXZ');const moved=v.lengthSq()>1e-5||fly.lookDirty;fly.lookDirty=false;return moved}
+function facing(){const t=((fly.yaw%(2*Math.PI))+2*Math.PI)%(2*Math.PI);return['Norden','Westen','Süden','Osten'][Math.round(t/(Math.PI/2))%4]}
+function updFlyInfo(){if(!fly.on||!world)return;const p=fly.pos,d=new THREE.Vector3();cam.getWorldDirection(d);const h=pickRay(p,d);let t='';
+  if(h){const b=h.id?BL[h.id]:null,M=MAT[b?b.ck:'e_'+h.ent.type],room=roomAt(h.x,h.y,h.z);t=` · Blick: <b>${M.n}</b> (${h.x} ${h.y} ${h.z})${room?' · '+room.name:''}`}
+  $('flyInfo').innerHTML=`XYZ ${p.x.toFixed(1)} / ${p.y.toFixed(1)} / ${p.z.toFixed(1)} · Richtung ${facing()} · Tempo ${Math.round(fly.speed)}${t}`}
+function updFlyUI(){const on=fly.on;$('crosshair').hidden=!on;$('flyInfo').hidden=!on;$('btnTop').hidden=on;$('btnReset').hidden=on;
+  $('btnFull').hidden=!on||!document.fullscreenEnabled;$('btnFly').textContent=on?'Ego-Modus beenden':'Ego-Modus (WASD)';$('touchUI').hidden=!(on&&coarse);
+  $('roomTitle').textContent=on?'Räume (Teleport)':'Räume anfliegen';const h=document.querySelector('.chip.hint');if(h&&on)h.hidden=true;
+  const showHelp=on&&!fly.locked&&!fly.helpDismissed;$('flyHelp').hidden=!showHelp;
+  if(showHelp)$('flyHelpBox').innerHTML=coarse?'<b>Ego-Modus</b>Linker Stick: fliegen<br>Wischen: umsehen<br>▲ ▼: hoch und runter<br>Tippen: Block-Info<br>Raumliste und Ebenen-Knöpfe teleportieren dich.':
+    `<b>${fly.noLock?'Ego-Modus':'Klick ins Bild zum Steuern'}</b><kbd>W A S D</kbd>fliegen<br><kbd>Leertaste</kbd>hoch · <kbd>Shift</kbd>runter<br><kbd>Maus</kbd>${fly.noLock?'gedrückt halten und ziehen: umsehen':'umsehen'}<br><kbd>Mausrad</kbd>Tempo · <kbd>R</kbd>halten: schneller<br><kbd>Klick</kbd>Block-Info · <kbd>Esc</kbd>Maus freigeben`}
+function enterFly(){if(!world)return;fly.on=true;ctl.enabled=false;anim=null;st.layer=false;st.yCut=YR[1];st.zCut=ZR[1];st.preset='';syncSliders();queueRebuild();
+  cam.fov=70;cam.near=.05;cam.updateProjectionMatrix();setPose(FLYPOSE.gesamt);fly.helpDismissed=false;updFlyUI();try{$('cv').focus({preventScroll:true})}catch(e){}}
+function exitFly(){fly.on=false;fly.keys.clear();fly.joy.x=fly.joy.y=0;if(document.pointerLockElement)document.exitPointerLock();
+  const d=new THREE.Vector3();cam.getWorldDirection(d);cam.fov=40;cam.near=.1;cam.updateProjectionMatrix();ctl.target.copy(cam.position).addScaledVector(d,25);ctl.enabled=true;updFlyUI();updateHud();dirty=true}
+$('btnFly').onclick=()=>fly.on?exitFly():enterFly();
+$('btnFull').onclick=()=>{const v=$('viewer');try{if(document.fullscreenElement)document.exitFullscreen();else{const r=v.requestFullscreen();if(r&&r.catch)r.catch(()=>{})}}catch(e){}};
+const FLYKEYS=new Set(['KeyW','KeyA','KeyS','KeyD','KeyR','Space','ShiftLeft','ShiftRight','ArrowUp','ArrowDown','ArrowLeft','ArrowRight']);
+window.addEventListener('keydown',e=>{if(!fly.on)return;const tg=e.target;if(tg&&/^(INPUT|SELECT|TEXTAREA)$/.test(tg.tagName))return;if(FLYKEYS.has(e.code)){e.preventDefault();fly.keys.add(e.code);fly.helpDismissed=true;if(!$('flyHelp').hidden)updFlyUI()}});
+window.addEventListener('keyup',e=>{fly.keys.delete(e.code)});
+window.addEventListener('blur',()=>fly.keys.clear());
+(function(){const joy=$('joy'),knob=$('knob');let jid=null;
+  const mv=e=>{const r=joy.getBoundingClientRect(),dx=e.clientX-(r.left+r.width/2),dy=e.clientY-(r.top+r.height/2),R=r.width/2,l=Math.hypot(dx,dy),k=l>R?R/l:1;fly.joy.x=dx*k/R;fly.joy.y=dy*k/R;knob.style.transform=`translate(${dx*k}px,${dy*k}px)`};
+  joy.addEventListener('pointerdown',e=>{jid=e.pointerId;try{joy.setPointerCapture(e.pointerId)}catch(err){}mv(e);fly.helpDismissed=true;updFlyUI()});
+  joy.addEventListener('pointermove',e=>{if(e.pointerId===jid)mv(e)});
+  const end=e=>{if(e.pointerId!==jid)return;jid=null;fly.joy.x=fly.joy.y=0;knob.style.transform=''};joy.addEventListener('pointerup',end);joy.addEventListener('pointercancel',end);
+  for(const [id,code] of [['flyUp','Space'],['flyDown','ShiftLeft']]){const b=$(id),off=()=>fly.keys.delete(code);b.addEventListener('pointerdown',e=>{e.preventDefault();fly.keys.add(code)});b.addEventListener('pointerup',off);b.addEventListener('pointercancel',off);b.addEventListener('pointerleave',off)}})();
+
+// ================= Echte Texturen aus der eigenen Spieldatei =================
+const MC={grass_top:{p:['grass_block_top'],tint:'#91BD59'},grass_side:{p:['grass_block_side'],ov:['grass_block_side_overlay'],ovTint:'#91BD59'},dirt:'dirt',stone:'stone',deepslate:'deepslate',deepslate_top:'deepslate_top',
+ coal_ore:'coal_ore',iron_ore:'iron_ore',copper_ore:'copper_ore',gold_ore_d:'deepslate_gold_ore',diamond_ore_d:'deepslate_diamond_ore',redstone_ore_d:'deepslate_redstone_ore',lapis_ore_d:'deepslate_lapis_ore',
+ gravel:'gravel',andesite:'andesite',granite:'granite',diorite:'diorite',tuff:'tuff',white_concrete:'white_concrete',light_gray_concrete:'light_gray_concrete',black_concrete:'black_concrete',red_concrete:'red_concrete',yellow_concrete:'yellow_concrete',cyan_concrete:'cyan_concrete',
+ smooth_stone:'smooth_stone',slab_side:'smooth_stone_slab_side',polished_andesite:'polished_andesite',polished_deepslate:'polished_deepslate',deepslate_tiles:'deepslate_tiles',deepslate_bricks:'deepslate_bricks',stone_bricks:'stone_bricks',
+ glass:'glass',white_glass:'white_stained_glass',red_glass:'red_stained_glass',iron_block:'iron_block',iron_bars:'iron_bars',iron_door_b:'iron_door_bottom',iron_door_t:'iron_door_top',iron_trapdoor:'iron_trapdoor',chain:'chain',
+ sea_lantern:'sea_lantern',redstone_lamp:'redstone_lamp_on',barrel_side:'barrel_side',barrel_top:'barrel_top',chiseled_bookshelf:'chiseled_bookshelf_occupied',
+ oak_planks:'oak_planks',spruce_planks:'spruce_planks',dark_oak_planks:'dark_oak_planks',oak_log:'oak_log',oak_log_top:'oak_log_top',spruce_log:'spruce_log',spruce_log_top:'spruce_log_top',
+ oak_leaves:{p:['oak_leaves'],tint:'#77AB2F'},spruce_leaves:{p:['spruce_leaves'],tint:'#619961'},azalea_leaves:'azalea_leaves',flowering_azalea:'flowering_azalea_leaves',
+ water:{p:['water_still'],tint:'#3F76E4',alpha:175},soul_sand:'soul_sand',magma:'magma',rail_ew:{p:['rail'],rot:1},powered_rail_ew:{p:['powered_rail_on'],rot:1},
+ packed_ice:'packed_ice',brewing_stand:'brewing_stand',cauldron_side:'cauldron_side',furnace_side:'furnace_side',furnace_front:'furnace_front',blast_front:'blast_furnace_front_on',blast_top:'blast_furnace_top',smoker_front:'smoker_front_on',
+ dispenser_front:'dispenser_front',observer_front:'observer_front',observer_side:'observer_side',observer_top:'observer_top',waxed_cut_copper:'cut_copper',copper:'copper_block',
+ campfire_log:'campfire_log',fire:'campfire_fire',hay:'hay_block_side',dirt_path:'dirt_path_top',dirt_path_side:'dirt_path_side',red_wool:'red_wool',white_wool:'white_wool',gray_wool:'light_gray_wool',redstone_block:'redstone_block',
+ crafting_top:'crafting_table_top',crafting_side:'crafting_table_front',smithing_top:'smithing_table_top',smithing_side:'smithing_table_side',target_side:'target_side',
+ flower_pot:'flower_pot',fern:{p:['fern'],tint:'#91BD59'},wheat:'wheat_stage7',farmland:'farmland_moist',sniffer_egg:'sniffer_egg_not_cracked_north',bone_side:'bone_block_side',bone_top:'bone_block_top',lectern_top:'lectern_top',
+ smooth_quartz:'quartz_block_bottom',quartz_pillar:'quartz_pillar',quartz_pillar_top:'quartz_pillar_top',chiseled_quartz:'chiseled_quartz_block',quartz_bricks:'quartz_bricks',polished_diorite:'polished_diorite',calcite:'calcite',
+ gold_block:'gold_block',raw_gold_block:'raw_gold_block',blue_terracotta:'blue_terracotta',polished_granite:'polished_granite',
+ short_grass:{p:['grass','short_grass'],tint:'#91BD59'},poppy:'poppy',dandelion:'dandelion',cornflower:'cornflower',oxeye_daisy:'oxeye_daisy',torchflower:'torchflower',pink_petals:'pink_petals'};
+const specOf=v=>typeof v==='string'?{p:[v]}:v;
+const loadedTex=new Map();
+function texStatus(t){$('texStatus').textContent=t}
+async function unzipPick(buf,want){const dv=new DataView(buf),u8=new Uint8Array(buf),out=new Map(),td=new TextDecoder();let e=-1;
+  for(let i=buf.byteLength-22;i>=Math.max(0,buf.byteLength-65600);i--)if(dv.getUint32(i,true)===0x06054b50){e=i;break}
+  if(e<0)throw new Error('Das ist keine .jar- oder .zip-Datei.');
+  let n=dv.getUint16(e+10,true),off=dv.getUint32(e+16,true);
+  for(let k=0;k<n;k++){if(dv.getUint32(off,true)!==0x02014b50)break;const method=dv.getUint16(off+10,true),csize=dv.getUint32(off+20,true),nl=dv.getUint16(off+28,true),el=dv.getUint16(off+30,true),cl=dv.getUint16(off+32,true),lho=dv.getUint32(off+42,true);
+    const name=td.decode(u8.subarray(off+46,off+46+nl));off+=46+nl+el+cl;const key=want(name);if(!key)continue;
+    const start=lho+30+dv.getUint16(lho+26,true)+dv.getUint16(lho+28,true),data=u8.slice(start,start+csize);
+    if(method===0)out.set(key,new Blob([data],{type:'image/png'}));
+    else if(method===8){const st2=new Blob([data]).stream().pipeThrough(new DecompressionStream('deflate-raw'));out.set(key,await new Response(st2).blob())}}
+  return out}
+function tintCtx(ctx,res,hex,alpha){const im=ctx.getImageData(0,0,res,res),d=im.data,r=parseInt(hex.slice(1,3),16)/255,g=parseInt(hex.slice(3,5),16)/255,b=parseInt(hex.slice(5,7),16)/255;
+  for(let i=0;i<d.length;i+=4){d[i]*=r;d[i+1]*=g;d[i+2]*=b;if(alpha&&d[i+3])d[i+3]=Math.min(d[i+3],alpha)}ctx.putImageData(im,0,0)}
+function setAtlas(cv,save){tex.image=cv;tex.needsUpdate=true;dirty=true;let url='';try{url=cv.toDataURL('image/png')}catch(e){}
+  if(url)document.documentElement.style.setProperty('--atlas',`url(${url})`);
+  if(save!==undefined)try{if(save&&url)localStorage.setItem('hive-atlas-v1',url);else localStorage.removeItem('hive-atlas-v1')}catch(e){}
+  if(sel)select(sel);renderMats()}
+function applyLoaded(){let res=16;for(const i of loadedTex.values())res=Math.max(res,Math.min(64,i.width));
+  const cv=document.createElement('canvas');cv.width=cv.height=res*16;const c=cv.getContext('2d');c.imageSmoothingEnabled=false;c.drawImage(cvA,0,0,res*16,res*16);let used=0;
+  for(const k in MC){const s=specOf(MC[k]),img=s.p.map(n=>loadedTex.get(n)).find(Boolean),ti=TILE[k];if(!img||ti==null)continue;
+    const tc=document.createElement('canvas');tc.width=tc.height=res;const t=tc.getContext('2d');t.imageSmoothingEnabled=false;const w=img.width;
+    if(s.rot){t.translate(res/2,res/2);t.rotate(Math.PI/2);t.translate(-res/2,-res/2)}t.drawImage(img,0,0,w,w,0,0,res,res);t.setTransform(1,0,0,1,0,0);
+    if(s.tint)tintCtx(t,res,s.tint,s.alpha);
+    if(s.ov){const o=s.ov.map(n=>loadedTex.get(n)).find(Boolean);if(o){const oc=document.createElement('canvas');oc.width=oc.height=res;const ox=oc.getContext('2d');ox.imageSmoothingEnabled=false;ox.drawImage(o,0,0,o.width,o.width,0,0,res,res);tintCtx(ox,res,s.ovTint);t.drawImage(oc,0,0)}}
+    c.clearRect((ti&15)*res,(ti>>4)*res,res,res);c.drawImage(tc,(ti&15)*res,(ti>>4)*res);used++}
+  setAtlas(cv,true);return{used,res}}
+async function loadTexFile(file){if(!file||!tex)return;
+  if(!('DecompressionStream' in window)){texStatus('Dein Browser kann die Datei nicht entpacken. Nimm Chrome, Edge, Firefox oder Safari in einer aktuellen Version.');return}
+  texStatus(`Lese „${file.name}“ …`);
+  try{const need=new Set();for(const k in MC){const s=specOf(MC[k]);s.p.forEach(n=>need.add(n));(s.ov||[]).forEach(n=>need.add(n))}
+    const files=await unzipPick(await file.arrayBuffer(),name=>{const i=name.indexOf('assets/minecraft/textures/block/');if(i<0||!name.endsWith('.png'))return null;const n=name.slice(i+32,-4);return need.has(n)?n:null});
+    if(!files.size){texStatus(`In „${file.name}“ sind keine Minecraft-Blocktexturen. Nimm die 1.20.1.jar aus dem versions-Ordner oder ein Ressourcenpaket.`);return}
+    let got=0;for(const [n,b] of files){try{loadedTex.set(n,await createImageBitmap(b));got++}catch(err){}}
+    const {used,res}=applyLoaded();$('texReset').hidden=false;
+    texStatus(`Aktiv: echte Texturen aus „${file.name}“ (${used} von ${Object.keys(MC).length} Blocktexturen, ${res}×${res}). Ein weiteres Ressourcenpaket kannst du danach drüberladen.`)}
+  catch(err){texStatus('Die Datei konnte nicht gelesen werden: '+err.message)}}
+$('texFile').addEventListener('change',e=>{loadTexFile(e.target.files[0]);e.target.value=''});
+$('texReset').onclick=()=>{loadedTex.clear();setAtlas(cvA,false);$('texReset').hidden=true;texStatus('Aktiv: nachgezeichnete Texturen.')};
+$('viewer').addEventListener('dragover',e=>{e.preventDefault()});
+$('viewer').addEventListener('drop',e=>{e.preventDefault();const f=e.dataTransfer&&e.dataTransfer.files[0];if(f)loadTexFile(f)});
+function restoreAtlas(){let url=null;try{url=localStorage.getItem('hive-atlas-v1')}catch(e){}if(!url)return;const img=new Image();
+  img.onload=()=>{const cv=document.createElement('canvas');cv.width=img.width;cv.height=img.height;const c=cv.getContext('2d');c.drawImage(img,0,0);setAtlas(cv);$('texReset').hidden=false;texStatus('Aktiv: deine echten Texturen vom letzten Mal (in diesem Browser gespeichert).')};img.src=url}
+
 // ================= Start =================
 if(!window.THREE||!THREE.OrbitControls){$('loading').textContent='Das 3D-Modell konnte nicht geladen werden. Prüfe die Internetverbindung und lade die Seite neu.'}
-else{init3D();setTimeout(()=>{try{world=genWorld();counts=countWorld(world);renderMats();renderRooms();applyPreset(PRESETS[0],true);$('loading').hidden=true}
+else{init3D();setTimeout(()=>{try{world=genWorld();counts=countWorld(world);renderMats();renderRooms();applyPreset(PRESETS[0],true);restoreAtlas();$('loading').hidden=true}
   catch(err){$('loading').textContent='Fehler beim Bauen des Modells: '+err.message;console.error(err)}},40)}
 </script>
