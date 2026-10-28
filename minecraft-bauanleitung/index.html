@@ -1,0 +1,681 @@
+<title>Projekt Hive</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Saira+Condensed:wght@500;700&family=IBM+Plex+Sans:wght@400;600&family=JetBrains+Mono:wght@400;600&family=Cinzel:wght@600&display=swap">
+<style>
+/* Layout: Dienstausweis-Kopf, dann zwei Akten (Labor / Tempel) als Tabs; Karten als Block-Raster mit Klick-Info */
+:root{
+  --bg:#eef1f1; --panel:#ffffff; --line:#cfd7d8; --fg:#121718; --muted:#56646a;
+  --red:#b3121f; --red-soft:#f6dfe1; --gold:#86650f; --gold-soft:#f3ead2;
+  --grid-bg:#2a3134;
+  --f-display:"Saira Condensed","Arial Narrow",sans-serif;
+  --f-body:"IBM Plex Sans",system-ui,sans-serif;
+  --f-mono:"JetBrains Mono",ui-monospace,monospace;
+  --f-greek:"Cinzel",Georgia,serif;
+  /* Block-Farben: Texturen-Annäherung, in beiden Themes gleich */
+  --b-wall:#8e9597; --b-floor:#dfe3e3; --b-door:#b9bfc2; --b-glass:#9fd3e0; --b-lift:#2f7fb8; --b-stairs:#7a5c3a;
+  --b-console:#3c4a50; --b-table:#a07a4a; --b-barrel:#7b5530; --b-bed:#f3f3f3; --b-armor:#c8a46a; --b-decon:#7fd1c9;
+  --b-bars:#5d6467; --b-brew:#c9a43a; --b-caul:#3f4447; --b-ice:#8db4f0; --b-book:#9b6b3c; --b-tank:#3fb7a6;
+  --b-machine:#596066; --b-screen:#15191b; --b-queen:#e0263a; --b-laser:#ff5a6a; --b-vault:#c7cdd0; --b-mob:#4f8a3b;
+  --b-core:#e08a3c; --b-platform:#e2c044; --b-rail:#6b5a48; --b-void:#3a4245;
+  --b-step:#cfc9bb; --b-stylo:#e9e5da; --b-col:#f7f4ec; --b-cella:#d8d1c0; --b-cfloor:#bdb6a6; --b-altar:#e2b93b; --b-pot:#b7653a;
+  --b-gold:#e8bf2f; --b-ivory:#efe6cf; --b-robe:#f5f2ea; --b-fold:#d9d3c4; --b-shield:#c8962b; --b-spear:#a9773d; --b-ped:#4b4f55;
+}
+:root{color-scheme:dark;
+  --bg:#0c1012; --panel:#141a1c; --line:#283235; --fg:#e4eaeb; --muted:#8c9a9f;
+  --red:#e2323f; --red-soft:#2a1416; --gold:#d6b04e; --gold-soft:#241f12; --grid-bg:#1b2124;
+}
+@media (prefers-color-scheme: light){:root:not([data-theme="dark"]){color-scheme:light;
+  --bg:#eef1f1; --panel:#ffffff; --line:#cfd7d8; --fg:#121718; --muted:#56646a;
+  --red:#b3121f; --red-soft:#f6dfe1; --gold:#86650f; --gold-soft:#f3ead2; --grid-bg:#2a3134;}}
+:root[data-theme="light"]{color-scheme:light;
+  --bg:#eef1f1; --panel:#ffffff; --line:#cfd7d8; --fg:#121718; --muted:#56646a;
+  --red:#b3121f; --red-soft:#f6dfe1; --gold:#86650f; --gold-soft:#f3ead2; --grid-bg:#2a3134;}
+
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{background:var(--bg);color:var(--fg);font:15px/1.6 var(--f-body);
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:0 64px}
+.wrap{max-width:1040px;margin:0 auto}
+h1,h2,h3{font-family:var(--f-display);text-wrap:balance;line-height:1.1;margin:0}
+h2{font-size:30px;letter-spacing:.01em}
+h3{font-size:21px}
+p{margin:0;max-width:68ch}
+code,.mono{font-family:var(--f-mono);font-size:.86em}
+.eyebrow{font:600 12px/1 var(--f-mono);letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+
+/* Kopf */
+header{display:grid;grid-template-columns:auto 1fr;gap:20px;align-items:center;padding-block:32px 22px;border-bottom:1px solid var(--line)}
+.logo{width:72px;height:72px}
+.logo path{stroke:var(--bg);stroke-width:1.5}
+header h1{font-size:clamp(38px,7vw,64px);font-weight:700;letter-spacing:.02em;text-transform:uppercase}
+header h1 span{color:var(--red)}
+.meta{display:flex;flex-wrap:wrap;gap:6px 18px;margin-top:8px;font:13px/1.4 var(--f-mono);color:var(--muted)}
+.meta b{color:var(--fg);font-weight:600}
+
+nav{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);display:flex;gap:4px;padding-block:12px;border-bottom:1px solid var(--line)}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--bg)}
+nav a{font:700 17px/1 var(--f-display);letter-spacing:.06em;text-transform:uppercase;color:var(--muted);text-decoration:none;padding:10px 14px;border:1px solid transparent;border-radius:3px}
+nav a:hover{color:var(--fg)}
+nav a[aria-current="page"]{color:var(--fg);border-color:var(--line);background:var(--panel)}
+nav a[aria-current="page"].lab{box-shadow:inset 0 -3px 0 var(--red)}
+nav a[aria-current="page"].greek{box-shadow:inset 0 -3px 0 var(--gold)}
+nav a:focus-visible,button:focus-visible,.cell:focus-visible,input:focus-visible{outline:2px solid var(--red);outline-offset:2px}
+nav .prio{font:600 10px/1 var(--f-mono);letter-spacing:.1em;color:var(--red);margin-left:6px;vertical-align:2px}
+
+section.view{display:grid;gap:40px;padding-top:30px}
+.block{display:grid;gap:14px}
+.lead{font-size:17px;color:var(--fg)}
+.muted{color:var(--muted)}
+
+/* Querschnitt */
+.section-svg{width:100%;max-width:640px;height:auto;display:block}
+.section-svg text{font-family:var(--f-mono);font-size:11px;fill:var(--fg)}
+.section-svg .dim{fill:var(--muted)}
+
+/* Palette */
+.palette{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:10px}
+.pal{display:grid;grid-template-columns:28px 1fr;gap:10px;align-items:start;padding:10px 12px;background:var(--panel);border:1px solid var(--line);border-radius:3px}
+.sw{width:28px;height:28px;border-radius:2px;box-shadow:inset 0 0 0 1px rgba(0,0,0,.25)}
+.pal b{display:block;font-weight:600;font-size:14px;line-height:1.3}
+.pal small{display:block;font:12px/1.4 var(--f-mono);color:var(--muted);word-break:break-word}
+.tag{display:inline-block;font:600 10px/1 var(--f-mono);padding:3px 5px;border-radius:2px;background:var(--red-soft);color:var(--red);margin-left:4px;vertical-align:1px}
+.greek .tag{background:var(--gold-soft);color:var(--gold)}
+
+/* Karten */
+.mapbar{display:flex;flex-wrap:wrap;gap:6px}
+.mapbar button{font:700 15px/1 var(--f-display);letter-spacing:.05em;text-transform:uppercase;padding:9px 12px;background:var(--panel);color:var(--muted);border:1px solid var(--line);border-radius:3px;cursor:pointer}
+.mapbar button[aria-pressed="true"]{color:var(--fg);border-color:var(--red)}
+.greek .mapbar button[aria-pressed="true"]{border-color:var(--gold)}
+.maplayout{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(0,1fr);gap:22px;align-items:start}
+@media (max-width:820px){.maplayout{grid-template-columns:minmax(0,1fr)}}
+.gridbox{overflow-x:auto;background:var(--grid-bg);padding:10px;border-radius:3px}
+.grid{display:grid;gap:1px;width:max-content;margin:0 auto}
+.cell{width:var(--cs,17px);height:var(--cs,17px);border-radius:1px;cursor:pointer;position:relative}
+.cell.empty{background:transparent;cursor:default}
+.cell.hl{outline:2px solid #fff;outline-offset:-1px;z-index:1}
+.axis{display:flex;justify-content:space-between;font:11px/1 var(--f-mono);color:#c4cdd0;margin-top:8px}
+.readout{font:13px/1.5 var(--f-mono);padding:10px 12px;border:1px solid var(--line);background:var(--panel);border-radius:3px;min-height:44px}
+.readout b{color:var(--red)}
+.greek .readout b{color:var(--gold)}
+.legend{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:4px 12px;font-size:13px}
+.legend button{display:flex;gap:8px;align-items:center;background:none;border:0;padding:3px 0;color:var(--fg);font:inherit;text-align:left;cursor:pointer}
+.legend button .sw{width:14px;height:14px;flex:none}
+.legend button[aria-pressed="true"]{font-weight:600}
+.rooms{display:grid;gap:10px;margin:0;padding:0;list-style:none}
+.rooms li{display:grid;gap:2px;padding-left:12px;border-left:2px solid var(--line)}
+.rooms b{font-weight:600}
+.rooms span{color:var(--muted);font-size:14px}
+
+/* Material */
+table{border-collapse:collapse;width:100%;font-size:14px;font-variant-numeric:tabular-nums}
+.tablebox{overflow-x:auto;border:1px solid var(--line);border-radius:3px;background:var(--panel)}
+th,td{padding:8px 12px;text-align:left;border-bottom:1px solid var(--line);white-space:nowrap}
+th{font:600 11px/1 var(--f-mono);letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+td.n{text-align:right;font-family:var(--f-mono)}
+tr:last-child td{border-bottom:0}
+
+/* Tricks */
+.tricks{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px}
+.trick{padding:16px;background:var(--panel);border:1px solid var(--line);border-radius:3px;display:grid;gap:8px;align-content:start}
+.trick ol,.trick ul{margin:0;padding-left:20px;display:grid;gap:4px;font-size:14px}
+.trick p{font-size:14px}
+.warn{border-left:3px solid var(--red);padding:10px 14px;background:var(--red-soft);border-radius:0 3px 3px 0;font-size:14px}
+.greek .warn{border-left-color:var(--gold);background:var(--gold-soft)}
+
+/* Checkliste */
+.checks{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px}
+.checkgroup{display:grid;gap:6px;align-content:start}
+.checkgroup h3{font-size:17px;letter-spacing:.04em;text-transform:uppercase;color:var(--muted)}
+.checkgroup label{display:grid;grid-template-columns:20px 1fr;gap:8px;align-items:start;font-size:14px;cursor:pointer}
+.checkgroup input{width:16px;height:16px;margin:3px 0 0;accent-color:var(--red)}
+.greek .checkgroup input{accent-color:var(--gold)}
+.checkgroup label:has(input:checked) span{color:var(--muted);text-decoration:line-through}
+.progress{font:600 13px/1 var(--f-mono);color:var(--muted)}
+.progress b{color:var(--fg)}
+
+/* Griechisch */
+.greek h2,.greek h3.g{font-family:var(--f-greek);letter-spacing:.04em}
+.greek h2{font-size:28px}
+.steps{margin:0;padding-left:22px;display:grid;gap:8px;max-width:72ch}
+.steps li::marker{font-family:var(--f-mono);color:var(--muted)}
+
+footer{margin-top:48px;padding-top:16px;border-top:1px solid var(--line);font-size:13px;color:var(--muted)}
+@media (max-width:520px){header{grid-template-columns:1fr}.logo{width:52px;height:52px}h2{font-size:25px}}
+@media (prefers-reduced-motion:no-preference){.cell{transition:transform .08s}.cell:hover{transform:scale(1.25);z-index:2}}
+</style>
+
+<div class="wrap">
+<header>
+  <svg class="logo" viewBox="-50 -50 100 100" aria-hidden="true" id="logo"></svg>
+  <div>
+    <div class="eyebrow">Bauakte · Minecraft Java 1.20.1 · Forge</div>
+    <h1>Projekt <span>Hive</span></h1>
+    <div class="meta"><span>Untergrundlabor nach Umbrella-Vorbild · <b>Priorität</b></span><span>Tempel der Athena + Statue</span><span>nur Vanilla-Blöcke, läuft auf jedem 1.20.1-Server</span></div>
+  </div>
+</header>
+
+<nav aria-label="Bauprojekte">
+  <a href="#labor" class="lab" data-view="labor">Untergrundlabor<span class="prio">PRIO 1</span></a>
+  <a href="#tempel" class="greek" data-view="tempel">Athena-Tempel</a>
+</nav>
+
+<!-- ================= LABOR ================= -->
+<section class="view" id="view-labor">
+  <div class="block">
+    <div class="eyebrow">Briefing</div>
+    <h2>Das Labor unter dem Herrenhaus</h2>
+    <p class="lead">Vorbild ist der „Hive“ aus Resident Evil: ein Forschungskomplex der Umbrella Corporation tief unter einem harmlos aussehenden Haus in den Arklay-Bergen bei Raccoon City. Du baust ein Tarnhaus an der Oberfläche, darunter einen Aufzugsschacht und vier Ebenen mit je 27 × 15 Blöcken Grundfläche.</p>
+    <p class="muted">Alle Ebenen haben denselben Grundaufbau: Haupthalle in der Mitte mit Aufzug und Treppenhaus an exakt derselben Stelle, links und rechts je drei Räume. So kannst du jede Ebene mit derselben Außenhülle anfangen und nur die Einrichtung tauschen.</p>
+  </div>
+
+  <div class="block">
+    <div class="eyebrow">Querschnitt · Y-Höhen</div>
+    <h3>Wie tief welche Ebene liegt</h3>
+    <svg class="section-svg" viewBox="0 0 600 430" role="img" aria-label="Querschnitt: Tarnhaus auf Y 64, Ebenen B1 bis B4 auf Y 40, 30, 20 und minus 10">
+      <rect x="0" y="84" width="600" height="252" fill="var(--b-wall)" opacity=".18"/>
+      <rect x="0" y="336" width="600" height="94" fill="var(--b-console)" opacity=".45"/>
+      <line x1="0" y1="84" x2="600" y2="84" stroke="var(--b-mob)" stroke-width="3"/>
+      <text x="480" y="78" class="dim">Oberfläche ~Y 64</text>
+      <text x="480" y="352" class="dim">Tiefenschiefer ab Y 0</text>
+      <path d="M282 84 V60 L310 44 L338 60 V84 Z" fill="var(--b-barrel)"/>
+      <text x="350" y="62">Tarnhaus</text>
+      <rect x="310" y="84" width="30" height="296" fill="var(--b-lift)" opacity=".8"/>
+      <g id="sec-levels"></g>
+    </svg>
+  </div>
+
+  <div class="block">
+    <div class="eyebrow">Blockpalette</div>
+    <h3>Diese Blöcke brauchst du (alle in 1.20.1)</h3>
+    <div class="palette" id="lab-palette"></div>
+  </div>
+
+  <div class="block">
+    <div class="eyebrow">Grundrisse · 1 Kästchen = 1 Block</div>
+    <h3>Ebenen-Pläne</h3>
+    <p class="muted">Norden ist oben. Tippe ein Kästchen an, um Block und Koordinate zu sehen (x/z ab der Nordwest-Ecke). Ein Tipp auf die Legende markiert alle Blöcke dieser Sorte.</p>
+    <div class="mapbar" id="lab-tabs"></div>
+    <div class="maplayout">
+      <div class="block">
+        <div class="gridbox"><div class="grid" id="lab-grid"></div><div class="axis"><span>W · x 0</span><span>N oben</span><span>x 26 · O</span></div></div>
+        <div class="readout" id="lab-readout">Kästchen antippen …</div>
+        <div class="legend" id="lab-legend"></div>
+      </div>
+      <div class="block">
+        <h3 id="lab-title"></h3>
+        <p class="muted" id="lab-sub"></p>
+        <ul class="rooms" id="lab-rooms"></ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="block">
+    <div class="eyebrow">Material · automatisch aus den Plänen gezählt</div>
+    <h3>Einkaufsliste pro Ebene</h3>
+    <p class="muted">Raumhöhe 5 Blöcke Luft, plus Boden und Decke. Wände zählen 5 hoch, über Türen 3 und über Fenstern 2. Eine Stack-Angabe rundet auf 64er auf.</p>
+    <div class="tablebox"><table id="lab-mats"></table></div>
+  </div>
+
+  <div class="block">
+    <div class="eyebrow">Bauablauf</div>
+    <h3>In dieser Reihenfolge bauen</h3>
+    <ol class="steps">
+      <li><b>Ecke festlegen.</b> Drück F3, stell dich auf die geplante Nordwest-Ecke und schreib x und z auf. Alle Pläne zählen ab dort.</li>
+      <li><b>Schacht graben.</b> Vom Tarnhaus einen 3 × 3 Schacht bis Y −11 runter, genau über den blauen Aufzugsfeldern (x 11–13, z 6–8).</li>
+      <li><b>Ebenen aushöhlen.</b> Pro Ebene 27 × 15 × 7 Blöcke freiräumen (Boden auf Y, Decke auf Y+6). Effizienz-V-Spitzhacke und ein Leuchtfeuer mit Eile II sparen Stunden.</li>
+      <li><b>Hülle setzen.</b> Boden, Außenwand und Decke komplett schließen, bevor du innen weitermachst. So spawnen keine Mobs im Rohbau.</li>
+      <li><b>Innenwände nach Plan.</b> Grau = Wand, Türen und Fenster gleich mit aussparen.</li>
+      <li><b>Licht.</b> Alle 4 Blöcke eine Seelaterne oder ein Perlmutt-Froschlicht in die Decke. Weißes, kaltes Licht macht den Labor-Look.</li>
+      <li><b>Einrichtung und Redstone.</b> Erst Aufzug und Türen, danach Möbel, Tanks und Alarm.</li>
+    </ol>
+  </div>
+
+  <div class="block">
+    <div class="eyebrow">Details</div>
+    <h3>So baust du die Umbrella-Elemente</h3>
+    <div class="tricks">
+      <div class="trick"><h3>Umbrella-Logo</h3>
+        <p>Weißes Banner in den Webstuhl, rote Farbe, Muster <b>„Geständert“</b> (englisch Gyronny). Ergibt die acht rot-weißen Segmente. Kein Bannermuster-Item nötig.</p>
+        <p class="muted">Hinter die Empfangstheke drei Banner nebeneinander, dazu roter Beton als Streifen auf Hüfthöhe in jedem Gang.</p></div>
+      <div class="trick"><h3>Aufzug (Blasensäule)</h3>
+        <ol><li>Im 3 × 3 Schacht: linke Spalte Seelensand ganz unten (hoch), rechte Spalte Magmablock (runter), Mitte Leiter.</li>
+        <li>Wände aus Glas, damit man die Blasen sieht.</li>
+        <li>Wasser oben rein, dann die Spalte mit Seetang füllen und den Seetang abbauen. Jetzt ist jeder Block eine Wasserquelle.</li>
+        <li>An jeder Ebene Eisentür mit Knopf als Ausstieg.</li></ol></div>
+      <div class="trick"><h3>Probentanks</h3>
+        <ul><li>Unten Seelaterne, darauf 3 Glas- oder getöntes Glas hoch, oben glatte Steinstufe mit Kette zur Decke.</li>
+        <li>Innen Wasser, darin ein Zombie mit Namensschild. Nach kurzer Zeit wird er zum Ertrunkenen, genau wie ein Experiment.</li>
+        <li>Alternativ ein Schnüffler-Ei (neu in 1.20) im Glas als „Probe“.</li></ul></div>
+      <div class="trick"><h3>Laser-Korridor</h3>
+        <p>Rote Buntglasscheiben in verschiedenen Höhen quer durch den Gang. Darunter ein echter Stolperdraht (Haken + Faden), der Redstone-Lampen als Alarm und Werfer mit Pfeilen auslöst.</p></div>
+      <div class="trick"><h3>Red Queen (KI-Kern)</h3>
+        <p>2 × 2 rotes Buntglas, innen Redstone-Lampen an einem Taktgeber, damit der Kern pulsiert. Davor die Bildschirmwand: schwarzer Beton mit Leucht-Rahmen und echten Karten deiner Welt darin.</p></div>
+      <div class="trick"><h3>Alarm über Skulk</h3>
+        <p>Ein kalibrierter Skulk-Sensor (1.20) neben jeder Tür. Wer laut läuft, lässt die roten Redstone-Lampen im Gang aufleuchten. Wolle-Teppich auf dem Gang dämpft Schritte für „Schleichwege“.</p></div>
+      <div class="trick"><h3>Dekon-Dusche</h3>
+        <p>Unter dem Boden ein Lagerfeuer auf einem Heuballen, darüber eine Eisenfalltür im Boden. Der Rauch steigt wie Dampf aus dem Gitter. Wände aus weißem Buntglas.</p></div>
+      <div class="trick"><h3>Codeschloss mit Rahmen</h3>
+        <p>Rahmen mit Pfeil an die Wand, dahinter ein Komparator. Erst wenn der Pfeil auf Stellung 5 steht, ist das Signal stark genug für die Tür. Gut für den Tresor auf B3.</p></div>
+      <div class="trick"><h3>Tarneingang</h3>
+        <p>Kleines Haus aus Fichte und Schwarzeiche. Im Arbeitszimmer eine Wand aus gemeißelten Bücherregalen (1.20) als Klebkolben-Tür: 2 Klebkolben pro Seite, Auslöser ein Hebel hinter einem Bild.</p></div>
+      <div class="trick"><h3>Bahn nach Raccoon City</h3>
+        <p>Von B4 aus ein 3 hoher Tunnel nach Osten. Antriebsschiene etwa alle 30 Blöcke reicht auf gerader Strecke. Bahnsteig aus poliertem Tiefenschiefer mit gelbem Beton als Kante.</p></div>
+    </div>
+    <p class="warn">Forge-Mods: Alles hier ist Vanilla. Hat dein Server zusätzlich Mods wie Create oder Möbel-Mods, kannst du Aufzug und Konsolen damit ersetzen, musst aber nicht.</p>
+  </div>
+
+  <div class="block">
+    <div class="eyebrow">Checkliste · wird in diesem Browser gespeichert</div>
+    <h3>Baufortschritt <span class="progress" id="lab-progress"></span></h3>
+    <div class="checks" id="lab-checks"></div>
+  </div>
+</section>
+
+<!-- ================= TEMPEL ================= -->
+<section class="view greek" id="view-tempel" hidden>
+  <div class="block">
+    <div class="eyebrow">Briefing</div>
+    <h2>Tempel der Athena mit Statue</h2>
+    <p class="lead">Ein Tempel nach dem Vorbild des Parthenon in Athen: ringsum Säulen, innen der Cella-Raum. Davor steht die Athena Parthenos. Das Original von Phidias war rund 12 Meter hoch und aus Gold und Elfenbein. Im Spiel nimmst du dafür Goldblöcke und Kalzit oder Knochenblöcke.</p>
+    <p class="muted">Größe: Tempel 28 × 43 Blöcke, mit Giebel rund 20 hoch. Statue 21 breit, 28 hoch, etwa 6 tief. Die Statue steht auf dem Vorplatz vor dem Eingang (Süden), mindestens 8 Blöcke Abstand.</p>
+  </div>
+
+  <div class="block">
+    <div class="eyebrow">Blockpalette</div>
+    <h3 class="g">Marmor, Gold und Elfenbein</h3>
+    <div class="palette" id="gr-palette"></div>
+  </div>
+
+  <div class="block">
+    <div class="eyebrow">Pläne · 1 Kästchen = 1 Block</div>
+    <h3 class="g">Grundriss und Statue</h3>
+    <div class="mapbar" id="gr-tabs"></div>
+    <div class="maplayout">
+      <div class="block">
+        <div class="gridbox"><div class="grid" id="gr-grid"></div><div class="axis" id="gr-axis"></div></div>
+        <div class="readout" id="gr-readout">Kästchen antippen …</div>
+        <div class="legend" id="gr-legend"></div>
+      </div>
+      <div class="block">
+        <h3 class="g" id="gr-title"></h3>
+        <p class="muted" id="gr-sub"></p>
+        <ol class="steps" id="gr-steps"></ol>
+      </div>
+    </div>
+  </div>
+
+  <div class="block">
+    <div class="eyebrow">Details</div>
+    <h3 class="g">Kleine Dinge, die viel ausmachen</h3>
+    <div class="tricks">
+      <div class="trick"><h3>Amphoren</h3><p>Verzierte Töpfe (1.20) mit Töpferscherben aus Wüsten- und Ozeanruinen. Je Seite andere Scherbe. Paarweise neben die Cellatür und rund um den Altar.</p></div>
+      <div class="trick"><h3>Bunter Fries</h3><p>Antike Tempel waren bemalt. Im Fries jedes zweite Feld aus cyanfarbener oder roter Keramik statt Quarz. Das sieht sofort echter aus als reines Weiß.</p></div>
+      <div class="trick"><h3>Olivenbäume</h3><p>Eichenstamm, krumm gebaut, mit Azaleenlaub. Das Graugrün kommt echten Oliven sehr nahe. Dazwischen Rosa Blütenblätter (1.20) und Fackellilien.</p></div>
+      <div class="trick"><h3>Heiliges Feuer</h3><p>Altar aus Goldblock, darauf ein Lagerfeuer. Zwei Eisenstangen-Feuerschalen mit Seelenfeuer links und rechts der Tür.</p></div>
+    </div>
+  </div>
+
+  <div class="block">
+    <div class="eyebrow">Checkliste · wird in diesem Browser gespeichert</div>
+    <h3 class="g">Baufortschritt <span class="progress" id="gr-progress"></span></h3>
+    <div class="checks" id="gr-checks"></div>
+  </div>
+</section>
+
+<footer>Bauanleitung für Minecraft Java 1.20.1 (Forge-Server). Keine Inhalte aus 1.21 wie Kupferbirnen oder Tuffziegel verwendet. Resident Evil und Umbrella gehören Capcom; dies ist eine Fan-Bauidee.</footer>
+</div>
+
+<script>
+// ---------- Logo ----------
+(function(){
+  const svg=document.getElementById('logo');let s='';
+  for(let i=0;i<8;i++){const a1=(i*45-90)*Math.PI/180,a2=((i+1)*45-90)*Math.PI/180;
+    s+=`<path d="M0 0 L${46*Math.cos(a1)} ${46*Math.sin(a1)} L${46*Math.cos(a2)} ${46*Math.sin(a2)} Z" fill="${i%2?'var(--fg)':'var(--red)'}"/>`;}
+  svg.innerHTML=s;
+})();
+
+// ---------- Blöcke ----------
+const LAB_BLOCKS={
+ '#':['Wand','Hellgrauer Beton','light_gray_concrete','--b-wall'],
+ '.':['Boden','Weißer Beton','white_concrete','--b-floor'],
+ 'D':['Tür','Eisentür + Knopf','iron_door','--b-door'],
+ 'G':['Fenster','Glasscheibe','glass_pane','--b-glass'],
+ 'E':['Aufzug','Blasensäule im Glasschacht','soul_sand / magma_block','--b-lift'],
+ 'Z':['Treppenhaus','Leiter oder Wendeltreppe','ladder','--b-stairs'],
+ 'C':['Konsole','Beobachter + Tageslichtsensor','observer','--b-console'],
+ 'T':['Labortisch','Glatte Steinstufe auf Zaun','smooth_stone_slab','--b-table'],
+ 'S':['Lager','Fass','barrel','--b-barrel'],
+ 'B':['Bett','Weißes Bett','white_bed','--b-bed'],
+ 'A':['Waffenständer','Rüstungsständer mit Rüstungsbesatz','armor_stand','--b-armor'],
+ 'P':['Dekon-Dusche','Eisenfalltür über Lagerfeuer','iron_trapdoor','--b-decon'],
+ 'X':['Gitter','Eisenstangen','iron_bars','--b-bars'],
+ 'K':['Braustand','Braustand','brewing_stand','--b-brew'],
+ 'U':['Kessel','Kessel','cauldron','--b-caul'],
+ 'I':['Kühlwand','Packeis','packed_ice','--b-ice'],
+ 'N':['Archiv','Gemeißeltes Bücherregal','chiseled_bookshelf','--b-book'],
+ 'W':['Probentank','Glas + Wasser + Seelaterne','glass','--b-tank'],
+ 'M':['Maschine','Hochofen, Spender, Beobachter','blast_furnace','--b-machine'],
+ 'Q':['Bildschirmwand','Schwarzer Beton + Leucht-Rahmen + Karte','glow_item_frame','--b-screen'],
+ 'R':['Red Queen','Rotes Buntglas + Redstone-Lampe','red_stained_glass','--b-queen'],
+ 'L':['Laser','Rote Buntglasscheibe + Stolperdraht','red_stained_glass_pane','--b-laser'],
+ 'V':['Tresor','Eisenblock + Codeschloss','iron_block','--b-vault'],
+ '!':['Testobjekt','Zombie mit Namensschild','name_tag','--b-mob'],
+ 'O':['Reaktorkern','Gewachstes Kupfer + Seelaterne + Blitzableiter','waxed_cut_copper','--b-core'],
+ 'Y':['Bahnsteig','Polierter Tiefenschiefer, Kante gelber Beton','polished_deepslate','--b-platform'],
+ 'H':['Gleis','Schiene / Antriebsschiene','rail','--b-rail'],
+};
+const LAB_PALETTE=[
+ ['--b-floor','Weißer Beton','white_concrete','Böden'],
+ ['--b-wall','Hellgrauer Beton','light_gray_concrete','Wände, alt. polierter Andesit'],
+ ['--b-queen','Roter Beton','red_concrete','Umbrella-Streifen in den Gängen'],
+ ['--b-col','Seelaterne / Perlmutt-Froschlicht','sea_lantern / pearlescent_froglight','Deckenlicht'],
+ ['--b-machine','Glatter Stein','smooth_stone','Decke, Lüftungsgitter'],
+ ['--b-screen','Getöntes Glas','tinted_glass','Beobachtungsfenster ohne Licht'],
+ ['--b-door','Eisentür, Eisenfalltür','iron_door / iron_trapdoor','Schleusen, Spinde'],
+ ['--b-bars','Eisenstangen, Ketten','iron_bars / chain','Zellen, Kabel an der Decke'],
+ ['--b-core','Gewachstes Kupfer','waxed_cut_copper','Rohre, Reaktor (oxidiert nicht)'],
+ ['--b-book','Gemeißeltes Bücherregal','chiseled_bookshelf','Archiv, Geheimtür','1.20'],
+ ['--b-mob','Kalibrierter Skulk-Sensor','calibrated_sculk_sensor','Alarmanlage','1.20'],
+ ['--b-platform','Polierter Tiefenschiefer','polished_deepslate','Ebene B4, Bahnsteig'],
+];
+const S=(...p)=>p.join('');
+const LEVELS=[
+ {id:'b1',name:'B1 · Sicherheit',y:40,sub:'Ankunft vom Aufzug. Wer hier durch will, muss an Spinden, Dusche und Checkpoint vorbei.',
+  rows:['###########################',
+   S('#','SSSS..','#','.........','#','BBB..BBB','#'),
+   S('#','......','#','.........','#','........','#'),
+   S('#','SSSS..','D','.........','D','........','#'),
+   S('#','......','#','....C....','#','BBB..BBB','#'),
+   S('####D###','.........','#','########','#'),
+   S('#','......','#','...EEE...','#','AAA...SS','#'),
+   S('#','PPP...','D','...EEE...','D','........','#'),
+   S('#','......','#','...EEE...','#','AAA...SS','#'),
+   S('####D###','.........','#','###D####','#'),
+   S('#','......','G','.........','G','........','#'),
+   S('#','.CTC..','D','...ZZZ...','D','..XXX...','#'),
+   S('#','......','G','...ZZZ...','G','..XXX...','#'),
+   S('#','......','#','...ZZZ...','#','........','#'),
+   '###########################'],
+  rooms:[['Spinde','oben links','Fässer als Spinde, Eisenfalltüren davor. Laborkittel auf Rüstungsständern.'],
+   ['Dekontamination','Mitte links','Dusche aus Eisenfalltüren mit Rauch von unten. Nur über Spinde und Checkpoint erreichbar.'],
+   ['Checkpoint','unten links','Zwei Konsolen und ein Tisch, Glasfenster zur Halle. Hier sitzt die Wache.'],
+   ['Empfangshalle','Mitte','Theke mit Konsole, drei Umbrella-Banner, Aufzug und Treppe nach unten.'],
+   ['Quartiere','oben rechts','Sechs weiße Betten, Hängeschilder (1.20) mit Namen an jedem Bett.'],
+   ['Waffenkammer','Mitte rechts','Rüstungsständer mit Rüstungsbesatz, Armbrüste in Rahmen, Munition in Fässern.'],
+   ['Arrestzellen','unten rechts','Eisenstangen als Zellengitter, Glasfenster zur Halle.']]},
+ {id:'b2',name:'B2 · Labore',y:30,sub:'Die eigentliche Forschung. Glaswände zum Gang, damit man von außen in jedes Labor sieht.',
+  rows:['###########################',
+   S('#','KKU..U','#','.........','#','W.W.W.W.','#'),
+   S('#','......','G','.........','G','........','#'),
+   S('#','T.TT.T','D','.........','#','W.W.W.W.','#'),
+   S('#','......','G','....C....','G','........','#'),
+   S('####D###','.........','#','###D####','#'),
+   S('#','IIIIII','#','...EEE...','#','PP....PP','#'),
+   S('#','I....I','D','...EEE...','D','........','#'),
+   S('#','IIIIII','#','...EEE...','#','PP....PP','#'),
+   S('####D###','.........','#','########','#'),
+   S('#','......','#','.........','#','........','#'),
+   S('#','.CTC.S','D','...ZZZ...','D','MM.MM.MM','#'),
+   S('#','......','#','...ZZZ...','#','........','#'),
+   S('#','SS..NN','#','...ZZZ...','#','MM.MM.MM','#'),
+   '###########################'],
+  rooms:[['Chemielabor','oben links','Braustände und Kessel auf Labortischen, Tränke in Rahmen an der Wand.'],
+   ['Kühlraum','Mitte links','Wände innen mit Packeis verkleiden, Proben in Fässern. Nur über das Labor oder das Büro erreichbar.'],
+   ['Büro des Chefforschers','unten links','Schreibtisch mit zwei Konsolen, Archiv aus gemeißelten Bücherregalen, Pult mit Tagebuch.'],
+   ['Laborgang','Mitte','Glaswände links und rechts, roter Beton als Streifen am Boden.'],
+   ['Virologie','oben rechts','Acht Probentanks in zwei Reihen. Nur durch die Sterilschleuse zu betreten.'],
+   ['Sterilschleuse','Mitte rechts','Dekon-Duschen an beiden Seiten, Eisentüren vorn und hinten.'],
+   ['Serverraum','unten rechts','Reihen aus Beobachtern und Spendern, zwischen denen Redstone-Lampen blinken.']]},
+ {id:'b3',name:'B3 · Red Queen',y:20,sub:'Kontrollzentrum und Hochsicherheit. Hier sitzt die KI, die den ganzen Komplex steuert.',
+  rows:['###########################',
+   S('#','......','X','.........','#','QQQQQQQQ','#'),
+   S('#','..!...','D','.........','#','........','#'),
+   S('#','......','X','.........','#','.C.CC.C.','#'),
+   S('#','......','X','.........','#','........','#'),
+   S('########','.........','#','...RR...','#'),
+   S('#','......','X','...EEE...','#','...RR...','#'),
+   S('#','...!..','D','...EEE...','D','........','#'),
+   S('#','......','X','...EEE...','#','.CC..CC.','#'),
+   S('########','.........','#','D#######','#'),
+   S('#','......','X','.........','#','.#######','#'),
+   S('#','..!...','D','...ZZZ...','#','.LLLLL.V','#'),
+   S('#','......','X','...ZZZ...','#','.LLLLL.V','#'),
+   S('#','......','X','...ZZZ...','#','########','#'),
+   '###########################'],
+  rooms:[['Containment-Zellen','ganze linke Seite','Drei Zellen mit Eisenstangen zur Halle. In jede ein Mob mit Namensschild, z. B. „Licker“.'],
+   ['Lagezentrum','Mitte','Offene Halle, Blick in alle Zellen. Rote Lampen an der Decke für den Alarm.'],
+   ['Kontrollraum','rechts oben','Bildschirmwand mit Karten, sechs Konsolen, in der Mitte der pulsierende Red-Queen-Kern.'],
+   ['Laser-Korridor','rechts unten','Eingang aus dem Kontrollraum, fünf Blöcke Laser, am Ende der Tresor mit Codeschloss.']]},
+ {id:'b4',name:'B4 · Reaktor',y:-10,sub:'Ganz unten im Tiefenschiefer. Energie für den Komplex und der Fluchtweg per Bahn.',
+  rows:['###########################',
+   S('#','MMMMMM','#','.........','#','.SS..SS.','#'),
+   S('#','......','#','.........','#','........','#'),
+   S('#','MMMMMM','D','.........','D','.YYYYYY.','#'),
+   S('#','......','#','.........','#','HHHHHHHH','H'),
+   S('####D###','.........','#','########','#'),
+   S('#','......','#','...EEE...','#','........','#'),
+   S('#','......','D','...EEE...','D','..MMMM..','#'),
+   S('#','......','#','...EEE...','#','..WWWW..','#'),
+   S('#','..OO..','#','.........','#','..WWWW..','#'),
+   S('#','..OO..','#','.........','#','..MMMM..','#'),
+   S('#','......','#','...ZZZ...','#','........','#'),
+   S('#','......','#','...ZZZ...','#','........','#'),
+   S('#','......','#','...ZZZ...','#','........','#'),
+   '###########################'],
+  rooms:[['Generatoren','oben links','Zwei Reihen Hochöfen und Spender, darüber Kupferrohre an Ketten.'],
+   ['Reaktor','unten links','2 × 2 Kern aus Kupfer und Seelaternen, ringsum Blitzableiter. Gern 3 Blöcke tiefer graben und mit Laufsteg aus Eisenfalltüren bauen.'],
+   ['Halle','Mitte','Endstation von Aufzug und Treppe. Boden hier aus poliertem Tiefenschiefer.'],
+   ['Bahnsteig Arklay-Linie','oben rechts','Gleis führt durch die Ostwand in den Tunnel Richtung Stadt. Bänke aus Stufen, Fässer als Gepäck.'],
+   ['Kühlsystem','unten rechts','Wasserbecken zwischen Pumpen. Gut für Leuchttintenfische oder Axolotl.']]},
+];
+
+// ---------- Tempel ----------
+const GR_BLOCKS={
+ 't':['Stufen','Quarztreppe','quartz_stairs','--b-step'],
+ 's':['Stylobat','Glatter Quarz','smooth_quartz','--b-stylo'],
+ 'c':['Säule','Quarzsäule, 10 hoch','quartz_pillar','--b-col'],
+ 'q':['Cellawand','Quarzziegel','quartz_bricks','--b-cella'],
+ 'f':['Cellaboden','Polierter Diorit','polished_diorite','--b-cfloor'],
+ 'D':['Portal','Offen, 4 breit, 6 hoch','air','--b-ped'],
+ 'a':['Altar','Goldblock + Lagerfeuer','gold_block','--b-altar'],
+ 'v':['Amphore','Verzierter Topf','decorated_pot','--b-pot'],
+};
+const ST_BLOCKS={
+ 'g':['Gold','Goldblock','gold_block','--b-gold'],
+ 'b':['Haut / Elfenbein','Kalzit oder Knochenblock','calcite','--b-ivory'],
+ 'w':['Gewand','Glatter Quarz','smooth_quartz','--b-robe'],
+ 'v':['Faltenwurf','Quarzsäule','quartz_pillar','--b-fold'],
+ 'h':['Schild','Rohgoldblock','raw_gold_block','--b-shield'],
+ 's':['Speer','Eichenzaun, Spitze Blitzableiter','oak_fence','--b-spear'],
+ 'p':['Sockel','Polierter Tiefenschiefer','polished_deepslate','--b-ped'],
+};
+const GR_PALETTE=[
+ ['--b-stylo','Glatter Quarz','smooth_quartz','Stylobat, Gebälk'],
+ ['--b-col','Quarzsäule','quartz_pillar','Säulenschaft'],
+ ['--b-step','Gemeißelter Quarz','chiseled_quartz_block','Säulenfuß und Kapitell, Triglyphen'],
+ ['--b-cella','Quarzziegel','quartz_bricks','Cellawände'],
+ ['--b-gold','Goldblock','gold_block','Helm, Ägis, Nike-Figur'],
+ ['--b-ivory','Kalzit','calcite','Haut der Statue (Elfenbein)'],
+ ['--b-pot','Verzierter Topf','decorated_pot','Amphoren','1.20'],
+ ['--b-mob','Azaleenlaub','azalea_leaves','Olivenbäume'],
+];
+function templeRows(){
+  const W=28,L=43,g=[];
+  for(let z=0;z<L;z++){let r='';for(let x=0;x<W;x++){
+    let ch='s';const e=Math.min(x,z,W-1-x,L-1-z);
+    if(e<2) ch='t';
+    else if((x===3||x===24) && z>=3&&z<=39 && (z-3)%3===0) ch='c';
+    else if((z===3||z===39) && x>=3&&x<=24 && (x-3)%3===0) ch='c';
+    if(x>=7&&x<=20&&z>=9&&z<=33){
+      if(x===7||x===20||z===9||z===33) ch=(z===33&&x>=12&&x<=15)?'D':'q';
+      else ch='f';
+      if((x===10||x===17)&&z>=12&&z<=30&&(z-12)%3===0) ch='c';
+      if(z===13&&(x===13||x===14)) ch='a';
+      if((z===11&&(x===9||x===18))||(z===31&&(x===9||x===18))||(z===14&&(x===12||x===15))) ch='v';
+    }
+    if((z===34&&(x===11||x===16))) ch='v';
+    r+=ch;}g.push(r);}
+  return g;
+}
+const STATUE=[
+ '.........ggg.......s.',
+ '........ggggg......s.',
+ '........gbbbg......s.',
+ '........gbbbg......s.',
+ '.........bbb.......s.',
+ '.g....wwwwwwwww....s.',
+ 'ggg..bwwwwgwwwwb...s.',
+ '.g..bbwwwwgwwwwbb..s.',
+ '.bbbb.wwwwwwwww.b..s.',
+ '......wwwwwwwww..b.s.',
+ '......wwwwwwwww.bbbs.',
+ '......wwwwwwwww..hhh.',
+ '......wwwwwwwww.hhhhh',
+ '......wwwwwwwww.hhghh',
+ '......wwwwwwwww.hgggh',
+ '......wwwwwwwww.hhghh',
+ '.....wwwwwwwwwwwhhhhh',
+ '.....wvwwvwvwwvw.hhh.',
+ '.....wvwwvwvwwvw...s.',
+ '.....wvwwvwvwwvw...s.',
+ '.....wvwwvwvwwvw...s.',
+ '.....wvwwvwvwwvw...s.',
+ '.....wvwwvwvwwvw...s.',
+ '......bb....bb.....s.',
+ '...ppppppppppppppp...',
+ '...ppppppppppppppp...',
+ '.ppppppppppppppppppp.',
+ '.ppppppppppppppppppp.',
+];
+const GR_VIEWS=[
+ {id:'tempel',name:'Tempel · Grundriss',rows:templeRows(),blocks:GR_BLOCKS,cs:13,axis:['N · Rückseite','28 × 43','Eingang · S'],
+  title:'Grundriss Tempel',sub:'Draufsicht. 8 Säulen an den Schmalseiten, 13 an den Langseiten, wie beim Parthenon. Der Eingang liegt im Süden (unten).',
+  steps:['Fläche 28 × 43 einebnen. Zwei Ringe Quarztreppen als Stufen, dann der Stylobat aus glattem Quarz eine Ebene höher.',
+   'Säulen: unten gemeißelter Quarz, 8 Quarzsäulen, oben gemeißelter Quarz. Insgesamt 10 hoch, alle 3 Blöcke eine.',
+   'Cellawände aus Quarzziegeln 8 hoch. Das Portal im Süden bleibt 4 breit und 6 hoch offen.',
+   'Gebälk auf den Säulen: eine Reihe glatter Quarz (Architrav), darüber der Fries abwechselnd gemeißelter Quarz und Quarzziegel.',
+   'Gesims aus umgedrehten Quarztreppen, die einen Block überstehen.',
+   'Giebel an Nord- und Südseite: Dreieck, jede Reihe 2 Blöcke schmaler, also etwa 7 hoch. Dach mit Quarzstufen und Quarztreppen schließen.',
+   'Innen Altar, Amphoren und die zweite Säulenreihe. Vor dem Portal den Vorplatz für die Statue pflastern.']},
+ {id:'statue',name:'Athena · Vorderansicht',rows:STATUE,blocks:ST_BLOCKS,cs:15,axis:['links: Nike','21 × 28','rechts: Schild'],
+  title:'Athena Parthenos',sub:'Ansicht von vorn, oben ist oben. Rechte Hand (für dich links) hält die Siegesgöttin Nike, die linke ruht auf dem Schild, der Speer lehnt an der Schulter.',
+  steps:['Zuerst den Sockel bauen: 19 breit unten, 15 breit oben, 9 tief, 4 hoch.',
+   'Die Vorderansicht ist die vorderste Schicht. Baue sie Zeile für Zeile von unten nach oben.',
+   'Tiefe nach hinten: Kopf 3 Blöcke, Oberkörper 4, Gewand unten 5 bis 6. Ränder mit Stufen und Treppen abrunden.',
+   'Faltenwurf: die hellgrauen Streifen sind Quarzsäulen, die durch ihre Rillen wie Stoff wirken.',
+   'Arme 2 tief, Hände als einzelner Block. Die Nike ist 3 hoch und steht auf der Handfläche.',
+   'Schild 5 × 7 aus Rohgold, Mitte Goldblock. Er steht 1 Block vor dem Körper und berührt die Hand.',
+   'Speer 1 Block breit von der Schulter bis zum Sockel, Spitze ein Blitzableiter. Helmbusch aus Goldblock, dahinter 2 Goldstufen.']},
+];
+
+// ---------- Rendering ----------
+function renderPalette(el,list){
+  el.innerHTML=list.map(([c,n,id,use,tag])=>`<div class="pal"><div class="sw" style="background:var(${c})"></div><div><b>${n}${tag?`<span class="tag">${tag}</span>`:''}</b><small>${id}</small><small>${use}</small></div></div>`).join('');
+}
+function makeMap(prefix,views,opts){
+  const tabs=document.getElementById(prefix+'-tabs'),grid=document.getElementById(prefix+'-grid'),
+    read=document.getElementById(prefix+'-readout'),leg=document.getElementById(prefix+'-legend');
+  let cur=0,hl=null;
+  tabs.innerHTML=views.map((v,i)=>`<button type="button" id="${prefix}-tab-${v.id}" data-i="${i}">${v.name}</button>`).join('');
+  tabs.onclick=e=>{const b=e.target.closest('button');if(b)show(+b.dataset.i)};
+  function show(i){
+    cur=i;hl=null;const v=views[i],blocks=v.blocks||opts.blocks,rows=v.rows;
+    [...tabs.children].forEach((b,j)=>b.setAttribute('aria-pressed',j===i));
+    const w=rows[0].length;grid.style.gridTemplateColumns=`repeat(${w},var(--cs))`;
+    grid.style.setProperty('--cs',(v.cs||opts.cs)+'px');
+    let h='';rows.forEach((r,z)=>[...r].forEach((ch,x)=>{
+      const b=blocks[ch];
+      h+=b?`<div class="cell" tabindex="-1" data-ch="${ch}" data-x="${x}" data-z="${z}" style="background:var(${b[3]})" title="${b[0]}"></div>`:'<div class="cell empty"></div>';
+    }));
+    grid.innerHTML=h;
+    const used=[...new Set(rows.join(''))].filter(c=>blocks[c]);
+    leg.innerHTML=used.map(c=>`<button type="button" data-ch="${c}"><span class="sw" style="background:var(${blocks[c][3]})"></span>${blocks[c][0]}</button>`).join('');
+    read.textContent='Kästchen antippen …';
+    if(opts.onShow) opts.onShow(v,i);
+  }
+  grid.onclick=e=>{const c=e.target.closest('.cell:not(.empty)');if(!c)return;
+    const v=views[cur],b=(v.blocks||opts.blocks)[c.dataset.ch];
+    const yInfo=opts.yOf?` · Y ${opts.yOf(v,+c.dataset.z)}`:'';
+    const pos=opts.posLabel?opts.posLabel(v,+c.dataset.x,+c.dataset.z):`x ${c.dataset.x} · z ${c.dataset.z}`;
+    read.innerHTML=`<b>${b[0]}</b> · ${b[1]}<br>${pos}${yInfo} · <span class="muted">minecraft:${b[2]}</span>`;};
+  leg.onclick=e=>{const b=e.target.closest('button');if(!b)return;const ch=b.dataset.ch;hl=hl===ch?null:ch;
+    [...leg.children].forEach(x=>x.setAttribute('aria-pressed',x.dataset.ch===hl));
+    grid.querySelectorAll('.cell').forEach(c=>c.classList.toggle('hl',c.dataset.ch===hl));};
+  show(0);
+  return show;
+}
+
+renderPalette(document.getElementById('lab-palette'),LAB_PALETTE);
+renderPalette(document.getElementById('gr-palette'),GR_PALETTE);
+
+makeMap('lab',LEVELS,{blocks:LAB_BLOCKS,cs:17,
+  yOf:v=>`${v.y} bis ${v.y+6}`,
+  onShow:v=>{document.getElementById('lab-title').textContent=v.name+' · Boden Y '+v.y;
+    document.getElementById('lab-sub').textContent=v.sub;
+    document.getElementById('lab-rooms').innerHTML=v.rooms.map(r=>`<li><b>${r[0]} <span>· ${r[1]}</span></b><span>${r[2]}</span></li>`).join('');}});
+
+makeMap('gr',GR_VIEWS,{cs:13,
+  posLabel:(v,x,z)=>v.id==='statue'?`Spalte ${x} · Höhe ${v.rows.length-1-z} über Boden`:`x ${x} · z ${z}`,
+  onShow:v=>{document.getElementById('gr-title').textContent=v.title;
+    document.getElementById('gr-sub').textContent=v.sub;
+    document.getElementById('gr-steps').innerHTML=v.steps.map(s=>`<li>${s}</li>`).join('');
+    document.getElementById('gr-axis').innerHTML=v.axis.map(a=>`<span>${a}</span>`).join('');}});
+
+// ---------- Querschnitt ----------
+(function(){
+  const y=Y=>84+(64-Y)*4;let s='';
+  LEVELS.forEach(l=>{const top=y(l.y+6),bot=y(l.y);
+    s+=`<rect x="200" y="${top}" width="270" height="${bot-top}" fill="var(--b-floor)" stroke="var(--red)" stroke-width="1.5"/>`;
+    s+=`<rect x="310" y="${top}" width="30" height="${bot-top}" fill="var(--b-lift)"/>`;
+    s+=`<text x="16" y="${(top+bot)/2+4}">${l.name}</text><text x="130" y="${(top+bot)/2+4}" class="dim">Y ${l.y}</text>`;});
+  document.getElementById('sec-levels').innerHTML=s;
+})();
+
+// ---------- Material ----------
+(function(){
+  const st=n=>{const s=Math.floor(n/64),r=n%64;return s?(r?`${s} St. + ${r}`:`${s} St.`):`${n}`};
+  const rows=[['Wände · Hellgrauer Beton',c=>c['#']*5+c.D*3+c.G*2],['Boden · Weißer Beton',c=>c.in],
+    ['Decke · Glatter Stein',c=>c.in-Math.ceil(c.in/16)],['Licht · Seelaterne',c=>Math.ceil(c.in/16)],
+    ['Glasscheiben',c=>c.G*3],['Eisentüren',c=>c.D],['Eisenstangen',c=>c.X*5]];
+  const counts=LEVELS.map(l=>{const c={'#':0,D:0,G:0,X:0,in:0};
+    l.rows.forEach((r,z)=>[...r].forEach((ch,x)=>{if(ch in c)c[ch]++;
+      if(ch!=='#'&&z>0&&z<l.rows.length-1&&x>0&&x<r.length-1)c.in++;}));return c;});
+  let h='<thead><tr><th>Material</th>'+LEVELS.map(l=>`<th style="text-align:right">${l.name.split(' ·')[0]}</th>`).join('')+'<th style="text-align:right">Gesamt</th></tr></thead><tbody>';
+  rows.forEach(([n,f])=>{const v=counts.map(f),t=v.reduce((a,b)=>a+b,0);
+    h+=`<tr><td>${n}</td>${v.map(x=>`<td class="n">${x}</td>`).join('')}<td class="n"><b>${t}</b> <span class="muted">(${st(t)})</span></td></tr>`;});
+  document.getElementById('lab-mats').innerHTML=h+'</tbody>';
+})();
+
+// ---------- Checklisten ----------
+function makeChecks(prefix,groups){
+  const key='hive-checks-'+prefix;let saved={};
+  try{saved=JSON.parse(localStorage.getItem(key)||'{}')}catch(e){}
+  const el=document.getElementById(prefix+'-checks'),prog=document.getElementById(prefix+'-progress');
+  el.innerHTML=groups.map((g,gi)=>`<div class="checkgroup"><h3>${g[0]}</h3>${g[1].map((t,ti)=>{const id=`${prefix}-c-${gi}-${ti}`;
+    return `<label for="${id}"><input type="checkbox" id="${id}" ${saved[id]?'checked':''}><span>${t}</span></label>`}).join('')}</div>`).join('');
+  const upd=()=>{const all=el.querySelectorAll('input'),done=[...all].filter(i=>i.checked).length;prog.innerHTML=`· <b>${done}</b> von ${all.length}`};
+  el.onchange=e=>{saved[e.target.id]=e.target.checked;try{localStorage.setItem(key,JSON.stringify(saved))}catch(err){}upd()};
+  upd();
+}
+makeChecks('lab',[
+ ['Oberfläche',['Nordwest-Ecke notiert (F3)','Tarnhaus gebaut','Bücherregal-Geheimtür funktioniert','Schacht 3 × 3 bis Y −11 gegraben']],
+ ['Rohbau',['B1 ausgehöhlt und Hülle zu','B2 ausgehöhlt und Hülle zu','B3 ausgehöhlt und Hülle zu','B4 ausgehöhlt und Hülle zu','Innenwände aller Ebenen','Deckenlicht alle 4 Blöcke']],
+ ['Technik',['Blasensäulen-Aufzug hoch und runter','Treppenhaus durchgehend','Eisentüren mit Knöpfen','Laser-Korridor mit Stolperdraht','Skulk-Alarm mit roten Lampen','Codeschloss am Tresor']],
+ ['Einrichtung',['Umbrella-Banner in der Halle','Probentanks in der Virologie','Red-Queen-Kern pulsiert','Bildschirmwand mit Karten','Testobjekte in den Zellen','Reaktor und Bahnsteig mit Tunnel']],
+]);
+makeChecks('gr',[
+ ['Tempel',['Fläche 28 × 43 eingeebnet','Stufen und Stylobat','Alle 38 Außensäulen','Cellawände und Portal','Gebälk und Fries','Giebel Nord und Süd','Dach geschlossen']],
+ ['Statue',['Sockel','Gewand und Faltenwurf','Arme, Hände, Nike','Kopf und goldener Helm','Schild','Speer']],
+ ['Umgebung',['Altar mit Feuer','Amphoren aufgestellt','Olivenbäume und Blumen','Vorplatz gepflastert']],
+]);
+
+// ---------- Ansichten ----------
+function route(){
+  const v=location.hash==='#tempel'?'tempel':'labor';
+  document.getElementById('view-labor').hidden=v!=='labor';
+  document.getElementById('view-tempel').hidden=v!=='tempel';
+  document.querySelectorAll('nav a').forEach(a=>{if(a.dataset.view===v)a.setAttribute('aria-current','page');else a.removeAttribute('aria-current');});
+}
+window.addEventListener('hashchange',route);route();
+</script>
