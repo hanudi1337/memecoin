@@ -1084,7 +1084,7 @@ function init3D(){const cv=$('cv');renderer=new THREE.WebGLRenderer({canvas:cv,a
   fly.pos=new THREE.Vector3();fly.vel=new THREE.Vector3();
   let down=null;
   cv.addEventListener('pointerdown',e=>{const h=document.querySelector('.chip.hint');if(h)h.hidden=true;
-    if(fly.on){fly.helpDismissed=true;updFlyUI();if(e.pointerType==='mouse'&&e.button===0){if(fly.locked){pickCenter();return}if(!fly.noLock){reqLock();return}}
+    if(fly.on){fly.helpDismissed=true;updFlyUI();if(e.pointerType==='mouse'&&e.button===0){if(fly.locked){pickCenter();return}if(!fly.noLock)reqLock()}
       try{cv.setPointerCapture(e.pointerId)}catch(err){}}
     down={x:e.clientX,y:e.clientY,lx:e.clientX,ly:e.clientY,id:e.pointerId,t:e.pointerType,moved:false}});
   cv.addEventListener('pointermove',e=>{if(fly.on&&fly.locked&&e.pointerType==='mouse'){look(e.movementX||0,e.movementY||0,.0022);return}
@@ -1196,7 +1196,8 @@ const FLYPOSE={gesamt:[34.5,65.62,88,0,.06],statue:[34.5,65.62,84,0,.14],tempel:
 function flyPoseFor(id){if(FLYPOSE[id])return FLYPOSE[id];const lv=LEVELS.find(l=>l.key===id);if(!lv)return FLYPOSE.gesamt;return lv.kind==='hall'?[C+.5,lv.L+2.62,C-12.5,Math.PI,-.06]:[C+.5,lv.L+2.62,C-11.5,Math.PI,-.1]}
 function setPose(p){fly.pos.set(p[0],p[1],p[2]);fly.yaw=p[3];fly.pitch=p[4]||0;fly.vel.set(0,0,0);fly.lookDirty=true;stepFly(0);updFlyInfo();dirty=true}
 function look(dx,dy,s){fly.yaw-=dx*s;fly.pitch=Math.max(-1.55,Math.min(1.55,fly.pitch-dy*s));fly.lookDirty=true}
-function reqLock(){const cv=$('cv');try{const r=cv.requestPointerLock();if(r&&r.catch)r.catch(()=>{fly.noLock=true;updFlyUI()})}catch(err){fly.noLock=true;updFlyUI()}}
+function reqLock(){const cv=$('cv');try{const r=cv.requestPointerLock();if(r&&r.catch)r.catch(()=>{fly.noLock=true;updFlyUI()})}catch(err){fly.noLock=true;updFlyUI()}
+  setTimeout(()=>{if(fly.on&&document.pointerLockElement!==cv){fly.noLock=true;updFlyUI()}},500)}
 function stepFly(dt){const k=fly.keys;let f=0,s=0,u=0;
   if(k.has('KeyW')||k.has('ArrowUp'))f+=1;if(k.has('KeyS')||k.has('ArrowDown'))f-=1;if(k.has('KeyD')||k.has('ArrowRight'))s+=1;if(k.has('KeyA')||k.has('ArrowLeft'))s-=1;
   if(k.has('Space'))u+=1;if(k.has('ShiftLeft')||k.has('ShiftRight'))u-=1;f-=fly.joy.y;s+=fly.joy.x;
@@ -1221,8 +1222,13 @@ function exitFly(){fly.on=false;fly.keys.clear();fly.joy.x=fly.joy.y=0;if(docume
 $('btnFly').onclick=()=>fly.on?exitFly():enterFly();
 $('btnFull').onclick=()=>{const v=$('viewer');try{if(document.fullscreenElement)document.exitFullscreen();else{const r=v.requestFullscreen();if(r&&r.catch)r.catch(()=>{})}}catch(e){}};
 const FLYKEYS=new Set(['KeyW','KeyA','KeyS','KeyD','KeyR','Space','ShiftLeft','ShiftRight','ArrowUp','ArrowDown','ArrowLeft','ArrowRight']);
-window.addEventListener('keydown',e=>{if(!fly.on)return;const tg=e.target;if(tg&&/^(INPUT|SELECT|TEXTAREA)$/.test(tg.tagName))return;if(FLYKEYS.has(e.code)){e.preventDefault();fly.keys.add(e.code);fly.helpDismissed=true;if(!$('flyHelp').hidden)updFlyUI()}});
-window.addEventListener('keyup',e=>{fly.keys.delete(e.code)});
+const KEYMAP={w:'KeyW',a:'KeyA',s:'KeyS',d:'KeyD',r:'KeyR',' ':'Space',Shift:'ShiftLeft',ArrowUp:'ArrowUp',ArrowDown:'ArrowDown',ArrowLeft:'ArrowLeft',ArrowRight:'ArrowRight'};
+const keyOf=e=>FLYKEYS.has(e.code)?e.code:KEYMAP[e.key]||KEYMAP[(e.key||'').toLowerCase()]||null;
+let viewerActive=false;document.addEventListener('pointerdown',e=>{viewerActive=!!(e.target.closest&&e.target.closest('#viewer'))},true);
+document.addEventListener('keydown',e=>{const tg=e.target;if(tg&&/^(INPUT|SELECT|TEXTAREA)$/.test(tg.tagName))return;const k=keyOf(e);if(!k)return;
+  if(!fly.on){if(viewerActive&&world&&/^Key[WASD]$/.test(k))enterFly();else return}
+  e.preventDefault();fly.keys.add(k);fly.helpDismissed=true;if(!$('flyHelp').hidden)updFlyUI()},true);
+document.addEventListener('keyup',e=>{const k=keyOf(e);if(k)fly.keys.delete(k);if(e.key==='Shift'){fly.keys.delete('ShiftLeft');fly.keys.delete('ShiftRight')}},true);
 window.addEventListener('blur',()=>fly.keys.clear());
 (function(){const joy=$('joy'),knob=$('knob');let jid=null;
   const mv=e=>{const r=joy.getBoundingClientRect(),dx=e.clientX-(r.left+r.width/2),dy=e.clientY-(r.top+r.height/2),R=r.width/2,l=Math.hypot(dx,dy),k=l>R?R/l:1;fly.joy.x=dx*k/R;fly.joy.y=dy*k/R;knob.style.transform=`translate(${dx*k}px,${dy*k}px)`};
