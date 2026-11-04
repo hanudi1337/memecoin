@@ -1,0 +1,3 @@
+[submodule "ps5view/third-party/chiaki-ng"]
+	path = ps5view/third-party/chiaki-ng
+	url = https://github.com/streetpea/chiaki-ng.git
