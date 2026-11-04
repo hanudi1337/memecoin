@@ -11,7 +11,9 @@
 #include <stdint.h>
 #include <stdio.h>
 
-#if defined(__GNUC__) || defined(__clang__)
+#if defined(__MINGW32__) && defined(__MINGW_PRINTF_FORMAT)
+#define PV_PRINTF(fmt_idx, args_idx) __attribute__((format(__MINGW_PRINTF_FORMAT, fmt_idx, args_idx)))
+#elif defined(__GNUC__) || defined(__clang__)
 #define PV_PRINTF(fmt_idx, args_idx) __attribute__((format(printf, fmt_idx, args_idx)))
 #else
 #define PV_PRINTF(fmt_idx, args_idx)

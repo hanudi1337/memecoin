@@ -13,6 +13,12 @@ set(PS5VIEW_SOURCE_URL "https://github.com/hanudi1337/memecoin/tree/main/ps5view
 	CACHE STRING "Where the corresponding source code of this build can be obtained (AGPL-3.0)")
 option(PS5VIEW_ENABLE_TESTS "Build unit and integration tests" ON)
 
+if(MINGW)
+	# C99-conforming printf family (%zu, %lld) instead of the old msvcrt one,
+	# for our code as well as libchiaki's log messages.
+	add_compile_definitions(__USE_MINGW_ANSI_STDIO=1)
+endif()
+
 set(CHIAKI_DIR "${CMAKE_CURRENT_SOURCE_DIR}/third-party/chiaki-ng")
 if(NOT EXISTS "${CHIAKI_DIR}/lib/CMakeLists.txt")
 	message(FATAL_ERROR

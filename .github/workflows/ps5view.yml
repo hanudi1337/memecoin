@@ -1,0 +1,127 @@
+name: ps5view
+
+on:
+  push:
+    paths:
+      - "ps5view/**"
+      - ".gitmodules"
+      - ".github/workflows/ps5view.yml"
+  pull_request:
+    paths:
+      - "ps5view/**"
+      - ".gitmodules"
+      - ".github/workflows/ps5view.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  windows:
+    name: Windows x64 (MSYS2 MINGW64)
+    runs-on: windows-latest
+    defaults:
+      run:
+        shell: msys2 {0}
+    steps:
+      - name: Disable autocrlf
+        shell: pwsh
+        run: |
+          git config --global core.autocrlf false
+          git config --global core.eol lf
+
+      - uses: actions/checkout@v4
+
+      - name: Fetch chiaki-ng submodule
+        shell: pwsh
+        run: |
+          git submodule update --init ps5view/third-party/chiaki-ng
+          git -C ps5view/third-party/chiaki-ng submodule update --init --depth 1 third-party/nanopb third-party/jerasure third-party/gf-complete third-party/curl
+          if ($LASTEXITCODE -ne 0) { git -C ps5view/third-party/chiaki-ng submodule update --init third-party/nanopb third-party/jerasure third-party/gf-complete third-party/curl }
+
+      - uses: msys2/setup-msys2@v2
+        with:
+          msystem: MINGW64
+          update: true
+          install: git zip
+          pacboy: >-
+            cc:p
+            cmake:p
+            ninja:p
+            pkgconf:p
+            openssl:p
+            opus:p
+            json-c:p
+            miniupnpc:p
+            libevent:p
+            protobuf:p
+            python:p
+            python-protobuf:p
+            ffmpeg:p
+            SDL2:p
+
+      - name: Configure
+        run: cmake -S ps5view -B build -G Ninja -DCMAKE_BUILD_TYPE=Release
+
+      - name: Build
+        run: cmake --build build
+
+      - name: Unit tests
+        run: SDL_VIDEODRIVER=dummy SDL_AUDIODRIVER=dummy ./build/ps5view-tests.exe
+
+      - name: Integration tests
+        run: SDL_VIDEODRIVER=dummy SDL_AUDIODRIVER=dummy python ps5view/tests/integration.py build/ps5view.exe
+
+      - name: Package
+        run: |
+          set -e
+          dist=dist/ps5view
+          mkdir -p "$dist/licenses"
+          cp build/ps5view.exe "$dist/"
+          strip "$dist/ps5view.exe" || true
+          # all DLLs the program needs from MSYS2 (system DLLs stay in C:\Windows)
+          ldd build/ps5view.exe | awk '{print $3}' | grep -i '^/mingw64/' | sort -u | while read -r dll; do cp "$dll" "$dist/"; done
+          cp ps5view/COPYING ps5view/README.md "$dist/"
+          cp ps5view/third-party/chiaki-ng/LICENSES/* "$dist/licenses/"
+          {
+            echo "ps5view - Quellcode / source code (AGPL-3.0):"
+            echo "  https://github.com/${GITHUB_REPOSITORY}/tree/${GITHUB_SHA}/ps5view"
+            echo "libchiaki (chiaki-ng) commit: $(git -C ps5view/third-party/chiaki-ng rev-parse HEAD)"
+            echo "Third-party DLLs come from MSYS2 (https://packages.msys2.org); their sources are available there."
+          } > "$dist/SOURCE.txt"
+          ./build/ps5view.exe --version
+          (cd dist && zip -r ../ps5view-windows-x64.zip ps5view)
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ps5view-windows-x64
+          path: ps5view-windows-x64.zip
+          if-no-files-found: error
+
+  linux:
+    name: Linux (build + tests)
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Fetch chiaki-ng submodule
+        run: |
+          git submodule update --init ps5view/third-party/chiaki-ng
+          git -C ps5view/third-party/chiaki-ng submodule update --init --depth 1 third-party/nanopb third-party/jerasure third-party/gf-complete third-party/curl \
+            || git -C ps5view/third-party/chiaki-ng submodule update --init third-party/nanopb third-party/jerasure third-party/gf-complete third-party/curl
+
+      - name: Dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends cmake ninja-build pkg-config libssl-dev libopus-dev \
+            libjson-c-dev libminiupnpc-dev libevent-dev libavcodec-dev libavutil-dev libavformat-dev libswscale-dev \
+            libsdl2-dev protobuf-compiler python3-protobuf
+
+      - name: Configure
+        run: cmake -S ps5view -B build -G Ninja -DCMAKE_BUILD_TYPE=RelWithDebInfo
+
+      - name: Build
+        run: cmake --build build
+
+      - name: Tests
+        run: SDL_VIDEODRIVER=dummy SDL_AUDIODRIVER=dummy ctest --test-dir build --output-on-failure

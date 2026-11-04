@@ -7,6 +7,7 @@
 #define PV_ERRORS_H
 
 #include "diag.h"
+#include "util.h"
 
 #include <chiaki/session.h>
 
@@ -46,9 +47,7 @@ const PvAppReason *pv_app_reason_lookup(uint32_t code);
 
 void pv_failure_clear(PvFailure *f);
 void pv_failure_set(PvFailure *f, int exit_code, PvRetryClass retry, const char *hint, const char *fmt, ...)
-#if defined(__GNUC__) || defined(__clang__)
-	__attribute__((format(printf, 5, 6)))
-#endif
+	PV_PRINTF(5, 6)
 	;
 void pv_failure_from_app_reason(PvFailure *f, uint32_t code);
 // Session ended with `reason`. Returns with f->failed == false for a regular stop.

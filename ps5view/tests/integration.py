@@ -156,6 +156,14 @@ def main():
     check("stream --save stores the exact audio device name",
           saved.get("audio_device") == "System audio output device" and "0x80108b12" in p.out, p)
 
+    # ---- check ----
+    with FakePS5():
+        p = run("check")
+        check("check with reachable fake console",
+              p.returncode == 0 and "TCP 9295 ist erreichbar" in p.out and "PS5-FAKE" in p.out, p)
+    p = run("check")
+    check("check without console reports the failure", p.returncode == 3 and "[FAIL]" in p.out, p)
+
     p = run("stream", "--profile", "doesnotexist")
     check("stream: unknown profile", p.returncode == 2 and "fake" in p.out, p)
     p = run("stream", "--fps", "45")

@@ -99,6 +99,9 @@ class FakePS5:
                 data, addr = sock.recvfrom(2048)
             except socket.timeout:
                 continue
+            except ConnectionResetError:
+                # Windows reports an earlier ICMP "port unreachable" this way
+                continue
             except OSError:
                 return
             text = data.decode("ascii", "replace")
@@ -142,6 +145,9 @@ class FakePS5:
             try:
                 data, addr = sock.recvfrom(2048)
             except socket.timeout:
+                continue
+            except ConnectionResetError:
+                # Windows reports an earlier ICMP "port unreachable" this way
                 continue
             except OSError:
                 return
