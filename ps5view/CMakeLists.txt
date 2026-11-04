@@ -132,6 +132,9 @@ target_link_libraries(ps5view-core PUBLIC
 	${Opus_LIBRARIES}
 	OpenSSL::Crypto
 	Threads::Threads)
+if(UNIX)
+	target_link_libraries(ps5view-core PUBLIC m)
+endif()
 if(WIN32)
 	target_compile_definitions(ps5view-core PUBLIC WIN32_LEAN_AND_MEAN _WIN32_WINNT=0x0A00 UNICODE _UNICODE)
 	target_link_libraries(ps5view-core PUBLIC iphlpapi ws2_32 shell32 ole32 bcrypt crypt32)
@@ -159,6 +162,7 @@ if(PS5VIEW_ENABLE_TESTS)
 	enable_testing()
 	add_executable(ps5view-tests tests/test_main.c)
 	target_link_libraries(ps5view-tests PRIVATE ps5view-core)
+	target_include_directories(ps5view-tests PRIVATE ${Opus_INCLUDE_DIRS})
 	target_compile_definitions(ps5view-tests PRIVATE
 		PV_CHIAKI_SOURCE_DIR="${CHIAKI_DIR}"
 		PV_TEST_DATA_DIR="${CMAKE_CURRENT_SOURCE_DIR}/tests/data")

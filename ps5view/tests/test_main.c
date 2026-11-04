@@ -16,6 +16,9 @@
 #include <chiaki/common.h>
 
 #include <libavcodec/avcodec.h>
+#include <opus/opus.h>
+
+#include <math.h>
 
 #include <SDL.h>
 
@@ -461,6 +464,79 @@ static void test_audio_match(void)
 	CHECK(pv_audio_match_device("x", NULL, 0, &idx) == PV_AUDIO_MATCH_NONE);
 }
 
+static void pump_audio(PvAudio *a, int ms)
+{
+	for(int t = 0; t < ms; t += 5)
+	{
+		SDL_Event e;
+		while(SDL_PollEvent(&e))
+			pv_audio_handle_event(a, &e);
+		SDL_Delay(5);
+	}
+}
+
+// Opus packets -> libchiaki opus decoder -> our sink -> SDL (dummy driver).
+static void test_audio_pipeline(void)
+{
+#ifdef _WIN32
+	_putenv_s("SDL_AUDIODRIVER", "dummy");
+#else
+	setenv("SDL_AUDIODRIVER", "dummy", 1);
+#endif
+	SDL_SetMainReady();
+	if(SDL_Init(SDL_INIT_AUDIO | SDL_INIT_EVENTS) != 0)
+	{
+		fprintf(stderr, "skipping audio test: %s\n", SDL_GetError());
+		return;
+	}
+	int oerr = 0;
+	OpusEncoder *enc = opus_encoder_create(48000, 2, OPUS_APPLICATION_AUDIO, &oerr);
+	CHECK(enc != NULL);
+	for(int round = 0; round < 2 && enc; round++)
+	{
+		// round 0: default device; round 1: a device that does not exist (must stay silent, no fallback)
+		char err[128];
+		PvAudio *a = pv_audio_create(round == 0 ? NULL : "Gibt es nicht 123", 50, err, sizeof(err));
+		CHECK(a != NULL);
+		if(!a)
+			break;
+		ChiakiAudioSink sink;
+		pv_audio_get_sink(a, &sink);
+		ChiakiAudioHeader h;
+		chiaki_audio_header_set(&h, 2, 16, 48000, 480);
+		sink.header_cb(&h, sink.user);
+		pump_audio(a, 50);
+		int16_t pcm[480 * 2];
+		uint8_t pkt[1500];
+		for(int f = 0; f < 100; f++)
+		{
+			for(int i = 0; i < 480; i++)
+				pcm[i * 2] = pcm[i * 2 + 1] = (int16_t)(6000 * sin((f * 480 + i) * 2.0 * 3.14159265 * 440.0 / 48000.0));
+			opus_int32 n = opus_encode(enc, pcm, 480, pkt, sizeof(pkt));
+			CHECK(n > 0);
+			if(n > 0)
+				sink.frame_cb(pkt, (size_t)n, sink.user);
+			if(f % 10 == 0)
+				pump_audio(a, 0);
+		}
+		pump_audio(a, 20);
+		PvAudioStats st;
+		pv_audio_get_stats(a, &st);
+		fprintf(stderr, "audio pipeline (%s): %llu frames, device %s, %u ch, %u Hz, queue %u ms\n",
+				round == 0 ? "default" : "missing device", (unsigned long long)st.frames,
+				st.device_open ? "open" : "closed", st.channels, st.rate, st.queued_ms);
+		CHECK(st.frames == 100);
+		if(round == 0)
+			CHECK(st.device_open && st.channels == 2 && st.rate == 48000);
+		else
+			CHECK(!st.device_open); // never falls back to another device
+		pv_audio_destroy(a);
+	}
+	if(enc)
+		opus_encoder_destroy(enc);
+	SDL_Quit();
+}
+
 // Feeds a real H.264 stream through the decoder and the SDL presentation path.
 static void test_video_pipeline(void)
 {
@@ -563,7 +639,8 @@ int main(void)
 	test_config();
 	test_config_file();
 	test_register_helpers();
-	// test_audio_match(); -- enabled together with the audio module
+	test_audio_match();
+	test_audio_pipeline();
 	test_video_pipeline();
 	fprintf(stderr, "%d checks, %d failures\n", checks, failures);
 	return failures ? 1 : 0;

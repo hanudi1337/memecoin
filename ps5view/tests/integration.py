@@ -141,6 +141,21 @@ def main():
     p = run("stream", "--no-audio", "--retries", "2")
     check("stream: nothing listening -> refused, bounded retries",
           p.returncode == 3 and "9295" in p.out and "Aufgegeben nach 2" in p.out, p)
+    # ---- audio ----
+    p = run("list-audio")
+    check("list-audio lists the dummy device", p.returncode == 0 and "System audio output device" in p.out, p)
+    p = run("list-audio", "--test-tone", "system audio", "--seconds", "1")
+    check("list-audio --test-tone plays", p.returncode == 0 and "Testton beendet" in p.out, p)
+    p = run("stream", "--audio-device", "CABLE Input")
+    check("stream: missing audio device -> no fallback, device error",
+          p.returncode == 6 and "NICHT auf ein anderes" in p.out and "System audio output device" in p.out, p)
+    with FakePS5(session_reason="80108b12"):
+        p = run("stream", "--audio-device", "system", "--save")
+    with open(CONFIG, encoding="utf-8") as f:
+        saved = json.load(f)["profiles"][0]["stream"]
+    check("stream --save stores the exact audio device name",
+          saved.get("audio_device") == "System audio output device" and "0x80108b12" in p.out, p)
+
     p = run("stream", "--profile", "doesnotexist")
     check("stream: unknown profile", p.returncode == 2 and "fake" in p.out, p)
     p = run("stream", "--fps", "45")
