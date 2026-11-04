@@ -40,6 +40,8 @@ static void print_profile(const PvConfig *cfg, const PvProfile *p)
 		ADD("%s ", s->wake ? "wake" : "no-wake");
 	if(s->display >= 0)
 		ADD("display=%d ", s->display);
+	if(s->controller[0])
+		ADD("controller=%s ", s->controller);
 #undef ADD
 	if(settings[0])
 		pv_out("    Stream:      %s", settings);

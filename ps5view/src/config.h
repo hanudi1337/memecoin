@@ -25,6 +25,7 @@ typedef struct pv_stream_settings_t
 	int wake;           // -1 = not set, 0 = no, 1 = yes
 	char hwdec[24];     // "auto" / "none" / "d3d11va" / ... ; "" = not set
 	int display;        // monitor index for the window ; -1 = not set
+	char controller[12]; // announced controller type: "ds4" / "dualsense" ; "" = not set
 } PvStreamSettings;
 
 typedef struct pv_profile_t

@@ -19,8 +19,9 @@ PS5 spielst (Controller an der PS5, Bild per HDMI auf deinem Monitor).
 > **Hinweis zum Controller:** Jede Remote-Play-Verbindung meldet an der PS5 einen
 > virtuellen Controller an – das verlangt das Protokoll. ps5view sendet für diesen
 > Controller ausschließlich den Ruhezustand (keine Taste gedrückt, Sticks in der Mitte)
-> und meldet ihn als DualShock 4 an (kein Haptik-/Trigger-Kanal). Dein echter Controller
-> funktioniert ganz normal weiter.
+> und meldet ihn standardmäßig als DualShock 4 an (kein Haptik-/Trigger-Kanal). Dein echter
+> Controller funktioniert ganz normal weiter. Zeigt die PS5 deshalb einen Hinweis zum
+> DUALSHOCK 4 an, kannst du mit `--controller dualsense` (wie bei chiaki-ng üblich) umschalten.
 
 ---
 
@@ -201,6 +202,7 @@ Optionen von `stream`:
 | `--window-size <BxH>` | 1280x720 | Startgröße des Fensters |
 | `--display <n>` | – | Fenster auf Bildschirm n öffnen; `ps5view check` listet die Bildschirme mit ihrem Index |
 | `--fullscreen` | – | im Vollbild starten |
+| `--controller ds4\|dualsense` | ds4 | Typ des (immer unbetätigten) Controllers, den Remote Play an der PS5 anmeldet |
 | `--skip-check` | – | Konsolensuche vor dem Verbinden überspringen |
 | `--save` | – | angegebene Optionen im Profil speichern |
 
@@ -385,6 +387,12 @@ PlayStation Portal). Nach einem Absturz von ps5view hält die PS5 die alte Sitzu
 fest – ps5view versucht es deshalb automatisch mit 10, 20, 30 … Sekunden Pause erneut
 (höchstens `--retries` Mal). ps5view beendet Sitzungen beim Schließen des Fensters, bei Strg+C
 und beim Schließen des Konsolenfensters sauber, damit das selten passiert.
+
+### Hinweis der PS5 zum Controller
+
+Remote Play meldet immer einen virtuellen Controller an (siehe oben). Blendet die PS5 dazu
+einen Hinweis ein (z. B. dass ein DUALSHOCK 4 für PS5-Spiele nicht geeignet ist), mit
+`--controller dualsense --save` den Typ umstellen. ps5view sendet in beiden Fällen keine Eingaben.
 
 ### Anmelde-Passcode
 

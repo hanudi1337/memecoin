@@ -62,6 +62,7 @@ typedef struct
 	bool fullscreen;
 	const char *login_pin;
 	bool skip_check;
+	bool dualsense; // controller type announced to the console
 } StreamOpts;
 
 typedef struct
@@ -177,6 +178,7 @@ static void usage(void)
 	pv_out("  --window-size <BxH>     Startgröße des Fensters, z. B. 1280x720");
 	pv_out("  --display <n>           Fenster auf Bildschirm n öffnen (0 = erster)");
 	pv_out("  --fullscreen            im Vollbild starten");
+	pv_out("  --controller <typ>      angemeldeter (unbetätigter) Controller: ds4 (Standard) oder dualsense");
 	pv_out("  --skip-check            Konsolensuche vor dem Verbinden überspringen");
 	pv_out("  --save                  angegebene Stream-Optionen im Profil speichern");
 }
@@ -541,7 +543,7 @@ static bool run_session(Stream *s, PvFailure *f, uint64_t *connected_duration_ms
 	ci.video_profile.codec = s->opt.codec;
 	ci.video_profile_auto_downgrade = true;
 	ci.enable_keyboard = false;   // view-only
-	ci.enable_dualsense = false;  // DualShock 4 announcement: no haptics / trigger channels
+	ci.enable_dualsense = s->opt.dualsense; // only the type of the (idle) announced controller
 	ci.audio_video_disabled = s->audio ? CHIAKI_NONE_DISABLED : CHIAKI_AUDIO_DISABLED;
 	ci.auto_regist = false;
 	ci.holepunch_session = NULL;
@@ -725,7 +727,8 @@ static int stream_main(Stream *s)
 	}
 
 	LOGI("stream", "Nur Zuschauen: ps5view sendet keine Eingaben. Für Remote Play meldet sich trotzdem ein (immer"
-			" unbetätigter) zweiter Controller an der PS5 an - das ist technisch nicht vermeidbar.");
+			" unbetätigter) zweiter Controller (%s) an der PS5 an - das ist technisch nicht vermeidbar.",
+			s->opt.dualsense ? "DualSense" : "DualShock 4");
 
 	int rc = PV_EXIT_OK;
 	PvFailure f;
@@ -813,7 +816,7 @@ int pv_cmd_stream(int argc, char **argv)
 	const char *profile_name = NULL;
 	const char *res_s = NULL, *fps_s = NULL, *bitrate_s = NULL, *codec_s = NULL, *audio_s = NULL;
 	const char *wake_timeout_s = NULL, *retries_s = NULL, *hwdec_s = NULL, *renderer_s = NULL;
-	const char *size_s = NULL, *display_s = NULL, *login_pin_s = NULL;
+	const char *size_s = NULL, *display_s = NULL, *login_pin_s = NULL, *controller_s = NULL;
 	int wake = -1;
 	bool no_audio = false, fullscreen = false, save = false, skip_check = false;
 
@@ -827,7 +830,7 @@ int pv_cmd_stream(int argc, char **argv)
 				|| pv_args_value(&a, "--wake-timeout", &wake_timeout_s) || pv_args_value(&a, "--retries", &retries_s)
 				|| pv_args_value(&a, "--hwdec", &hwdec_s) || pv_args_value(&a, "--renderer", &renderer_s)
 				|| pv_args_value(&a, "--window-size", &size_s) || pv_args_value(&a, "--display", &display_s)
-				|| pv_args_value(&a, "--login-pin", &login_pin_s))
+				|| pv_args_value(&a, "--login-pin", &login_pin_s) || pv_args_value(&a, "--controller", &controller_s))
 			continue;
 		if(pv_args_flag(&a, "--wake")) { wake = 1; continue; }
 		if(pv_args_flag(&a, "--no-wake")) { wake = 0; continue; }
@@ -973,6 +976,20 @@ int pv_cmd_stream(int argc, char **argv)
 	}
 	o->login_pin = login_pin_s;
 	o->skip_check = skip_check;
+	if((v = controller_s ? controller_s : (ps->controller[0] ? ps->controller : NULL)))
+	{
+		if(pv_strcasecmp(v, "dualsense") == 0 || pv_strcasecmp(v, "ds") == 0)
+			o->dualsense = true;
+		else if(pv_strcasecmp(v, "ds4") == 0 || pv_strcasecmp(v, "dualshock4") == 0)
+			o->dualsense = false;
+		else
+		{
+			LOGE("stream", "--controller erwartet ds4 oder dualsense.");
+			bad = true;
+		}
+	}
+	if(!p->ps5)
+		o->dualsense = false;
 	if(bad)
 	{
 		pv_config_free(&cfg);
@@ -995,6 +1012,8 @@ int pv_cmd_stream(int argc, char **argv)
 			pv_strlcpy(ps->hwdec, hwdec_s, sizeof(ps->hwdec));
 		if(display_s)
 			ps->display = o->display;
+		if(controller_s)
+			pv_strlcpy(ps->controller, o->dualsense ? "dualsense" : "ds4", sizeof(ps->controller));
 		// the audio device is stored after it has been resolved to its exact name (below)
 	}
 

@@ -222,6 +222,8 @@ char *pv_config_to_json(const PvConfig *cfg)
 			json_object_object_add(s, "hwdec", json_object_new_string(st->hwdec));
 		if(st->display >= 0)
 			json_object_object_add(s, "display", json_object_new_int(st->display));
+		if(st->controller[0])
+			json_object_object_add(s, "controller", json_object_new_string(st->controller));
 		json_object_object_add(o, "stream", s);
 
 		json_object_array_add(arr, o);
@@ -349,6 +351,8 @@ static bool parse_profile(json_object *o, PvProfile *p, size_t index, char *err,
 			pv_strlcpy(st->hwdec, v, sizeof(st->hwdec));
 		if(get_int(s, "display", &iv) && iv >= 0 && iv < 16)
 			st->display = (int)iv;
+		if((v = get_str(s, "controller")))
+			pv_strlcpy(st->controller, v, sizeof(st->controller));
 	}
 #undef FAIL
 	return true;
