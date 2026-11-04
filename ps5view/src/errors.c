@@ -230,7 +230,8 @@ void pv_failure_from_regist(PvFailure *f, const PvDiagInfo *diag, const char *ho
 	else if(diag->regist_search_refused)
 		pv_failure_set(f, PV_EXIT_CONSOLE, PV_RETRY_NO,
 				"- An der PS5 " HINT_LINK_DEVICE " öffnen und den Bildschirm mit der PIN offen lassen, bis ps5view fertig ist.\n"
-				"- Die gerade angezeigte PIN verwenden (sie ändert sich bei jedem Öffnen).",
+				"- Die gerade angezeigte PIN verwenden (sie ändert sich bei jedem Öffnen).\n"
+				"- Stimmt die IP-Adresse? (ps5view discover)",
 				"Die PS5 (%s) hat die Registrierungsanfrage abgelehnt: Der Bildschirm \"Gerät verknüpfen\" ist nicht geöffnet.", h);
 	else if(diag->regist_search_timeout)
 		pv_failure_set(f, PV_EXIT_NETWORK, PV_RETRY_NO,
