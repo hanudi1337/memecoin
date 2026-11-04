@@ -271,7 +271,8 @@ bool pv_regist_key_credential(const uint8_t regist_key[16], uint64_t *credential
 	return true;
 }
 
-PvWakeResult pv_wake_and_wait(const char *host, const uint8_t regist_key[16], bool ps5, uint32_t timeout_ms, PvHostInfo *info)
+PvWakeResult pv_wake_and_wait(const char *host, const uint8_t regist_key[16], bool ps5, uint32_t timeout_ms,
+		PvHostInfo *info, PvWakeTick tick, void *tick_user)
 {
 	uint64_t credential;
 	if(!pv_regist_key_credential(regist_key, &credential))
@@ -286,6 +287,8 @@ PvWakeResult pv_wake_and_wait(const char *host, const uint8_t regist_key[16], bo
 	unsigned wakes = 0;
 	while(!pv_interrupted())
 	{
+		if(tick && !tick(tick_user))
+			return PV_WAKE_INTERRUPTED;
 		uint64_t now = pv_now_ms();
 		if(now - start >= timeout_ms)
 			break;
@@ -320,8 +323,13 @@ PvWakeResult pv_wake_and_wait(const char *host, const uint8_t regist_key[16], bo
 					st == PV_HOST_STANDBY ? "Ruhemodus" : st == PV_HOST_NO_RESPONSE ? "keine Antwort" : "unbekannt");
 			last_progress = now;
 		}
-		if(!pv_sleep_interruptible(500))
-			break;
+		for(int i = 0; i < 5; i++)
+		{
+			if(tick && !tick(tick_user))
+				return PV_WAKE_INTERRUPTED;
+			if(!pv_sleep_interruptible(100))
+				break;
+		}
 	}
 	if(pv_interrupted())
 		return PV_WAKE_INTERRUPTED;

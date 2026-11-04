@@ -61,7 +61,10 @@ typedef enum
 
 // The wake-up "user credential" is the registration key interpreted as hex.
 bool pv_regist_key_credential(const uint8_t regist_key[16], uint64_t *credential);
-PvWakeResult pv_wake_and_wait(const char *host, const uint8_t regist_key[16], bool ps5, uint32_t timeout_ms, PvHostInfo *info);
+// tick (may be NULL) is called regularly; returning false aborts (PV_WAKE_INTERRUPTED).
+typedef bool (*PvWakeTick)(void *user);
+PvWakeResult pv_wake_and_wait(const char *host, const uint8_t regist_key[16], bool ps5, uint32_t timeout_ms,
+		PvHostInfo *info, PvWakeTick tick, void *tick_user);
 
 const char *pv_host_state_text(ChiakiDiscoveryHostState s);
 

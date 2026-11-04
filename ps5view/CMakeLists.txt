@@ -96,6 +96,7 @@ configure_file(src/pv_version.h.in "${CMAKE_CURRENT_BINARY_DIR}/generated/pv_ver
 # ps5view
 # ---------------------------------------------------------------------------
 set(PV_CORE_SOURCES
+	src/app.c
 	src/args.c
 	src/audio.c
 	src/cmd_account.c
@@ -158,7 +159,9 @@ if(PS5VIEW_ENABLE_TESTS)
 	enable_testing()
 	add_executable(ps5view-tests tests/test_main.c)
 	target_link_libraries(ps5view-tests PRIVATE ps5view-core)
-	target_compile_definitions(ps5view-tests PRIVATE PV_CHIAKI_SOURCE_DIR="${CHIAKI_DIR}")
+	target_compile_definitions(ps5view-tests PRIVATE
+		PV_CHIAKI_SOURCE_DIR="${CHIAKI_DIR}"
+		PV_TEST_DATA_DIR="${CMAKE_CURRENT_SOURCE_DIR}/tests/data")
 	add_test(NAME unit COMMAND ps5view-tests)
 
 	find_package(Python3 COMPONENTS Interpreter QUIET)
