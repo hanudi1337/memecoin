@@ -303,6 +303,7 @@ static void test_config(void)
 	pv_strlcpy(a->stream.controller, "dualsense", sizeof(a->stream.controller));
 	PvProfile *b = pv_config_add(&cfg);
 	make_profile(b, "zweitkonto", "192.168.178.88");
+	a = &cfg.profiles[0]; // pv_config_add() may have moved the array
 	pv_strlcpy(cfg.default_profile, "main", sizeof(cfg.default_profile));
 
 	char *json = pv_config_to_json(&cfg);
