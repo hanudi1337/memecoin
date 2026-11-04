@@ -62,7 +62,8 @@ ps5view ist ein Kommandozeilenprogramm. Öffne im entpackten Ordner eine **Power
 (Shift + Rechtsklick > „PowerShell-Fenster hier öffnen“) oder eine Eingabeaufforderung.
 
 Beim ersten Start fragt die Windows-Firewall, ob ps5view kommunizieren darf:
-**„Private Netzwerke“ erlauben.**
+**„Private Netzwerke“ erlauben.** Da die exe nicht signiert ist, kann Windows SmartScreen
+„Der Computer wurde durch Windows geschützt“ anzeigen: „Weitere Informationen“ > „Trotzdem ausführen“.
 
 ### 1.3 PS5 finden: `discover`
 
