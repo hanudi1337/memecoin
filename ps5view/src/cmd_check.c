@@ -235,6 +235,14 @@ static void check_graphics(Summary *s)
 	}
 	else
 		report(s, 2, PV_EXIT_DEVICE, "Grafik: kein Renderer verfügbar: %s", SDL_GetError());
+	for(int i = 0; i < SDL_GetNumVideoDisplays(); i++)
+	{
+		SDL_Rect b;
+		const char *name = SDL_GetDisplayName(i);
+		if(SDL_GetDisplayBounds(i, &b) == 0)
+			report(s, 3, 0, "Bildschirm %d: \"%s\" %dx%d an Position (%d,%d)  ->  stream --display %d", i, name ? name : "?",
+					b.w, b.h, b.x, b.y, i);
+	}
 	if(r)
 		SDL_DestroyRenderer(r);
 	SDL_DestroyWindow(w);

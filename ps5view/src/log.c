@@ -307,6 +307,27 @@ void pv_out(const char *fmt, ...)
 	}
 }
 
+void pv_out_private(const char *fmt, ...)
+{
+	char buf[LOG_LINE_MAX];
+	va_list ap;
+	va_start(ap, fmt);
+	vsnprintf(buf, sizeof(buf), fmt, ap);
+	va_end(ap);
+	if(g_log.initialized)
+		chiaki_mutex_lock(&g_log.mutex);
+	fputs(buf, stdout);
+	fputc('\n', stdout);
+	fflush(stdout);
+	if(g_log.initialized)
+	{
+		char ts[32];
+		pv_format_time(ts, sizeof(ts), PV_TIME_LOG);
+		write_file_line(ts, PV_LOG_INFO, "out", "(Ausgabe mit Kontodaten - nicht protokolliert)");
+		chiaki_mutex_unlock(&g_log.mutex);
+	}
+}
+
 static void chiaki_log_cb(ChiakiLogLevel level, const char *msg, void *user)
 {
 	(void)user;

@@ -17,6 +17,7 @@ void pv_stream_settings_init(PvStreamSettings *s)
 {
 	memset(s, 0, sizeof(*s));
 	s->wake = -1;
+	s->display = -1;
 }
 
 void pv_stream_settings_free(PvStreamSettings *s)
@@ -219,6 +220,8 @@ char *pv_config_to_json(const PvConfig *cfg)
 			json_object_object_add(s, "wake", json_object_new_boolean(st->wake ? 1 : 0));
 		if(st->hwdec[0])
 			json_object_object_add(s, "hwdec", json_object_new_string(st->hwdec));
+		if(st->display >= 0)
+			json_object_object_add(s, "display", json_object_new_int(st->display));
 		json_object_object_add(o, "stream", s);
 
 		json_object_array_add(arr, o);
@@ -344,6 +347,8 @@ static bool parse_profile(json_object *o, PvProfile *p, size_t index, char *err,
 			st->wake = json_object_get_boolean(w) ? 1 : 0;
 		if((v = get_str(s, "hwdec")))
 			pv_strlcpy(st->hwdec, v, sizeof(st->hwdec));
+		if(get_int(s, "display", &iv) && iv >= 0 && iv < 16)
+			st->display = (int)iv;
 	}
 #undef FAIL
 	return true;

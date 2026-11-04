@@ -47,6 +47,8 @@ void pv_logv(PvLogLevel level, const char *tag, const char *fmt, va_list ap);
 
 // Result output for the user: stdout, without timestamp, mirrored into the log file.
 void pv_out(const char *fmt, ...) PV_PRINTF(1, 2);
+// Like pv_out, but never written to the log file (account id etc.).
+void pv_out_private(const char *fmt, ...) PV_PRINTF(1, 2);
 
 // libchiaki bridge. All libchiaki objects log into this ChiakiLog.
 ChiakiLog *pv_chiaki_log(void);

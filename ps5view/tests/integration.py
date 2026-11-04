@@ -20,6 +20,13 @@ sys.path.insert(0, HERE)
 from fake_ps5 import FakePS5  # noqa: E402
 from fake_psn_auth import FakePSNAuth, expected_account_id  # noqa: E402
 
+# readable CI logs on Windows (default would be the ANSI code page)
+for stream in (sys.stdout, sys.stderr):
+    try:
+        stream.reconfigure(encoding="utf-8", errors="replace")
+    except AttributeError:
+        pass
+
 EXE = os.path.abspath(sys.argv[1])
 TMP = tempfile.mkdtemp(prefix="ps5view-it-")
 CONFIG = os.path.join(TMP, "config.json")
@@ -74,9 +81,13 @@ def main():
     check("unknown command -> usage error", p.returncode == 1, p)
     p = run("stream", "--bogus")
     check("unknown option -> usage error", p.returncode == 1 and "--bogus" in p.out, p)
+    p = run("register", "--help")
+    check("output is UTF-8 (umlauts)", p.returncode == 0 and "Schlüssel" in p.out, p)
 
     # ---- discover ----
     with FakePS5(state="standby"):
+        # also queries the PS4 port 987 (nothing listens there -> ICMP unreachable,
+        # which must not kill discovery on Windows)
         p = run("discover", "--host", "127.0.0.1", "--timeout", "2")
         check("discover finds fake console in standby", p.returncode == 0 and "PS5-FAKE" in p.out and "Ruhemodus" in p.out, p)
     p = run("discover", "--host", "127.0.0.1", "--timeout", "1")

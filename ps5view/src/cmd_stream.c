@@ -963,6 +963,8 @@ int pv_cmd_stream(int argc, char **argv)
 		else
 			o->display = (int)ul;
 	}
+	else if(ps->display >= 0)
+		o->display = ps->display;
 	o->fullscreen = fullscreen;
 	if(login_pin_s && !parse_digits(login_pin_s, 4, 8))
 	{
@@ -991,6 +993,8 @@ int pv_cmd_stream(int argc, char **argv)
 			ps->wake = wake;
 		if(hwdec_s)
 			pv_strlcpy(ps->hwdec, hwdec_s, sizeof(ps->hwdec));
+		if(display_s)
+			ps->display = o->display;
 		// the audio device is stored after it has been resolved to its exact name (below)
 	}
 

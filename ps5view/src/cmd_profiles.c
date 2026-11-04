@@ -38,6 +38,8 @@ static void print_profile(const PvConfig *cfg, const PvProfile *p)
 		ADD("hwdec=%s ", s->hwdec);
 	if(s->wake >= 0)
 		ADD("%s ", s->wake ? "wake" : "no-wake");
+	if(s->display >= 0)
+		ADD("display=%d ", s->display);
 #undef ADD
 	if(settings[0])
 		pv_out("    Stream:      %s", settings);

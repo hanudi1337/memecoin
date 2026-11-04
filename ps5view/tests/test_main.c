@@ -299,6 +299,7 @@ static void test_config(void)
 	a->stream.fps = 60;
 	a->stream.audio_device = pv_strdup("CABLE Input (VB-Audio Virtual Cable)");
 	a->stream.wake = 1;
+	a->stream.display = 1;
 	PvProfile *b = pv_config_add(&cfg);
 	make_profile(b, "zweitkonto", "192.168.178.88");
 	pv_strlcpy(cfg.default_profile, "main", sizeof(cfg.default_profile));
@@ -319,11 +320,11 @@ static void test_config(void)
 		CHECK(memcmp(m->account_id, a->account_id, 8) == 0);
 		CHECK(m->has_mac && memcmp(m->mac, a->mac, 6) == 0);
 		CHECK_STR(m->stream.audio_device, "CABLE Input (VB-Audio Virtual Cable)");
-		CHECK(m->stream.wake == 1 && m->stream.fps == 60);
+		CHECK(m->stream.wake == 1 && m->stream.fps == 60 && m->stream.display == 1);
 		CHECK_STR(m->stream.resolution, "1080p");
 	}
 	PvProfile *z = pv_config_find(&back, "zweitkonto");
-	CHECK(z && z->stream.wake == -1 && z->stream.audio_device == NULL);
+	CHECK(z && z->stream.wake == -1 && z->stream.audio_device == NULL && z->stream.display == -1);
 
 	CHECK(pv_config_select(&back, NULL, err, sizeof(err)) == m);
 	CHECK(pv_config_select(&back, "zweitkonto", err, sizeof(err)) == z);

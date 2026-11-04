@@ -159,6 +159,13 @@ int main(int argc_raw, char **argv_raw)
 	for(int i = 1; i < argc; i++)
 	{
 		const char *a = argv[i];
+		if((strcmp(a, "--config") == 0 || strcmp(a, "--log-file") == 0) && i + 1 >= argc)
+		{
+			pv_log_init(NULL, 0);
+			LOGE("main", "Option %s braucht einen Wert, z. B. %s <datei>.", a, a);
+			free(rest);
+			return PV_EXIT_USAGE;
+		}
 		if(strcmp(a, "-v") == 0 || strcmp(a, "--verbose") == 0)
 			pv_global.verbose = true;
 		else if(strcmp(a, "--trace") == 0)
@@ -196,7 +203,8 @@ int main(int argc_raw, char **argv_raw)
 			print_license();
 		else
 			print_usage();
-		bool pause = nrest == 0 && !want_version && !want_help && !want_license && pv_console_owned_by_us();
+		bool pause = nrest == 0 && !want_version && !want_help && !want_license && pv_console_owned_by_us()
+				&& pv_stdin_is_terminal();
 		if(pause)
 		{
 			pv_out("%s", "");
@@ -250,7 +258,8 @@ int main(int argc_raw, char **argv_raw)
 	LOGD("main", "Beendet mit Code %d", rc);
 	pv_log_close();
 	pv_shutdown_complete();
-	if(rc != PV_EXIT_OK && rc != PV_EXIT_INTERRUPTED && pv_console_owned_by_us())
+	// Started by double click: keep the window open so the message can be read.
+	if(rc != PV_EXIT_OK && rc != PV_EXIT_INTERRUPTED && pv_console_owned_by_us() && pv_stdin_is_terminal())
 		pv_console_pause();
 	free(log_path);
 	free(rest);

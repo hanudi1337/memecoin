@@ -14,6 +14,10 @@
 #ifdef _WIN32
 #include <winsock2.h>
 #include <ws2tcpip.h>
+#include <mswsock.h>
+#ifndef SIO_UDP_CONNRESET
+#define SIO_UDP_CONNRESET _WSAIOW(IOC_VENDOR, 12)
+#endif
 #else
 #include <arpa/inet.h>
 #include <netdb.h>
@@ -159,6 +163,17 @@ int pv_discover(const PvDiscoverOptions *opt, PvHostInfo *out, size_t max_out, c
 		chiaki_mutex_fini(&c.mutex);
 		return -1;
 	}
+#ifdef _WIN32
+	// Windows reports an ICMP "port unreachable" from an earlier sendto() as
+	// WSAECONNRESET on the next recvfrom(); libchiaki's discovery thread would
+	// then stop and miss the answers of all other consoles. Switch that off.
+	{
+		BOOL report = FALSE;
+		DWORD bytes = 0;
+		if(WSAIoctl(discovery.socket, SIO_UDP_CONNRESET, &report, sizeof(report), NULL, 0, &bytes, NULL, NULL) != 0)
+			LOGD("discover", "SIO_UDP_CONNRESET nicht gesetzt (%d)", WSAGetLastError());
+	}
+#endif
 	ChiakiDiscoveryThread thread;
 	cerr = chiaki_discovery_thread_start(&thread, &discovery, discovery_cb, &c);
 	if(cerr != CHIAKI_ERR_SUCCESS)

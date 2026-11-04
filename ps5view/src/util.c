@@ -15,6 +15,7 @@
 
 #ifdef _WIN32
 #include <windows.h>
+#include <objbase.h>
 #include <shellapi.h>
 #include <io.h>
 #include <fcntl.h>
@@ -934,7 +935,11 @@ bool pv_open_url(const char *url)
 	wchar_t *w = pv_utf8_to_wide(url);
 	if(!w)
 		return false;
+	// ShellExecute may hand the URL to COM-based handlers (default browser).
+	HRESULT com = CoInitializeEx(NULL, COINIT_APARTMENTTHREADED | COINIT_DISABLE_OLE1DDE);
 	HINSTANCE r = ShellExecuteW(NULL, L"open", w, NULL, NULL, SW_SHOWNORMAL);
+	if(SUCCEEDED(com))
+		CoUninitialize();
 	free(w);
 	return (INT_PTR)r > 32;
 #else

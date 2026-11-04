@@ -386,11 +386,12 @@ int pv_cmd_account_id(int argc, char **argv)
 
 	pv_out("%s", "");
 	if(online_id)
-		pv_out("PSN-Konto:   %s", online_id);
-	pv_out("Account-ID:  %s", b64);
+		pv_out_private("PSN-Konto:   %s", online_id);
+	pv_out_private("Account-ID:  %s", b64);
 	pv_out("%s", "");
 	pv_out("Nächster Schritt: An der PS5 \"Einstellungen > System > Remote Play > Gerät verknüpfen\" öffnen und dann:");
-	pv_out("  ps5view register --host <IP der PS5> --account-id %s --pin <8-stellige PIN>", b64);
+	pv_out_private("  ps5view register --host <IP der PS5> --account-id %s --pin <8-stellige PIN>", b64);
+	LOGD("account", "Account-ID ermittelt (%.4s...)", b64);
 
 out:
 	if(tok_json)
