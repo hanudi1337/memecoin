@@ -3,6 +3,7 @@
 // Unit tests for ps5view. Run: ps5view-tests (or ctest).
 
 #include "audio.h"
+#include "chiaki_patch.h"
 #include "config.h"
 #include "diag.h"
 #include "discover.h"
@@ -247,6 +248,8 @@ static void test_errors(void)
 
 	pv_failure_from_session(&f, CHIAKI_QUIT_REASON_STREAM_CONNECTION_REMOTE_DISCONNECTED, "Remote Play session ended", &d, "h");
 	CHECK(f.failed && strstr(f.message, "Remote Play session ended"));
+	CHECK(f.retry == PV_RETRY_NO); // never reconnect after the console ended the stream on purpose
+	CHECK(strstr(f.hint, "zweiten PSN-Konto") != NULL);
 
 	pv_failure_from_session(&f, CHIAKI_QUIT_REASON_STREAM_CONNECTION_REMOTE_SHUTDOWN, "Server shutting down", &d, "h");
 	CHECK(!f.failed && f.exit_code == 0 && f.message[0]);
@@ -630,11 +633,19 @@ static void test_video_pipeline(void)
 #endif
 }
 
+// The view-only switch must be compiled into chiaki-lib (cmake/PatchLibchiaki.cmake)
+// and default to libchiaki's normal behaviour.
+static void test_chiaki_patch(void)
+{
+	CHECK(ps5view_announce_controller == true);
+}
+
 int main(void)
 {
 	pv_log_init(NULL, 0);
 	pv_log_set_console_level(PV_LOG_WARN);
 	chiaki_lib_init();
+	test_chiaki_patch();
 	test_util();
 	test_oauth();
 	test_diag();

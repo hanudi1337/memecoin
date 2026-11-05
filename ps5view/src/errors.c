@@ -22,14 +22,14 @@ const PvAppReason pv_app_reasons[] = {
 	{ 0x80108b02,
 		"Die Konsole akzeptiert die PSN-Account-ID nicht (0x80108b02).",
 		"- Account-ID neu ermitteln: ps5view account-id\n"
-		"- Es muss das PSN-Konto sein, mit dem du an der PS5 angemeldet bist (bei mehreren Benutzern genau dieser Benutzer).\n"
+		"- Das PSN-Konto muss als Benutzer auf der PS5 eingerichtet sein (auch ein Zweitkonto nur zum Zuschauen).\n"
 		"- Das Konto muss an der PS5 mindestens einmal online angemeldet gewesen sein.",
 		PV_EXIT_AUTH, PV_RETRY_NO },
 	{ 0x80108b09,
 		"Registrierung abgelehnt: Die PIN ist falsch oder abgelaufen (0x80108b09).",
 		"- An der PS5: " HINT_LINK_DEVICE ". Die 8-stellige PIN gilt nur, solange dieser Bildschirm offen ist (wenige Minuten).\n"
 		"- Neue PIN anzeigen lassen und sofort erneut registrieren: ps5view register --host <ip> --account-id <id> --pin <neue PIN>\n"
-		"- Account-ID prüfen: Sie muss zu dem PSN-Konto gehören, das an der PS5 angemeldet ist.",
+		"- Account-ID prüfen: Sie muss zu einem PSN-Konto gehören, das als Benutzer auf der PS5 eingerichtet ist.",
 		PV_EXIT_AUTH, PV_RETRY_NO },
 	{ 0x80108b10,
 		"Remote Play ist bereits durch ein anderes Gerät belegt (0x80108b10).",
@@ -199,9 +199,15 @@ void pv_failure_from_session(PvFailure *f, ChiakiQuitReason reason, const char *
 				HINT_FIREWALL_UDP,
 				"Die Streamverbindung zur PS5 ist abgebrochen.");
 	else if(reason == CHIAKI_QUIT_REASON_STREAM_CONNECTION_REMOTE_DISCONNECTED)
-		pv_failure_set(f, PV_EXIT_CONSOLE, PV_RETRY_FAST,
-				"- Wurde Remote Play an der PS5 beendet oder hat sich ein anderes Gerät verbunden?\n"
-				"- Bei instabilem WLAN: Bitrate senken (--bitrate 8000) oder LAN-Kabel verwenden.",
+		// The console ended the stream on purpose. Reconnecting automatically would be
+		// wrong: the typical cause is the local controller taking back the same PSN
+		// account, and a reconnect would switch that controller off again.
+		pv_failure_set(f, PV_EXIT_CONSOLE, PV_RETRY_NO,
+				"- Häufigste Ursache: Am Controller der PS5 wurde dasselbe PSN-Konto gewählt, mit dem ps5view registriert ist.\n"
+				"  Die PS5 beendet dann Remote Play. Lösung: ps5view mit einem zweiten PSN-Konto registrieren, das nur zuschaut\n"
+				"  (README: \"Mit nur einem Controller an der PS5 spielen\"), oder --controller none ausprobieren.\n"
+				"- Sonst: Wurde Remote Play an der PS5 beendet oder hat sich ein anderes Gerät verbunden?\n"
+				"- ps5view verbindet sich in diesem Fall absichtlich nicht automatisch neu. Neu starten: ps5view stream",
 				"Die PS5 hat den Stream beendet: \"%s\".", reason_str && *reason_str ? reason_str : "ohne Begründung");
 	else if(reason == CHIAKI_QUIT_REASON_PSN_REGIST_FAILED)
 		pv_failure_set(f, PV_EXIT_AUTH, PV_RETRY_NO, "", "PSN-Registrierung fehlgeschlagen.");
@@ -225,7 +231,7 @@ void pv_failure_from_regist(PvFailure *f, const PvDiagInfo *diag, const char *ho
 	else if(diag->regist_http_code && diag->regist_http_code != 200)
 		pv_failure_set(f, PV_EXIT_AUTH, PV_RETRY_NO,
 				"- PIN neu anfordern (" HINT_LINK_DEVICE ") und sofort verwenden.\n"
-				"- Account-ID prüfen (ps5view account-id): Sie muss zum an der PS5 angemeldeten PSN-Konto gehören.",
+				"- Account-ID prüfen (ps5view account-id): Sie muss zu einem PSN-Konto gehören, das als Benutzer auf der PS5 eingerichtet ist.",
 				"Die PS5 hat die Registrierung abgelehnt (HTTP %d).", diag->regist_http_code);
 	else if(diag->regist_search_refused)
 		pv_failure_set(f, PV_EXIT_CONSOLE, PV_RETRY_NO,

@@ -16,12 +16,17 @@ PS5 spielst (Controller an der PS5, Bild per HDMI auf deinem Monitor).
 * Basiert auf **libchiaki** aus [chiaki-ng](https://github.com/streetpea/chiaki-ng)
   (AGPL-3.0). Das Sony-Protokoll wird nicht nachgebaut.
 
-> **Hinweis zum Controller:** Jede Remote-Play-Verbindung meldet an der PS5 einen
-> virtuellen Controller an – das verlangt das Protokoll. ps5view sendet für diesen
-> Controller ausschließlich den Ruhezustand (keine Taste gedrückt, Sticks in der Mitte)
-> und meldet ihn standardmäßig als DualShock 4 an (kein Haptik-/Trigger-Kanal). Dein echter
-> Controller funktioniert ganz normal weiter. Zeigt die PS5 deshalb einen Hinweis zum
-> DUALSHOCK 4 an, kannst du mit `--controller dualsense` (wie bei chiaki-ng üblich) umschalten.
+> **Wichtig, wenn du mit nur einem Controller direkt an der PS5 spielst:** Remote Play bindet
+> sich an das PSN-Konto, mit dem ps5view registriert ist. Beim Verbinden schaltet die PS5 deinen
+> Controller aus. Nach einem Druck auf die PS-Taste fragt sie „Wer benutzt diesen Controller?“.
+> Wählst du dort **dasselbe** Konto, beendet die PS5 Remote Play. Lösung: ps5view mit einem
+> **zweiten PSN-Konto nur zum Zuschauen** registrieren. Du spielst weiter mit deinem Hauptkonto,
+> Trophäen und Spielstände bleiben dort. Anleitung:
+> [1.8 Mit nur einem Controller an der PS5 spielen](#18-mit-nur-einem-controller-an-der-ps5-spielen).
+>
+> ps5view sendet nie Eingaben. Für den angemeldeten virtuellen Controller schickt es nur den
+> Ruhezustand (keine Taste, Sticks in der Mitte). Mit `--controller none` gibt es zusätzlich ein
+> Experiment ganz ohne Controller-Anmeldung.
 
 ---
 
@@ -91,8 +96,11 @@ Antwortet nichts, kannst du die IP direkt abfragen: `.\ps5view.exe discover --ho
 .\ps5view.exe account-id
 ```
 
-1. Der Browser öffnet die Sony-Anmeldung. Melde dich mit **dem PSN-Konto an, das an der
-   PS5 angemeldet ist**.
+1. Der Browser öffnet die Sony-Anmeldung. Melde dich mit dem PSN-Konto an, das ps5view nutzen
+   soll. Es muss als Benutzer auf der PS5 eingerichtet sein. **Spielst du mit nur einem Controller
+   direkt an der PS5, nimm dafür ein zweites Konto** (siehe
+   [1.8](#18-mit-nur-einem-controller-an-der-ps5-spielen)), sonst beendet die PS5 Remote Play,
+   sobald du am Controller dein Hauptkonto wählst.
 2. Danach landet der Browser auf einer fast leeren Seite (oft nur „redirect“). Kopiere die
    **komplette Adresse** aus der Adresszeile (beginnt mit
    `https://remoteplay.dl.playstation.net/remoteplay/redirect?code=...`).
@@ -146,9 +154,67 @@ Windows-Soundeinstellungen > Aufnahme, und nicht aus deinen Lautsprechern):
 * `--wake` weckt die PS5 aus dem Ruhemodus und wartet, bis sie bereit ist.
 * `--save` merkt sich die angegebenen Optionen im Profil – danach genügt `.\ps5view.exe stream`.
 
+Beim Verbinden schaltet die PS5 deinen Controller aus: **PS-Taste drücken und dein Konto wählen**
+(mit nur einem Controller siehe [1.8](#18-mit-nur-einem-controller-an-der-ps5-spielen)).
+
 Fenster: frei skalierbar (Bild bleibt im richtigen Seitenverhältnis), **F11**, **Alt+Enter**
 oder **Doppelklick** = Vollbild, **Esc** = Vollbild verlassen, **Fenster schließen** oder
 **Strg+C** in der Konsole = Verbindung sauber beenden.
+
+### 1.8 Mit nur einem Controller an der PS5 spielen
+
+So verhält sich die PS5. Nutzer haben es auf einer PS5 Pro (Firmware 10.20) getestet
+([phantomptr/ps5upload#649](https://github.com/phantomptr/ps5upload/issues/649)), für die PS4 hat es der
+chiaki-Entwickler bestätigt ([thestr4ng3r/chiaki#101](https://github.com/thestr4ng3r/chiaki/issues/101)):
+
+1. Sobald sich eine Remote-Play-App verbindet (ps5view, PS Remote Play, chiaki-ng …), schaltet die
+   PS5 deinen Controller aus.
+2. Drückst du die PS-Taste, fragt die PS5 „Wer benutzt diesen Controller?“.
+3. Wählst du das Konto, mit dem die Remote-Play-App registriert ist, **beendet die PS5 Remote Play**.
+   ps5view verbindet sich danach absichtlich nicht automatisch neu, sonst ginge dein Controller
+   sofort wieder aus.
+4. Wählst du ein **anderes** Konto, läuft der Stream weiter.
+
+**Lösung: ein kostenloses zweites PSN-Konto nur für ps5view.** Einmalige Einrichtung:
+
+1. Ein zweites PSN-Konto anlegen (eigene E-Mail-Adresse), z. B. an der PS5 über „Benutzer hinzufügen“,
+   und an der PS5 einmal mit diesem Konto anmelden.
+2. Als Zweitkonto an der PS5: Einstellungen > System > Remote Play > **Gerät verknüpfen** (PIN anzeigen).
+3. Am PC die Account-ID des **Zweitkontos** holen (beim Sony-Login mit dem Zweitkonto anmelden):
+
+   ```powershell
+   .\ps5view.exe account-id
+   ```
+
+4. Mit dieser ID registrieren:
+
+   ```powershell
+   .\ps5view.exe register --host 192.168.178.88 --account-id <ID des Zweitkontos> --pin <PIN> --name zuschauen --default
+   ```
+
+5. An der PS5 wieder zum Hauptkonto wechseln.
+
+Jedes Mal beim Streamen:
+
+1. `.\ps5view.exe stream` starten (das Profil „zuschauen“ ist Standard).
+2. Dein Controller geht aus: **PS-Taste drücken und dein Hauptkonto wählen**. Der Stream läuft weiter.
+3. Weiterspielen. Läuft das Spiel noch nicht, starte es mit dem Hauptkonto.
+
+Du spielst also ganz normal mit deinem Hauptkonto (Trophäen, Spielstände, Freunde). Das
+Zweitkonto ist nur im Hintergrund angemeldet und schaut zu. Da ps5view nie Tasten drückt, tritt
+es in Spielen nicht als zweiter Spieler bei.
+
+**Experiment ohne Zweitkonto: `--controller none`.** Damit meldet ps5view **keinen** Controller an und
+sendet **keinerlei** Controllerdaten. Ob die PS5 deinen Controller dann trotzdem abschaltet, hat
+noch niemand getestet. Probier es mit dem Profil deines Hauptkontos:
+
+```powershell
+.\ps5view.exe stream --profile <Hauptkonto-Profil> --controller none
+```
+
+* Bleibt dein Controller an und kommt das Bild: Du brauchst kein Zweitkonto. Mit `--save` merkt
+  sich ps5view die Einstellung.
+* Geht der Controller trotzdem aus oder kommt kein Bild: die Zweitkonto-Lösung oben verwenden.
 
 ---
 
@@ -203,7 +269,7 @@ Optionen von `stream`:
 | `--window-size <BxH>` | 1280x720 | Startgröße des Fensters |
 | `--display <n>` | – | Fenster auf Bildschirm n öffnen; `ps5view check` listet die Bildschirme mit ihrem Index |
 | `--fullscreen` | – | im Vollbild starten |
-| `--controller ds4\|dualsense` | ds4 | Typ des (immer unbetätigten) Controllers, den Remote Play an der PS5 anmeldet |
+| `--controller ds4\|dualsense\|none` | ds4 | ds4/dualsense: Typ des (immer unbetätigten) Controllers, den Remote Play anmeldet; none: Experiment ohne Controller-Anmeldung und ohne Controllerdaten (siehe 1.8) |
 | `--skip-check` | – | Konsolensuche vor dem Verbinden überspringen |
 | `--save` | – | angegebene Optionen im Profil speichern |
 
@@ -285,7 +351,7 @@ Die PS5 begründet abgelehnte Anfragen mit einem Code. ps5view übersetzt ihn:
 
 | Code | Bedeutung | Was tun | Neuversuch? |
 |---|---|---|---|
-| `0x80108b02` | PSN-Account-ID wird nicht akzeptiert | `account-id` neu ermitteln; muss das an der PS5 angemeldete Konto sein | nein |
+| `0x80108b02` | PSN-Account-ID wird nicht akzeptiert | `account-id` neu ermitteln; das Konto muss als Benutzer auf der PS5 eingerichtet sein | nein |
 | `0x80108b09` | Registrierung abgelehnt – PIN falsch/abgelaufen | „Gerät verknüpfen“ neu öffnen, neue PIN sofort verwenden | nein |
 | `0x80108b10` | Remote Play schon belegt | andere Sitzung beenden (PS App, PS Remote Play, chiaki-ng, PS Portal) | ja, mit langen Pausen |
 | `0x80108b11` | Remote-Play-Version passt nicht | PS5-Systemsoftware/ps5view aktualisieren | nein |
@@ -389,11 +455,16 @@ fest – ps5view versucht es deshalb automatisch mit 10, 20, 30 … Sekunden Pau
 (höchstens `--retries` Mal). ps5view beendet Sitzungen beim Schließen des Fensters, bei Strg+C
 und beim Schließen des Konsolenfensters sauber, damit das selten passiert.
 
-### Hinweis der PS5 zum Controller
+### Controller geht aus / Stream endet beim Weiterspielen
 
-Remote Play meldet immer einen virtuellen Controller an (siehe oben). Blendet die PS5 dazu
-einen Hinweis ein (z. B. dass ein DUALSHOCK 4 für PS5-Spiele nicht geeignet ist), mit
-`--controller dualsense --save` den Typ umstellen. ps5view sendet in beiden Fällen keine Eingaben.
+* Dass die PS5 beim Verbinden deinen Controller ausschaltet, ist normales Remote-Play-Verhalten.
+  PS-Taste drücken und dein Konto wählen.
+* Endet der Stream genau dann („Die PS5 hat den Stream beendet“), ist ps5view mit **demselben**
+  Konto registriert, das du am Controller gewählt hast. Lösung: siehe
+  [1.8 Mit nur einem Controller an der PS5 spielen](#18-mit-nur-einem-controller-an-der-ps5-spielen).
+* Blendet die PS5 einen Hinweis zum virtuellen Controller ein (z. B. dass ein DUALSHOCK 4 für
+  PS5-Spiele nicht geeignet ist), stell mit `--controller dualsense --save` den Typ um. ps5view
+  sendet in beiden Fällen keine Eingaben.
 
 ### Anmelde-Passcode
 
@@ -434,8 +505,11 @@ Hat dein PS5-Benutzer einen Anmelde-Passcode, fragt die PS5 danach. Dann
 ps5view versucht eine Verbindung höchstens `--retries` Mal (Standard 5) mit steigender Pause:
 2, 4, 8, 16, 30 s – bei „Konsole belegt“/„abgestürzt“ 10, 20, 30, 45, 60 s. Fehler, die ein
 Neuversuch nicht beheben kann (falsche PIN, Remote Play deaktiviert, ungültige Registrierung,
-Ruhemodus ohne `--wake`), beenden sofort mit einer klaren Meldung. Läuft ein Stream mindestens
-60 s stabil und bricht dann ab, beginnt die Zählung neu (automatisches Wiederverbinden).
+Ruhemodus ohne `--wake`), beenden sofort mit einer klaren Meldung. Das gilt auch, wenn die PS5 den
+Stream selbst beendet, z. B. weil am Controller das Konto von ps5view gewählt wurde. Ein
+automatisches Neuverbinden würde dann den Controller wieder ausschalten. Bricht ein Stream nach
+mindestens 60 s stabilem Lauf aus Netzwerkgründen ab, beginnt die Zählung neu (automatisches
+Wiederverbinden).
 
 ---
 
@@ -583,6 +657,11 @@ Wichtige Entwurfsentscheidungen:
   neuen chiaki-ng-Version ändern.
 * **View-only:** `chiaki_session_set_controller_state()` wird nie aufgerufen, Tastatur und
   Mikrofon sind aus, Controller-/Tastatur-Ereignisse des Fensters werden nicht weitergegeben.
+* **`--controller none`:** `cmake/PatchLibchiaki.cmake` baut libchiakis `streamconnection.c` aus
+  einer gepatchten Kopie im Build-Verzeichnis (das Submodule bleibt unverändert). Ein Schalter
+  unterdrückt die Controller-Anmeldung (`CONTROLLER_CONNECTION`, die libchiaki erst seit 2022 sendet)
+  und den Feedback-Sender (Controllerzustand). Ändert sich der libchiaki-Code an den
+  gepatchten Stellen, bricht die Konfiguration mit einer klaren Meldung ab.
 * **Threads:** libchiaki ruft Video-/Audio-/Ereignis-Callbacks auf eigenen Threads auf; diese
   füttern nur Decoder bzw. Audio-Warteschlange und wecken den Hauptthread über SDL-Ereignisse.
   Fenster, Texturen und das Öffnen von Audiogeräten passieren ausschließlich im Hauptthread.

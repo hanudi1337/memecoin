@@ -198,7 +198,8 @@ static void usage(void)
 	pv_out("Aufruf: ps5view account-id [--no-browser] [--redirect-url <url>]");
 	pv_out("%s", "");
 	pv_out("Ermittelt die PSN-Account-ID (base64), die für \"ps5view register\" gebraucht wird.");
-	pv_out("Ablauf: Im Browser bei Sony anmelden (mit dem PSN-Konto, das an der PS5 angemeldet ist),");
+	pv_out("Ablauf: Im Browser bei Sony mit dem PSN-Konto anmelden, das ps5view nutzen soll (es muss als");
+	pv_out("Benutzer auf der PS5 eingerichtet sein; spielst du mit nur einem Controller: ein Zweitkonto, siehe README 1.8),");
 	pv_out("danach die URL aus der Adresszeile in ps5view einfügen.");
 	pv_out("%s", "");
 	pv_out("  --no-browser           Browser nicht automatisch öffnen, nur die Login-URL anzeigen");
@@ -260,7 +261,9 @@ int pv_cmd_account_id(int argc, char **argv)
 	char perr[300];
 	if(!redirect)
 	{
-		pv_out("1. Diese Adresse im Browser öffnen und mit dem PSN-Konto anmelden, das an der PS5 angemeldet ist:");
+		pv_out("1. Diese Adresse im Browser öffnen und mit dem PSN-Konto anmelden, das ps5view nutzen soll.");
+		pv_out("   Es muss als Benutzer auf der PS5 eingerichtet sein. Spielst du mit nur einem Controller direkt an");
+		pv_out("   der PS5, nimm ein ZWEITES Konto nur zum Zuschauen (README 1.8):");
 		pv_out("%s", "");
 		pv_out("%s", login_url);
 		pv_out("%s", "");

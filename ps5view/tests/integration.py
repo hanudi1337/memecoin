@@ -175,6 +175,14 @@ def main():
     p = run("check")
     check("check without console reports the failure", p.returncode == 3 and "[FAIL]" in p.out, p)
 
+    # ---- controller modes ----
+    with FakePS5(session_reason="80108b12"):
+        p = run("stream", "--no-audio", "--controller", "none")
+        check("stream --controller none runs (experimental view-only mode)",
+              p.returncode == 5 and "Experiment --controller none" in p.out and "0x80108b12" in p.out, p)
+    p = run("stream", "--controller", "xbox")
+    check("stream --controller invalid -> usage error", p.returncode == 1 and "ds4, dualsense oder none" in p.out, p)
+
     p = run("stream", "--profile", "doesnotexist")
     check("stream: unknown profile", p.returncode == 2 and "fake" in p.out, p)
     p = run("stream", "--fps", "45")

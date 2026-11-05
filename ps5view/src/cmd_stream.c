@@ -3,13 +3,14 @@
 // ps5view stream [--profile <name>] [options]
 //
 // Connects to the console and shows its picture (and sound) in a window.
-// View-only: no controller, keyboard or touch input is ever sent. Remote Play
-// itself still announces one (idle) virtual controller to the console, as every
+// View-only: no controller, keyboard or touch input is ever sent. By default
+// Remote Play still announces one (idle) virtual controller to the console, as every
 // Remote Play client does.
 
 #include "app.h"
 #include "args.h"
 #include "audio.h"
+#include "chiaki_patch.h"
 #include "config.h"
 #include "diag.h"
 #include "discover.h"
@@ -62,7 +63,8 @@ typedef struct
 	bool fullscreen;
 	const char *login_pin;
 	bool skip_check;
-	bool dualsense; // controller type announced to the console
+	bool dualsense;           // controller type announced to the console
+	bool announce_controller; // false = --controller none (experimental, no controller data at all)
 } StreamOpts;
 
 typedef struct
@@ -178,7 +180,8 @@ static void usage(void)
 	pv_out("  --window-size <BxH>     Startgröße des Fensters, z. B. 1280x720");
 	pv_out("  --display <n>           Fenster auf Bildschirm n öffnen (0 = erster)");
 	pv_out("  --fullscreen            im Vollbild starten");
-	pv_out("  --controller <typ>      angemeldeter (unbetätigter) Controller: ds4 (Standard) oder dualsense");
+	pv_out("  --controller <typ>      ds4 (Standard) oder dualsense: Typ des unbetätigten Remote-Play-Controllers;");
+	pv_out("                          none: Experiment - keinen Controller anmelden, keinerlei Controllerdaten senden");
 	pv_out("  --skip-check            Konsolensuche vor dem Verbinden überspringen");
 	pv_out("  --save                  angegebene Stream-Optionen im Profil speichern");
 }
@@ -390,7 +393,11 @@ static void periodic(Stream *s)
 		else if(!s->warned_no_video && now - s->last_frame_seen_ms > NO_VIDEO_WARN_MS)
 		{
 			s->warned_no_video = true;
-			if(vs.samples == 0)
+			if(vs.samples == 0 && !s->opt.announce_controller && vs.frames_shown == 0)
+				LOGW("stream", "Seit %u s kommen keine Videodaten an. Mit --controller none sendet die PS5 eventuell kein Bild -"
+						" dann ohne diese Option starten (und ps5view mit einem zweiten PSN-Konto registrieren, siehe README).",
+						(unsigned)((now - s->last_frame_seen_ms) / 1000));
+			else if(vs.samples == 0)
 				LOGW("stream", "Seit %u s kommen keine Videodaten an. Blockiert eine Firewall UDP von der PS5 (Port 9296)?",
 						(unsigned)((now - s->last_frame_seen_ms) / 1000));
 			else
@@ -543,7 +550,7 @@ static bool run_session(Stream *s, PvFailure *f, uint64_t *connected_duration_ms
 	ci.video_profile.codec = s->opt.codec;
 	ci.video_profile_auto_downgrade = true;
 	ci.enable_keyboard = false;   // view-only
-	ci.enable_dualsense = s->opt.dualsense; // only the type of the (idle) announced controller
+	ci.enable_dualsense = s->opt.dualsense && s->opt.announce_controller; // only the type of the (idle) announced controller
 	ci.audio_video_disabled = s->audio ? CHIAKI_NONE_DISABLED : CHIAKI_AUDIO_DISABLED;
 	ci.auto_regist = false;
 	ci.holepunch_session = NULL;
@@ -581,11 +588,13 @@ static bool run_session(Stream *s, PvFailure *f, uint64_t *connected_duration_ms
 
 	s->attempt_id++;
 	s->session = &session;
+	ps5view_announce_controller = s->opt.announce_controller; // read by libchiaki's stream thread
 	cerr = chiaki_session_start(&session);
 	if(cerr != CHIAKI_ERR_SUCCESS)
 	{
 		s->session = NULL;
 		chiaki_session_fini(&session);
+		ps5view_announce_controller = true;
 		pv_video_stop_decoder(s->video);
 		pv_failure_set(f, PV_EXIT_INTERNAL, PV_RETRY_NO, "", "Sitzung kann nicht gestartet werden: %s", chiaki_error_string(cerr));
 		return true;
@@ -614,6 +623,7 @@ static bool run_session(Stream *s, PvFailure *f, uint64_t *connected_duration_ms
 	chiaki_session_join(&session);
 	s->session = NULL;
 	chiaki_session_fini(&session);
+	ps5view_announce_controller = true;
 	pv_video_stop_decoder(s->video);
 
 	if(s->quit_requested && (s->quit_reason == CHIAKI_QUIT_REASON_STOPPED || s->quit_reason == CHIAKI_QUIT_REASON_NONE))
@@ -625,6 +635,10 @@ static bool run_session(Stream *s, PvFailure *f, uint64_t *connected_duration_ms
 		*f = s->own_failure;
 	else
 		pv_failure_from_session(f, s->quit_reason, s->quit_reason_str, &d, p->host);
+	if(f->failed && !s->opt.announce_controller && s->connected && *connected_duration_ms < 30000)
+		strncat(f->hint, "\n- Mit --controller none hat die PS5 die Sitzung kurz nach dem Verbinden beendet: ohne diese Option starten\n"
+				"  und ps5view mit einem zweiten PSN-Konto registrieren (README: \"Mit nur einem Controller an der PS5 spielen\").",
+				sizeof(f->hint) - strlen(f->hint) - 1);
 	LOGD("stream", "Sitzung beendet: %s%s%s", chiaki_quit_reason_string(s->quit_reason),
 			s->quit_reason_str[0] ? " - " : "", s->quit_reason_str);
 	return !s->quit_requested;
@@ -726,9 +740,17 @@ static int stream_main(Stream *s)
 			LOGW("stream", "Ohne Ton: %s", err);
 	}
 
-	LOGI("stream", "Nur Zuschauen: ps5view sendet keine Eingaben. Für Remote Play meldet sich trotzdem ein (immer"
-			" unbetätigter) zweiter Controller (%s) an der PS5 an - das ist technisch nicht vermeidbar.",
-			s->opt.dualsense ? "DualSense" : "DualShock 4");
+	if(s->opt.announce_controller)
+	{
+		LOGI("stream", "Nur Zuschauen: ps5view sendet keine Eingaben. Remote Play meldet aber einen (unbetätigten) %s an.",
+				s->opt.dualsense ? "DualSense" : "DualShock 4");
+		LOGI("stream", "Die PS5 schaltet beim Verbinden deinen Controller aus: PS-Taste drücken und dein Konto wählen."
+				" Ist ps5view mit DEMSELBEN Konto registriert, beendet die PS5 dabei Remote Play -"
+				" dann ps5view mit einem zweiten PSN-Konto registrieren (README) oder --controller none testen.");
+	}
+	else
+		LOGI("stream", "Experiment --controller none: ps5view meldet keinen Controller an und sendet keinerlei Controllerdaten."
+				" Achte beim Verbinden darauf, ob dein Controller an der PS5 an bleibt - und gib mir Bescheid.");
 
 	int rc = PV_EXIT_OK;
 	PvFailure f;
@@ -976,15 +998,18 @@ int pv_cmd_stream(int argc, char **argv)
 	}
 	o->login_pin = login_pin_s;
 	o->skip_check = skip_check;
+	o->announce_controller = true;
 	if((v = controller_s ? controller_s : (ps->controller[0] ? ps->controller : NULL)))
 	{
 		if(pv_strcasecmp(v, "dualsense") == 0 || pv_strcasecmp(v, "ds") == 0)
 			o->dualsense = true;
 		else if(pv_strcasecmp(v, "ds4") == 0 || pv_strcasecmp(v, "dualshock4") == 0)
 			o->dualsense = false;
+		else if(pv_strcasecmp(v, "none") == 0)
+			o->announce_controller = false;
 		else
 		{
-			LOGE("stream", "--controller erwartet ds4 oder dualsense.");
+			LOGE("stream", "--controller erwartet ds4, dualsense oder none.");
 			bad = true;
 		}
 	}
@@ -1013,7 +1038,7 @@ int pv_cmd_stream(int argc, char **argv)
 		if(display_s)
 			ps->display = o->display;
 		if(controller_s)
-			pv_strlcpy(ps->controller, o->dualsense ? "dualsense" : "ds4", sizeof(ps->controller));
+			pv_strlcpy(ps->controller, !o->announce_controller ? "none" : (o->dualsense ? "dualsense" : "ds4"), sizeof(ps->controller));
 		// the audio device is stored after it has been resolved to its exact name (below)
 	}
 

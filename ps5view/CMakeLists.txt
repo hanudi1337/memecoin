@@ -51,6 +51,8 @@ set(CHIAKI_ENABLE_SPEEX OFF CACHE STRING "" FORCE)
 set(CHIAKI_LIB_ENABLE_OPUS ON CACHE BOOL "" FORCE)
 set(CHIAKI_GUI_ENABLE_SDL_GAMECONTROLLER OFF CACHE BOOL "" FORCE)
 add_subdirectory("${CHIAKI_DIR}" chiaki-ng EXCLUDE_FROM_ALL)
+# view-only switch for libchiaki (build-local patched copy, submodule untouched)
+include("${CMAKE_CURRENT_SOURCE_DIR}/cmake/PatchLibchiaki.cmake")
 
 # ---------------------------------------------------------------------------
 # Our own dependencies
